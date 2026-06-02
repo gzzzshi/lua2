@@ -1,4162 +1,6175 @@
--- Downloaded from https://github.com/s0daa/CSGO-HVH-LUAS
+_G.SCRIPT_NAME = "G$Z0LINA";
 
 
+-- gazolina fixed by 2k00 , enjoy
 
+local origrequire = require
+local compiler = loadstring or load
 
+local modules = {
+    ["neverlose/clipboard"] = function(require)
+        local char_array = ffi.typeof 'char[?]'
 
--- zazahook • gamesense
------ gz. 2023
+        local native_GetClipboardTextCount = utils.get_vfunc('vgui2.dll', 'VGUI_System010', 7, 'int(__thiscall*)(void*)')
+        local native_SetClipboardText = utils.get_vfunc('vgui2.dll', 'VGUI_System010', 9, 'void(__thiscall*)(void*, const char*, int)')
+        local native_GetClipboardText = utils.get_vfunc('vgui2.dll', 'VGUI_System010', 11, 'int(__thiscall*)(void*, int, const char*, int)')
 
-
-
-----<  Header  >----------------------------------------------------------------
-
-if not LPH_OBFUSCATED then
-	LPH_NO_VIRTUALIZE = function (...) return ... end
-end
-
-LPH_NO_VIRTUALIZE(function ()
-
-
-local a = function (...) return ... end
-
-
---------------------------------------------------------------------------------
--- #region :: Definitions
-
-
---
--- #region : Definitions
-
-local info_t = obex_fetch and obex_fetch() or { username = "gz", build = "Debug", discord = 0 }
-
-local _VERSION = "1.0"
-local _LOCALLIB = info_t.username == "gz"
-
--- #region - zazahook
-
-local _BUILD, _LEVEL, _BLISS, _BETA, _DEBUG, _AZAZI = "stable", 1, false, false, false, false do
-	local builds = {
-		["Private"] = {1, "stable"},
-		["User"] = {2, "bliss"},
-		["Beta"] = {3, "beta"},
-		["Debug"] = {4, "debug"},
-	}
-
-	local ctx = builds[info_t.build] or builds["User"]
-	_BUILD, _LEVEL = ctx[2], ctx[1]
-
-	if _LEVEL >= 2 then _BLISS = true end
-	if _LEVEL >= 3 then _BETA = true end
-	if _LEVEL >= 4 then _DEBUG = true end
-
-	do
-		local customs = {
-			["sisar"] = function () _BUILD = "theos" end,
-			["ruzh"] = function () _BUILD = "private" end,
-			["qingshang"] = function () _LOCALLIB = true end,
-			["justice"] = function () _AZAZI, _BUILD = true, "мезозои" end,
-			["0000"] = function () _AZAZI, _BUILD = true, "смысл пездеть" end,
-		}
-
-		local name = string.lower(info_t.username)
-		local custom = customs[name]
-		if custom then custom() end
-	end
-end
-
-local zazahook = {
-	name = "zazahook",
-	version = _VERSION, build = _BUILD, level = _LEVEL,
-	user = {
-		name = info_t.username,
-		avatar = nil
-	}
-}
-
--- #endregion
-
--- #region - Dependencies and localization
-
-local defer, error, getfenv, setfenv, getmetatable, setmetatable,
-ipairs, pairs, next, printf, rawequal, rawset, rawlen, readfile, writefile, require, select,
-tonumber, tostring, toticks, totime, type, unpack, pcall, xpcall =
-defer, error, getfenv, setfenv, getmetatable, setmetatable,
-ipairs, pairs, next, printf, rawequal, rawset, rawlen, readfile, writefile, require, select,
-tonumber, tostring, toticks, totime, type, unpack, pcall, xpcall
-
-local C = function (t) local c = {} if type(t) ~= "table" then return t end for k, v in next, t do c[k] = v end return c end
-
-local table, math, string = C(table), C(math), C(string)
-local ui, client, database, entity, ffi, globals, panorama, renderer
-= C(ui), C(client), C(database), C(entity), C(require "ffi"), C(globals), C(panorama), C(renderer)
-
---
-
-local requireb = function (name, link)
-    local s, lib = pcall(require, name)
-    if not s then error( ("You are not subscribed to %s.\nHere is the link to this library: gamesense.pub/forums/viewtopic.php?id=%s"):format(name, link), 3 ) end
-    return lib
-end
-
-local pui = require "gamesense/pui"
-local http = require "gamesense/http"
-local adata = require "gamesense/antiaim_funcs"
-local vector = require "vector"
-local msgpack = require "gamesense/msgpack"
-local weapondata = require "gamesense/csgo_weapons"
-
--- #endregion
-
--- #region - Misc
-
-table.clear = require "table.clear"
-table.ifind = function (t, j)  for i = 1, #t do if t[i] == j then return i end end  end
-table.append = function (t, ...)  for i, v in ipairs{...} do table.insert(t, v) end  end
-table.mfind = function (t, j)  for i = 1, table.maxn(t) do if t[i] == j then return i end end  end
-table.find = function (t, j)  for k, v in pairs(t) do if v == j then return k end end return false  end
-table.filter = function (t)  local res = {} for i = 1, table.maxn(t) do if t[i] ~= nil then res[#res+1] = t[i] end end return res  end
-table.copy = function (o) if type(o) ~= "table" then return o end local res = {} for k, v in pairs(o) do res[table.copy(k)] = table.copy(v) end return res end
-table.ihas = function (t, ...) local arg = {...} for i = 1, table.maxn(t) do for j = 1, #arg do if t[i] == arg[j] then return true end end end return false end
-table.distribute = function (t, r, k)  local result = {} for i, v in ipairs(t) do local n = k and v[k] or i result[n] = r == nil and i or v[r] end return result  end
-table.place = function (t, path, place)  local p = t for i, v in ipairs(path) do if type(p[v]) == "table" then p = p[v] else p[v] = (i < #path) and {} or place  p = p[v]  end end return t  end
-
-math.e = 2.71828
-math.gratio = 1.6180339887
-math.randomseed( client.timestamp() - 143 )
-math.round = function (v)  return math.floor(v + 0.5)  end
-math.roundb = function (v, d)  return math.floor(v + 0.5) / (d or 0) ^ 1  end
-math.clamp = function (x, a, b) if a > x then return a elseif b < x then return b else return x end end
-math.lerp = function (a, b, w)  return a + (b - a) * w  end
-math.normalize_yaw = function (yaw) return (yaw + 180) % -360 + 180 end
-math.normalize_pitch = function (pitch) return math.clamp(pitch, -89, 89) end
-math.closest_ray_point = function (p, s, e)
-	local t, d = p - s, e - s
-	local l = d:length()
-	d = d / l
-	local r = d:dot(t)
-	if r < 0 then return s elseif r > l then return e end
-	return s + d * r
-end
-
-string.insert = function (a, b, pos) return string.sub(a, 1, pos) .. b .. string.sub(a, pos + 1) end
-string.limit = function (s, l, c) local r, i = {}, 1 for w in string.gmatch(s, ".[\128-\191]*") do i, r[i] = i + 1, w if i > l then if c then r[i] = c == true and "..." or c end break end end return table.concat(r) end
-
-
---
-
-local NILFN = function()end
-local ternary = function (c, a, b)  if c then return a else return b end  end
-
-local my
-
--- #endregion
-
--- #endregion
---
-
-
---
--- #region : Helpers
-
--- #region - Callbacks
-
-local callbacks do
-	local event_mt = {
-		__call = function (self, bool, fn)
-			local action = bool and client.set_event_callback or client.unset_event_callback
-			action(self[1], fn)
-		end,
-		set = function (self, fn)
-			client.set_event_callback(self[1], fn)
-		end,
-		unset = function (self, fn)
-			client.unset_event_callback(self[1], fn)
-		end,
-		fire = function (self, ...)
-			client.fire_event(self[1], ...)
-		end,
-	}	event_mt.__index = event_mt
-
-	callbacks = setmetatable({}, {
-		__index = function (self, key)
-			self[key] = setmetatable({key}, event_mt)
-			return self[key]
-		end,
-	})
-end
-
--- #endregion
-
--- #region - Renderer
-
-local DPI, _DPI = 1, {}
-local sw, sh = client.screen_size()
-local asw, ash = sw, sh
-local sc = {x = sw * .5, y = sh * .5}
-local asc = {x = asw * .5, y = ash * .5}
-
---#region: custom colors
-
-local color do
-	local helpers = {
-		RGBtoHEX = a(function (col, short)
-			return string.format(short and "%02X%02X%02X" or "%02X%02X%02X%02X", col.r, col.g, col.b, col.a)
-		end),
-		HEXtoRGB = a(function (hex)
-			hex = string.gsub(hex, "^#", "")
-			return tonumber(string.sub(hex, 1, 2), 16), tonumber(string.sub(hex, 3, 4), 16), tonumber(string.sub(hex, 5, 6), 16), tonumber(string.sub(hex, 7, 8), 16) or 255
-		end)
-	}
-
-	local create
-
-	--
-	local mt = {
-		__eq = a(function (a, b)
-			return a.r == b.r and a.g == b.g and a.b == b.b and a.a == b.a
-		end),
-		lerp = a(function (f, t, w)
-			return create(f.r + (t.r - f.r) * w, f.g + (t.g - f.g) * w, f.b + (t.b - f.b) * w, f.a + (t.a - f.a) * w)
-		end),
-		to_hex = helpers.RGBtoHEX,
-		alphen = a(function (self, a, r)
-			return create(self.r, self.g, self.b, r and a * self.a or a)
-		end),
-	}	mt.__index = mt
-
-	create = ffi.metatype(ffi.typeof("struct { uint8_t r; uint8_t g; uint8_t b; uint8_t a; }"), mt)
-
-	--
-	color = setmetatable({
-		rgb = a(function (r,g,b,a)
-			r = math.min(r or 255, 255)
-			return create(r, g and math.min(g, 255) or r, b and math.min(b, 255) or r, a and math.min(a, 255) or 255)
-		end),
-		hex = a(function (hex)
-			local r,g,b,a = helpers.HEXtoRGB(hex)
-			return create(r,g,b,a)
-		end)
-	}, {
-		__call = a(function (self, r, g, b, a)
-			return type(r) == "string" and self.hex(r) or self.rgb(r, g, b, a)
-		end),
-	})
-end
-
---#endregion
-
---#region: custom renderer
-
-local render do
-	local alpha = 1
-	local astack = {}
-
-	local measurements = setmetatable({}, { __mode = "kv" })
-
-	-- #region - dpi
-
-	local dpi_flag = ""
-	local dpi_ref = ui.reference("MISC", "Settings", "DPI scale")
-
-	_DPI.scalable = false
-	_DPI.callback = function ()
-		local old = DPI
-		DPI = _DPI.scalable and tonumber(ui.get(dpi_ref):sub(1, -2)) * .01 or 1
-
-		sw, sh = client.screen_size()
-		sw, sh = sw / DPI, sh / DPI
-		sc.x, sc.y = sw * .5, sh * .5
-		dpi_flag = DPI ~= 1 and "d" or ""
-
-		if old ~= DPI then
-			callbacks["zazahook::render_dpi"]:fire(DPI)
-			old = DPI
-		end
-	end
-
-	_DPI.callback()
-	ui.set_callback(dpi_ref, _DPI.callback)
-
-	-- #endregion
-
-	-- #region - blur
-
-	local blurs = setmetatable({}, {__mode = "kv"})
-
-	do
-		local function check_screen ()
-			if sw == 0 or sh == 0 then
-				_DPI.callback()
-				asw, ash = client.screen_size()
-				sw, sh = render.screen_size()
-			else
-				callbacks.paint_ui:unset(check_screen)
-			end
-		end
-		callbacks.paint_ui:set(check_screen)
-	end
-
-	callbacks.paint:set(function ()
-		for i = 1, #blurs do
-			local v = blurs[i]
-			if v then renderer.blur(v[1], v[2], v[3], v[4]) end
-		end
-		table.clear(blurs)
-	end)
-	callbacks.paint_ui:set(function ()
-		table.clear(blurs)
-	end)
-
-	-- #endregion
-
-	local F, C, R = math.floor, math.ceil, math.round
-
-	--
-	render = setmetatable({
-		cheap = false,
-
-		push_alpha = a(function (v)
-			local len = #astack
-			astack[len+1] = v
-			alpha = alpha * astack[len+1] * (astack[len] or 1)
-			if len > 255 then error "alpha stack exceeded 255 objects, report to developers" end
-		end),
-		pop_alpha = a(function ()
-			local len = #astack
-			astack[len], len = nil, len-1
-			alpha = len == 0 and 1 or astack[len] * (astack[len-1] or 1)
-		end),
-		get_alpha = a(function ()  return alpha  end),
-
-		blur = a(function (x, y, w, h, a, s)
-			if not render.cheap and my.valid and (a or 1) * alpha > .25 then
-				blurs[#blurs+1] = {F(x * DPI), F(y * DPI), F(w * DPI), F(h * DPI)}
-			end
-		end),
-		gradient = a(function (x, y, w, h, c1, c2, dir)
-			renderer.gradient(F(x * DPI), F(y * DPI), F(w * DPI), F(h * DPI), c1.r, c1.g, c1.b, c1.a * alpha, c2.r, c2.g, c2.b, c2.a * alpha, dir or false)
-		end),
-
-		line = a(function (xa, ya, xb, yb, c)
-			renderer.line(F(xa * DPI), F(ya * DPI), F(xb * DPI), F(yb * DPI), c.r, c.g, c.b, c.a * alpha)
-		end),
-		rectangle = a(function (x, y, w, h, c, n)
-			x, y, w, h, n = F(x * DPI), F(y * DPI), F(w * DPI), F(h * DPI), n and F(n * DPI) or 0
-			local r, g, b, a = c.r, c.g, c.b, c.a * alpha
-
-			if n == 0 then
-				renderer.rectangle(x, y, w, h, r, g, b, a)
-			else
-				renderer.circle(x + n, y + n, r, g, b, a, n, 180, 0.25)
-				renderer.rectangle(x + n, y, w - n - n, n, r, g, b, a)
-				renderer.circle(x + w - n, y + n, r, g, b, a, n, 90, 0.25)
-				renderer.rectangle(x, y + n, w, h - n - n, r, g, b, a)
-				renderer.circle(x + n, y + h - n, r, g, b, a, n, 270, 0.25)
-				renderer.rectangle(x + n, y + h - n, w - n - n, n, r, g, b, a)
-				renderer.circle(x + w - n, y + h - n, r, g, b, a, n, 0, 0.25)
-			end
-		end),
-		rect_outline = a(function (x, y, w, h, c, n, t)
-			x, y, w, h, n, t = F(x * DPI), F(y * DPI), F(w * DPI), F(h * DPI), n and F(n * DPI) or 0, t and F(t * DPI) or 1
-			local r, g, b, a = c.r, c.g, c.b, c.a * alpha
-
-			if n == 0 then
-				renderer.rectangle(x, y, w - t, t, r, g, b, a)
-				renderer.rectangle(x, y + t, t, h - t, r, g, b, a)
-				renderer.rectangle(x + w - t, y, t, h - t, r, g, b, a)
-				renderer.rectangle(x + t, y + h - t, w - t, t, r, g, b, a)
-			else
-				renderer.circle_outline(x + n, y + n, r, g, b, a, n, 180, 0.25, t)
-				renderer.rectangle(x + n, y, w - n - n, t, r, g, b, a)
-				renderer.circle_outline(x + w - n, y + n, r, g, b, a, n, 270, 0.25, t)
-				renderer.rectangle(x, y + n, t, h - n - n, r, g, b, a)
-				renderer.circle_outline(x + n, y + h - n, r, g, b, a, n, 90, 0.25, t)
-				renderer.rectangle(x + n, y + h - t, w - n - n, t, r, g, b, a)
-				renderer.circle_outline(x + w - n, y + h - n, r, g, b, a, n, 0, 0.25, t)
-				renderer.rectangle(x + w - t, y + n, t, h - n - n, r, g, b, a)
-			end
-		end),
-		triangle = a(function (x1, y1, x2, y2, x3, y3, c)
-			x1, y1, x2, y2, x3, y3 = x1 * DPI, y1 * DPI, x2 * DPI, y2 * DPI, x3 * DPI, y3 * DPI
-			renderer.triangle(x1, y1, x2, y2, x3, y3, c.r, c.g, c.b, c.a * alpha)
-		end),
-
-		circle = a(function (x, y, c, radius, start, percentage)
-			renderer.circle(x * DPI, y * DPI, c.r, c.g, c.b, c.a * alpha, radius * DPI, start or 0, percentage or 1)
-		end),
-		circle_outline = a(function (x, y, c, radius, start, percentage, thickness)
-			renderer.circle(x * DPI, y * DPI, c.r, c.g, c.b, c.a * alpha, radius * DPI, start or 0, percentage or 1, thickness * DPI)
-		end),
-
-		screen_size = a(function (raw)
-			local w, h = client.screen_size()
-			if raw then return w, h else return w / DPI, h / DPI end
-		end),
-
-		load_rgba = a(function (c, w, h) return renderer.load_rgba(c, w, h) end),
-		load_jpg = a(function (c, w, h) return renderer.load_jpg(c, w, h) end),
-		load_png = a(function (c, w, h) return renderer.load_png(c, w, h) end),
-		load_svg = a(function (c, w, h) return renderer.load_svg(c, w, h) end),
-		texture = a(function (id, x, y, w, h, c, mode)
-			if not id then return end
-			renderer.texture(id, F(x * DPI), F(y * DPI), F(w * DPI), F(h * DPI), c.r, c.g, c.b, c.a * alpha, mode or "f")
-		end),
-
-		text = a(function (x, y, c, flags, width, ...)
-			renderer.text(x * DPI, y * DPI, c.r, c.g, c.b, c.a * alpha, (flags or "") .. dpi_flag, width or 0, ...)
-		end),
-		measure_text = a(function (flags, text)
-			if not text or text == "" then return 0, 0 end
-			text = text:gsub("\a%x%x%x%x%x%x%x%x", "")
-
-			flags = (flags or "")
-
-			local key = string.format("<%s>%s", flags, text)
-			if not measurements[key] or measurements[key][1] == 0 then
-				measurements[key] = { renderer.measure_text(flags, text) }
-			end
-			return measurements[key][1], measurements[key][2]
-			-- return renderer.measure_text(flags, text)
-		end),
-	}, {__index = renderer})
-end
-
---#endregion
-
---#region: anima
-
-local anima do
-	local mt, animators = {}, setmetatable({}, {__mode = "kv"})
-	local frametime, g_speed = globals.absoluteframetime(), 1
-
-	--
-
-
-	anima = {
-		pulse = 0,
-
-		easings = {
-			pow = {
-				function (x, p) return 1 - ((1 - x) ^ (p or 3)) end,
-				function (x, p) return x ^ (p or 3) end,
-				function (x, p) return x < 0.5 and 4 * math.pow(x, p or 3) or 1 - math.pow(-2 * x + 2, p or 3) * 0.5 end,
-			}
-		},
-
-		lerp = a(function (a, b, s, t)
-			local c = a + (b - a) * frametime * (s or 8) * g_speed
-			return math.abs(b - c) < (t or .005) and b or c
-		end),
-
-		condition = a(function (id, c, s, e)
-			local ctx = id[1] and id or animators[id]
-			if not ctx then animators[id] = { c and 1 or 0, c }; ctx = animators[id] end
-
-			s = s or 4
-			local cur_s = s
-			if type(s) == "table" then cur_s = c and s[1] or s[2] end
-
-			ctx[1] = math.clamp(ctx[1] + ( frametime * math.abs(cur_s) * g_speed * (c and 1 or -1) ), 0, 1)
-
-			return (ctx[1] % 1 == 0 or cur_s < 0) and ctx[1] or
-			anima.easings.pow[e and (c and e[1][1] or e[2][1]) or (c and 1 or 3)](ctx[1], e and (c and e[1][2] or e[2][2]) or 3)
-		end)
-	}
-
-	--
-
-	mt = {
-		__call = anima.condition
-	}
-
-	--
-	callbacks.paint_ui:set(function ()
-		anima.pulse = math.abs(globals.realtime() * 1 % 2 - 1)
-		frametime = globals.absoluteframetime()
-	end)
-end
-
---#endregion
-
-local colors = {
-	hex		= "\a74A6A9FF",
-	accent	= color.hex("74A6A9"),
-	back	= color.rgb(23, 26, 28),
-	dark	= color.rgb(5, 6, 8),
-	white	= color.rgb(255),
-	black	= color.rgb(0),
-	null	= color.rgb(0, 0, 0, 0),
-	text	= color.rgb(230),
-	panel = {
-		l1 = color.rgb(5, 6, 8, 96),
-		g1 = color.rgb(5, 6, 8, 140),
-		l2 = color.rgb(23, 26, 28, 96),
-		g2 = color.rgb(23, 26, 28, 140),
-	}
-}
-
--- #endregion
-
--- #region - Utilites
-
---#region: filesystem
-
-local filesystem = {} do
-	local m, i = "filesystem_stdio.dll", "VFileSystem017"
-	local add_search_path		= vtable_bind(m, i, 11, "void (__thiscall*)(void*, const char*, const char*, int)")
-	local remove_search_path	= vtable_bind(m, i, 12, "bool (__thiscall*)(void*, const char*, const char*)")
-
-	local get_game_directory = vtable_bind("engine.dll", "VEngineClient014", 36, "const char*(__thiscall*)(void*)")
-	filesystem.game_directory = string.sub(ffi.string(get_game_directory()), 1, -5)
-
-	add_search_path(filesystem.game_directory, "ROOT_PATH", 0)
-	defer(function () remove_search_path(filesystem.game_directory, "ROOT_PATH") end)
-
-	filesystem.create_directory	= vtable_bind(m, i, 22, "void (__thiscall*)(void*, const char*, const char*)")
-end
-
-filesystem.create_directory("zazahook", "ROOT_PATH")
-
---#endregion
-
---#region: base64 (to be improved)
-
-local base64 do
-	local extract = function(v, from, width)
-		return bit.band(bit.rshift(v, from), bit.lshift(1, width) - 1)
-	end
-
-	local function makeencoder(alphabet)
-		local encoder, decoder = {}, {}
-		for i = 1, 65 do
-			local char = string.byte(string.sub(alphabet, i, i)) or 32 -- or ' '
-			if decoder[char] ~= nil then
-				error('invalid alphabet: duplicate character ' .. char, 3)
-			end
-			encoder[i - 1] = char
-			decoder[char] = i - 1
-		end
-		return encoder, decoder
-	end
-
-	local encoders, decoders = {}, {}
-
-	encoders['base64'], decoders['base64'] = makeencoder('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=')
-	encoders['base64url'], decoders['base64url'] = makeencoder('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_')
-
-	local alphabet_mt = {
-		__index = function(tbl, key)
-			if type(key) == 'string' and #key == 64 or #key == 65 then
-				encoders[key], decoders[key] = makeencoder(key)
-				return tbl[key]
-			end
-		end
-	}
-
-	setmetatable(encoders, alphabet_mt)
-	setmetatable(decoders, alphabet_mt)
-
-	base64 = {
-		encode = function (str, encoder)
-			encoder = encoders[encoder or 'base64'] or error('invalid alphabet specified', 2)
-
-			str = tostring(str)
-
-			local t, k, n = {}, 1, #str
-			local lastn = n % 3
-			local cache = {}
-
-			for i = 1, n-lastn, 3 do
-				local a, b, c = string.byte(str, i, i+2)
-				local v = a*0x10000 + b*0x100 + c
-				local s = cache[v]
-
-				if not s then
-					s = string.char(encoder[extract(v,18,6)], encoder[extract(v,12,6)], encoder[extract(v,6,6)], encoder[extract(v,0,6)])
-					cache[v] = s
-				end
-
-				t[k] = s
-				k = k + 1
-			end
-
-			if lastn == 2 then
-				local a, b = string.byte(str, n-1, n)
-				local v = a*0x10000 + b*0x100
-				t[k] = string.char(encoder[extract(v,18,6)], encoder[extract(v,12,6)], encoder[extract(v,6,6)], encoder[64])
-			elseif lastn == 1 then
-				local v = string.byte(str, n)*0x10000
-				t[k] = string.char(encoder[extract(v,18,6)], encoder[extract(v,12,6)], encoder[64], encoder[64])
-			end
-
-			return table.concat(t)
-		end,
-		decode = function (b64, decoder)
-			decoder = decoders[decoder or 'base64'] or error('invalid alphabet specified', 2)
-
-			local pattern = '[^%w%+%/%=]'
-			if decoder then
-				local s62, s63
-				for charcode, b64code in pairs(decoder) do
-					if b64code == 62 then s62 = charcode
-					elseif b64code == 63 then s63 = charcode
-					end
-				end
-				pattern = string.format('[^%%w%%%s%%%s%%=]', string.char(s62), string.char(s63))
-			end
-
-			b64 = string.gsub(tostring(b64), pattern, '')
-
-			local cache = {}
-			local t, k = {}, 1
-			local n = #b64
-			local padding = string.sub(b64, -2) == '==' and 2 or string.sub(b64, -1) == '=' and 1 or 0
-
-			for i = 1, padding > 0 and n-4 or n, 4 do
-				local a, b, c, d = string.byte(b64, i, i+3)
-
-				local v0 = a*0x1000000 + b*0x10000 + c*0x100 + d
-				local s = cache[v0]
-				if not s then
-					local v = decoder[a]*0x40000 + decoder[b]*0x1000 + decoder[c]*0x40 + decoder[d]
-					s = string.char(extract(v,16,8), extract(v,8,8), extract(v,0,8))
-					cache[v0] = s
-				end
-
-				t[k] = s
-				k = k + 1
-			end
-
-			if padding == 1 then
-				local a, b, c = string.byte(b64, n-3, n-1)
-				local v = decoder[a]*0x40000 + decoder[b]*0x1000 + decoder[c]*0x40
-				t[k] = string.char(extract(v,16,8), extract(v,8,8))
-			elseif padding == 2 then
-				local a, b = string.byte(b64, n-3, n-2)
-				local v = decoder[a]*0x40000 + decoder[b]*0x1000
-				t[k] = string.char(extract(v,16,8))
-			end
-			return table.concat(t)
-		end
-	}
-end
-
---#endregion
-
---#region: clipboard
-
-local clipboard do
-	local char_array = ffi.typeof "char[?]"
-
-	local native = {
-		GetClipboardTextCount = vtable_bind("vgui2.dll", "VGUI_System010", 7, "int(__thiscall*)(void*)"),
-		SetClipboardText = vtable_bind("vgui2.dll", "VGUI_System010", 9, "void(__thiscall*)(void*, const char*, int)"),
-		GetClipboardText = vtable_bind("vgui2.dll", "VGUI_System010", 11, "int(__thiscall*)(void*, int, const char*, int)")
-	}
-
-	clipboard = {
-		get = function ()
-			local length = native.GetClipboardTextCount()
-			if length == 0 then return end
-
-			local array = char_array(length)
-
-			native.GetClipboardText(0, array, length)
-			return ffi.string(array, length - 1)
-		end,
-		set = function (text)
-			text = tostring(text)
-			native.SetClipboardText(text, #text)
-		end
-	}
-end
-
---#endregion
-
---#region: print / debug
-
-local printc do
-	local native_print = vtable_bind("vstdlib.dll", "VEngineCvar007", 25, "void(__cdecl*)(void*, const void*, const char*, ...)")
-
-	printc = function (...)
-		for i, v in ipairs{...} do
-			local r = "\aD9D9D9" .. string.gsub(tostring(v), "[\r\v]", {["\r"] = "\aD9D9D9", ["\v"] = "\a".. (colors.hex:sub(1, 7))})
-			for col, text in r:gmatch("\a(%x%x%x%x%x%x)([^\a]*)") do
-				native_print(color.hex(col), text)
-			end
-		end
-		native_print(color.rgb(217, 217, 217), "\n")
-	end
-end
-
-zazahook.print = function (...)
-	printc(_AZAZI and "  \vzazahook\r  " or "  \vzazahook\r  ", ...)
-end
-
---
-
-local debug = function (...)
-	if _DEBUG then printc("  \vzazahook\r  ", ...) end
-end
-
---#endregion
-
---#region: misc
-
-local panorama_api = panorama.open()
-
-local network = {
-	open_link = panorama_api.SteamOverlayAPI.OpenExternalBrowserURL,
-}
-
-local mouse = { x = 0, y = 0 } do
-	local unlock_cursor = vtable_bind("vguimatsurface.dll", "VGUI_Surface031", 66, "void(__thiscall*)(void*)")
-	local lock_cursor = vtable_bind("vguimatsurface.dll", "VGUI_Surface031", 67, "void(__thiscall*)(void*)")
-
-	mouse.lock = function (bool)
-		if bool then lock_cursor() else unlock_cursor() end
-	end
-
-	mouse.in_bounds = function (x, y, w, h)
-		return (mouse.x >= x and mouse.y >= y) and (mouse.x <= (x + w) and mouse.y <= (y + h))
-	end
-
-	mouse.pressed = function (key)
-		return client.key_state(key or 1)
-	end
-
-	callbacks.pre_render:set(function ()
-		mouse.x, mouse.y = ui.mouse_position()
-		mouse.x, mouse.y = mouse.x / DPI, mouse.y / DPI
-	end)
-end
-
-client.extrapolate = function (x, y, z, velocity, ticks)
-	local time = globals.tickinterval() * ticks
-	return x + (velocity.x * time), y + (velocity.y * time), z + (velocity.z * time)
-end
-
-do
-	local native_get_client_entity = vtable_bind("client.dll", "VClientEntityList003", 3, "void*(__thiscall*)(void*, int)")
-	local animstate_t = ffi.typeof 'struct { char pad0[0x18]; float anim_update_timer; char pad1[0xC]; float started_moving_time; float last_move_time; char pad2[0x10]; float last_lby_time; char pad3[0x8]; float run_amount; char pad4[0x10]; void* entity; void* active_weapon; void* last_active_weapon; float last_client_side_animation_update_time; int	 last_client_side_animation_update_framecount; float eye_timer; float eye_angles_y; float eye_angles_x; float goal_feet_yaw; float current_feet_yaw; float torso_yaw; float last_move_yaw; float lean_amount; char pad5[0x4]; float feet_cycle; float feet_yaw_rate; char pad6[0x4]; float duck_amount; float landing_duck_amount; char pad7[0x4]; float current_origin[3]; float last_origin[3]; float velocity_x; float velocity_y; char pad8[0x4]; float unknown_float1; char pad9[0x8]; float unknown_float2; float unknown_float3; float unknown; float m_velocity; float jump_fall_velocity; float clamped_velocity; float feet_speed_forwards_or_sideways; float feet_speed_unknown_forwards_or_sideways; float last_time_started_moving; float last_time_stopped_moving; bool on_ground; bool hit_in_ground_animation; char pad10[0x4]; float time_since_in_air; float last_origin_z; float head_from_ground_distance_standing; float stop_to_full_running_fraction; char pad11[0x4]; float magic_fraction; char pad12[0x3C]; float world_force; char pad13[0x1CA]; float min_yaw; float max_yaw; } **'
-	local animlayer_t = ffi.typeof 'struct { char pad_0x0000[0x18]; uint32_t sequence; float prev_cycle; float weight; float weight_delta_rate; float playback_rate; float cycle;void *entity;char pad_0x0038[0x4]; } **'
-
-	entity.get_pointer = function (ent)
-		return native_get_client_entity(ent)
-	end
-
-	entity.get_animstate = function (ent)
-		local pointer = native_get_client_entity(ent)
-		if pointer then return ffi.cast(animstate_t, ffi.cast("char*", ffi.cast("void***", pointer)) + 0x9960)[0] end
-	end
-
-	entity.get_animlayer = function (ent, layer)
-		local pointer = native_get_client_entity(ent)
-		if pointer then return ffi.cast(animlayer_t, ffi.cast('char*', ffi.cast("void***", pointer)) + 0x3914)[0][layer or 0] end
-	end
-
-	entity.get_simtime = function (ent)
-		local pointer = native_get_client_entity(ent)
-		if pointer then return entity.get_prop(ent, "m_flSimulationTime"), ffi.cast("float*", ffi.cast("uintptr_t", pointer) + 0x26C)[0] else return 0 end
-	end
-
-	entity.get_max_desync = function (animstate)
-		local speedfactor = math.clamp(animstate.feet_speed_forwards_or_sideways, 0, 1)
-		local avg_speedfactor = (animstate.stop_to_full_running_fraction * -0.3 - 0.2) * speedfactor + 1
-
-		local duck_amount = animstate.duck_amount
-		if duck_amount > 0 then
-			local duck_speed = duck_amount * speedfactor
-
-			avg_speedfactor = avg_speedfactor + (duck_speed * (0.5 - avg_speedfactor))
-		end
-
-		return math.clamp(avg_speedfactor, .5, 1)
-	end
-end
-
---#endregion
-
--- #endregion
-
--- #endregion
---
-
---
--- #region : Features introduction
-
-local antiaim = {
-	states = {
-		{"default", "Default", "D"},
-		{"stand", "Standing", "S"},
-		{"run", "Running", "R"},
-		{"walk", "Walking", "W"},
-		{"air", "In-air", "A"},
-		{"airduck", "Air-crouching", "AC"},
-		{"crouch", "Crouching", "C"},
-		{"sneak", "Sneaking", "3"},
-	},
-	presets = {
-		-- [1] = antibrute
-		custom = {
-			[1] = {},
-		},
-	}
-}
-
-local rage, misc, visuals = {}, {}, {}
-local vars, refs, textures = {}, {}, {}
-
--- #endregion
---
-
---
--- #region : Miscellaneous
-
--- #region - database
-
-local db = {
-	key = "zazahook",
-	version = 2,
-} do
-	local data = database.read(db.key)
-
-	if not data then
-		data = {
-			version = db.version,
-			configs = {},
-			stats = {
-				killed = 0, evaded = 0, playtime = 0, loaded = 1
-			},
-		}
-
-		database.write(db.key, data)
-	end
-
-	if data.version ~= db.version then
-		data.stats.candies = nil
-		data.version = db.version
-	end
-
-	if not data.stats.killed then data.stats.killed = 0 end
-	if not data.stats.evaded then data.stats.evaded = 0 end
-	if not data.stats.playtime then data.stats.playtime = 0 end
-	if not data.stats.loaded then data.stats.loaded = 1 end
-
-	data.stats.loaded = data.stats.loaded + 1
-
-	--
-	do
-		local function automemo ()
-			debug("autosave")
-			client.fire_event("zazahook::database_write")
-			database.write(db.key, data)
-			client.delay_call(300, automemo)
-		end client.delay_call(300, automemo)
-	end
-
-	defer(function ()
-		database.write(db.key, data)
-		database.flush()
-	end)
-
-	--
-	setmetatable(db, {
-		__index = data,
-		__call = function (self, flush)
-			database.write(db.key, data)
-			if flush == true then database.flush() end
-		end
- 	})
-end
-
--- #endregion
-
--- #region - enums
-
-local enums = {
-	hitgroups = {'generic', 'head', 'chest', 'stomach', 'left arm', 'right arm', 'left leg', 'right leg', 'neck', '?', 'gear'},
-	states = table.distribute(antiaim.states, nil, 1),
-	build = {
-		["stable"] = {"", ""},
-		["beta"] = {"β", ""},
-		["debug"] = {"♪", ""},
-	},
-	aspect_ratios = {
-		{125, "5:4"},
-		{133, "4:3"},
-		{150, "3:2"},
-		{160, "16:10"},
-		{178, "16:9"},
-		{200, "2:1"},
-	},
-}
-
-local cvars = setmetatable({}, {
-	__index = function (self, k)
-		local v = cvar[k]
-		rawset(self, k, v)
-		return v
-	end
-})
-
--- #endregion
-
--- #region - me
-
-local players = {}
-
-my = {
-	entity = entity.get_local_player(),
-	origin = vector(),
-	valid = false,
-	threat = client.current_threat(),
-	velocity = 0,
-	exploit = {
-		active = nil,
-		defensive = false,
-		lagpeek = false,
-		shifted = false,
-		ready = false,
-		diff = 0,
-	},
-	side = 0,
-} do
-	local get_state = a(function (cmd)
-		if my.on_ground then
-			if my.crouching then return enums.states.crouch end
-			if my.velocity > 5 then return my.walking and enums.states.walk or enums.states.run
-			else return enums.states.stand end
-		else
-			-- return my.crouching and enums.states.aircrouch or enums.states.air
-			return enums.states.air
-		end
-	end)
-
-	local tickbase_max = 0
-	local last_commandnumber
-
-	callbacks.predict_command:set(function (cmd)
-		if not my.valid or last_commandnumber ~= cmd.command_number then return end
-
-		local tickbase = entity.get_prop(my.entity, "m_nTickBase") or 0
-
-		if tickbase_max ~= nil then
-            my.exploit.diff = tickbase - tickbase_max
-			my.exploit.defensive = my.exploit.diff < -3
-
-			if math.abs(tickbase - tickbase_max) > 64 then tickbase_max = 0 end
+        local function get()
+            local len = native_GetClipboardTextCount()
+            if len > 0 then
+                local char_arr = char_array(len)
+                native_GetClipboardText(0, char_arr, len)
+                return ffi.string(char_arr, len - 1)
+            end
         end
 
-		tickbase_max = math.max(tickbase, tickbase_max or 0)
-	end)
+        local function set(...)
+            local text = tostring(table.concat({ ... }))
+            native_SetClipboardText(text, string.len(text))
+        end
 
-	callbacks.finish_command:set(function (cmd)
-		if my.valid then
-			last_commandnumber = cmd.command_number
-		end
-	end)
+        return {
+            set = set,
+            get = get
+        }
+    end,
 
-	callbacks.run_command:set(function (cmd)
-		my.entity = entity.get_local_player()
-		my.valid = (my.entity and entity.is_alive(my.entity)) and true or false
+    ["neverlose/base64"] = function(require)
+        local shl, shr, band = bit.lshift, bit.rshift, bit.band
+        local char, byte, gsub, sub, format, concat, tostring, error, pairs = string.char, string.byte, string.gsub, string.sub, string.format, table.concat, tostring, error, pairs
 
-		my.threat = my.valid and client.current_threat() or nil
-		my.weapon = my.valid and entity.get_player_weapon(my.entity) or nil
+        local extract = function(v, from, width)
+            return band(shr(v, from), shl(1, width) - 1)
+        end
 
-		my.in_game = globals.mapname() ~= nil
-		players = entity.get_players()
+        local function makeencoder(alphabet)
+            local encoder, decoder = {}, {}
+            for i=1, 65 do
+                local chr = byte(sub(alphabet, i, i)) or 32
+                if decoder[chr] ~= nil then
+                    error('invalid alphabet: duplicate character ' .. tostring(chr), 3)
+                end
+                encoder[i-1] = chr
+                decoder[chr] = i-1
+            end
+            return encoder, decoder
+        end
 
-		if my.valid then
-			local velocity = vector(entity.get_prop(my.entity, "m_vecVelocity"))
-			my.velocity = velocity:length2d()
+        local encoders, decoders = {}, {}
 
-			my.origin = vector(entity.get_prop(my.entity, "m_vecOrigin"))
-		end
-	end)
+        encoders['base64'], decoders['base64'] = makeencoder('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=')
+        encoders['base64url'], decoders['base64url'] = makeencoder('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_')
 
-	callbacks.pre_render:set(function ()
-		my.valid = my.valid and globals.mapname() ~= nil
-	end)
+        local alphabet_mt = {
+            __index = function(tbl, key)
+                if type(key) == 'string' and (key:len() == 64 or key:len() == 65) then
+                    encoders[key], decoders[key] = makeencoder(key)
+                    return tbl[key]
+                end
+            end
+        }
 
-	local counter = 0
+        setmetatable(encoders, alphabet_mt)
+        setmetatable(decoders, alphabet_mt)
 
-	callbacks.net_update_end:set(function ()
-		my.entity = entity.get_local_player()
-		my.valid = (my.entity and entity.is_alive(my.entity)) and true or false
-		my.game_rules = entity.get_game_rules()
+        local function encode(str, encoder)
+            encoder = encoders[encoder or 'base64'] or error('invalid alphabet specified', 2)
+            str = tostring(str)
+            local t, k, n = {}, 1, #str
+            local lastn = n % 3
+            local cache = {}
 
-		if my.valid then
-			local st_cur, st_old = entity.get_simtime(my.entity)
+            for i = 1, n-lastn, 3 do
+                local a, b, c = byte(str, i, i+2)
+                local v = a*0x10000 + b*0x100 + c
+                local s = cache[v]
+                if not s then
+                    s = char(encoder[extract(v,18,6)], encoder[extract(v,12,6)], encoder[extract(v,6,6)], encoder[extract(v,0,6)])
+                    cache[v] = s
+                end
+                t[k] = s
+                k = k + 1
+            end
 
-			my.exploit.lagpeek = st_cur < st_old
+            if lastn == 2 then
+                local a, b = byte(str, n-1, n)
+                local v = a*0x10000 + b*0x100
+                t[k] = char(encoder[extract(v,18,6)], encoder[extract(v,12,6)], encoder[extract(v,6,6)], encoder[64])
+            elseif lastn == 1 then
+                local v = byte(str, n)*0x10000
+                t[k] = char(encoder[extract(v,18,6)], encoder[extract(v,12,6)], encoder[64], encoder[64])
+            end
+            return concat(t)
+        end
 
-			-- counter = is_tb and counter + 1 or 0
-			-- debug(is_st and "+" or "-", " ST / TB ", is_tb and "+" or "-")
-			-- debug(counter, ": ", is_st and "ST " or "", is_tb and "TB " or "")
-		end
-	end)
+        local function decode(b64, decoder)
+            decoder = decoders[decoder or 'base64'] or error('invalid alphabet specified', 2)
+            local pattern = '[^%w%+%/%=]'
+            b64 = gsub(tostring(b64), pattern, '')
 
-	callbacks.setup_command:set(function (cmd)
-		my.entity = entity.get_local_player()
-		my.valid = (my.entity and entity.is_alive(my.entity)) and true or false
+            local cache = {}
+            local t, k = {}, 1
+            local n = #b64
+            local padding = sub(b64, -2) == '==' and 2 or sub(b64, -1) == '=' and 1 or 0
 
-		my.threat = my.valid and client.current_threat() or nil
-		my.weapon = my.valid and entity.get_player_weapon(my.entity) or nil
+            for i = 1, padding > 0 and n-4 or n, 4 do
+                local a, b, c, d = byte(b64, i, i+3)
+                local v0 = a*0x1000000 + b*0x10000 + c*0x100 + d
+                local s = cache[v0]
+                if not s then
+                    local v = decoder[a]*0x40000 + decoder[b]*0x1000 + decoder[c]*0x40 + decoder[d]
+                    s = char(extract(v,16,8), extract(v,8,8), extract(v,0,8))
+                    cache[v0] = s
+                end
+                t[k] = s
+                k = k + 1
+            end
 
-		players = entity.get_players()
+            if padding == 1 then
+                local a, b, c = byte(b64, n-3, n-1)
+                local v = decoder[a]*0x40000 + decoder[b]*0x1000 + decoder[c]*0x40
+                t[k] = char(extract(v,16,8), extract(v,8,8))
+            elseif padding == 2 then
+                local a, b = byte(b64, n-3, n-2)
+                local v = decoder[a]*0x40000 + decoder[b]*0x1000
+                t[k] = char(extract(v,16,8))
+            end
+            return concat(t)
+        end
 
-		if my.valid then
-			my.exploit.active =
-			(refs.rage.aimbot.double_tap[1].value and refs.rage.aimbot.double_tap[1].hotkey:get()) and 0 or
-			(refs.aa.other.onshot.value and refs.aa.other.onshot.hotkey:get()) and 1 or nil
-			if refs.rage.other.duck:get() then my.exploit.active = nil end
+        return {
+            encode = encode,
+            decode = decode
+        }
+    end,
+    ["neverlose/pui"] = function(require)
+        -- perfect user interface
+        ----- neverlose
 
-			my.exploit.shifted = my.exploit.diff <= 0 or adata.get_double_tap()
+        --------------------------------------------------------------------------------
+        -- #region :: Header
+
+        --
+        -- #region : Definitions
+
+        local _PUIVERSION = 1
+
+        --#region: localization
+
+        local print, require, print_raw, print_error, color, next, vector, type, pairs, ipairs, getmetatable, setmetatable, assert, rawget, rawset, rawequal, rawlen, unpack, select, tonumber, tostring, error, pcall, xpcall, print_dev =
+              print, require, print_raw, print_error, color, next, vector, type, pairs, ipairs, getmetatable, setmetatable, assert, rawget, rawset, rawequal, rawlen, unpack, select, tonumber, tostring, error, pcall, xpcall, print_dev
+
+        local C = function (t) local c = {} for k, v in next, t do c[k] = v end return c end
+
+        local table, math, string, ui = C(table), C(math), C(string), C(ui)
+
+        --#endregion
+
+        --#region: global table
+
+        table.find = function (t, j)  for k, v in next, t do if v == j then return k end end return false  end
+        table.ifind = function (t, j)  for i = 1, table.maxn(t) do if t[i] == j then return i end end  end
+        table.ihas = function (t, ...) local arg = {...} for i = 1, table.maxn(t) do for j = 1, #arg do if t[i] == arg[j] then return true end end end return false end
+
+        table.filter = function (t)  local res = {} for i = 1, table.maxn(t) do if t[i] ~= nil then res[#res+1] = t[i] end end return res  end
+        table.append = function (t, ...)  for i, v in ipairs{...} do table.insert(t, v) end  end
+        table.appendf = function (t, ...)  local arg = {...} for i = 1, table.maxn(arg) do local v = arg[i] if v ~= nil then t[#t+1] = v end end  end
+        table.range = function (t, i, j)  local r = {} for l = i or 0, j or #t do r[#r+1] = t[l] end return r  end
+        table.copy = function (o) if type(o) ~= "table" then return o end local r = {} for k, v in next, o do r[table.copy(k)] = table.copy(v) end return r end
+
+        math.round = function (value)  return math.floor (value + 0.5)  end
+        math.lerp = function (a, b, w)  return a + (b - a) * w  end
+
+        local ternary = function (c, a, b)  if c then return a else return b end  end
+        local aserror = function (a, msg, level) if not a then error(msg, level and level + 1 or 4) end end
+        local contend = function (func, callback, ...)
+            local t = { pcall(func, ...) }
+            if not t[1] then if type(callback) == "function" then return callback(t[2]) else error(t[2], callback or 2) end end
+            return unpack(t, 2)
+        end
+
+        local debug = setmetatable({
+            warning = function (...)
+                print_raw("[\ae09334ffpui", "] ", ...)
+            end,
+            error = function (...)
+                print_raw("[\aef6060ffpui", "] ", ...)
+                cvar.play:call("ui/menu_invalid.wav")
+                error()
+            end
+        }, {
+            __call = function (self, ...)
+                if _IS_MARKET then return end
+                print_raw("\a74a6a9ffpui - ", ...)
+                print_dev(...)
+            end
+        })
+
+        --#endregion
+
+        --#region: directory tools
+
+        local dirs = {
+            execute = function (t, path, func)
+                local p, k for _, s in ipairs(path) do
+                    k, p, t = s, t, t[s]
+                    if t == nil then return end
+                end
+                if p[k] ~= nil then func(p[k], p) end
+            end,
+            replace = function (t, path, value)
+                local p, k for _, s in ipairs(path) do
+                    k, p, t = s, t, t[s]
+                    if t == nil then return end
+                end
+                p[k] = value
+            end,
+            find = function (t, path)
+                local p, k
+                for _, s in ipairs(path) do
+                    k, p, t = s, t, t[s]
+                    if type(t) ~= "table" then break end
+                end
+                return p[k]
+            end,
+        }
+
+        dirs.pave = function (t, place, path)
+            local p = t for i, v in ipairs(path) do
+                if type(p[v]) == "table" then p = p[v]
+                else p[v] = (i < #path) and {} or place  p = p[v]  end
+            end return t
+        end
+
+        dirs.extract = function (t, path)
+            if not path or #path == 0 then return t end
+            local j = dirs.find(t, path)
+            return dirs.pave({}, j, path)
+        end
+
+        --#endregion
+
+        local pui, pui_mt, methods_mt = {}, {}, { element = {}, group = {} }
+        local tools, elemence = {}, {}
+        local config, is_setup = {}, false
+
+        local stringlist
+
+        --
+        local dpi = render.get_scale(1)
+
+        -- #endregion
+        --
+
+        --
+        -- #region : Elements
+
+        --#region: definitions
+
+        local elements = {
+            switch					= { type = "boolean",	arg = 2 },
+            slider					= { type = "number",	arg = 6 },
+            combo					= { type = "string",	arg = 2, variable = true },
+            language				= { type = "string",	arg = 2, variable = true },
+            selectable				= { type = "table",		arg = 2, variable = true },
+            button					= { type = "function",	arg = 3, unsavable = true },
+            list					= { type = "number",	arg = 2, variable = true },
+            listable				= { type = "table",		arg = 2, variable = true },
+            label					= { type = "string",	arg = 1, unsavable = true },
+            texture					= { type = "userdata",	arg = 5, unsavable = true },
+            image					= { type = "userdata",	arg = 5, unsavable = true },
+            hotkey					= { type = "number",	arg = 2 },
+            input					= { type = "string",	arg = 2 },
+            textbox					= { type = "string",	arg = 2 },
+            color_picker			= { type = "userdata",	arg = 2 },
+            value					= { type = "any",		arg = 2 },
+            ["sol.lua::LuaVarClr"]	= { type = "userdata",	arg = 2 },
+            [""]					= { type = "any",		arg = 2 },
+        }
+
+        --#endregion
+
+        --#region: methods parsing
+
+        local __mt = {
+            group = {}, wrp_group = {},
+            element = {}, wrp_element = {},
+            events = {}
+        } do
+            local element = ui.find("Miscellaneous", "Main", "Movement", "Air Duck")
+            local group = element:parent()
+
+            local element_keys, group_keys = { "__eq", "__index", "__name", "__type", "color_picker", "create", "disabled", "export", "get", "get_override", "id", "import", "key", "list", "name", "new", "override", "parent", "reset", "set", "set_callback", "tooltip", "type", "unset_callback", "update", "visibility",
+            }, { "__eq", "__index", "__name", "__type", "button", "color_picker", "combo", "create", "disabled", "export", "hotkey", "import", "input", "label", "list", "listable", "name", "parent", "selectable", "slider", "switch", "texture", "value", "visibility", }
+
+            for i = 1, #element_keys do
+                local k = element_keys[i]
+                local v = element[k]
+                __mt.element[k], __mt.wrp_element[k] = v, function (self, ...) return v(self.ref, ...) end
+            end
+
+            for i = 1, #group_keys do
+                local k = group_keys[i]
+                local v = group[k]
+                __mt.group[k], __mt.wrp_group[k] = v, function (self, ...) return v(self.ref, ...) end
+            end
+        end
+
+        --#endregion
+
+        --#region: weak tables
+
+        local icons = setmetatable({}, {
+            __mode = "k",
+            __index = function (self, name)
+                local icon = ui.get_icon(name)
+                if #icon == 0 then
+                    debug.warning(icon, ("<%s> icon not found"):format(name))
+                    return "[?]"
+                end
+                self[name] = icon
+                return self[name]
+            end
+        })
+
+        local groups = setmetatable({}, {
+            __mode = "k",
+            __index = function (self, raw)
+                local key, group
+                local kind = type(raw)
+
+                if kind == "table" then
+                    if raw.__name == "pui::group" then return raw.ref end
+                    for i = 1, #raw do  raw[i] = tools.format(raw[i])  end
+
+                    key, group = raw[1] .."-".. (raw[2] or ""), ui.create(unpack(raw))
+                elseif kind == "userdata" and raw.__name == "sol.lua::LuaGroup" then
+                    key, group = tostring(raw), raw
+                else
+                    raw = tools.format(raw)
+                    key, group = tostring(raw), ui.create(raw)
+                end
+
+                self[key] = group
+
+                return self[key]
+            end
+        })
+
+        --#endregion
+
+        -- #endregion
+        --
+
+        --
+        -- #region : Utils
+
+        --#region: tools
+
+        do
+            local fmethods = {
+                gradients = function (col, text)
+                    local colors = {}; for w in string.gmatch(col, "\b%x+") do
+                        colors[#colors+1] = color(string.sub(w, 2))
+                    end
+                    if #colors > 0 then return tools.gradient(text, colors) end
+                end,
+                colors = function (col)
+                    return pui.colors[col] and ("\a".. pui.colors[col]:to_hex()) or "\aDEFAULT"
+                end,
+                macros = setmetatable({}, {
+                    __newindex = function (self, key, value)
+                        local kv = type(value)
+
+                        if kv == "string" then
+                        elseif kv == "userdata" and value.__name == "sol.ImColor" then
+                            value = "\a" .. value:to_hex()
+                        else
+                            value = tostring(value)
+                        end
+
+                        rawset(self, tostring(key), value)
+                    end,
+                    __index = function (self, key) return rawget(self, key) end
+                })
+            }
+
+            pui.macros = fmethods.macros
+
+            tools.format = function (s)
+                if type(s) == "string" then
+                    if stringlist then stringlist[s] = true end
+                    s = string.gsub(s, "\b<(.-)>", fmethods.macros)
+                    s = string.gsub(s, "[\v\r]", { ["\v"] = "\a{Link Active}", ["\r"] = "\aDEFAULT" })
+                    s = string.gsub(s, "([\b%x]-)%[(.-)%]", fmethods.gradients)
+                    s = string.gsub(s, "\a%[(.-)%]", fmethods.colors)
+                    s = string.gsub(s, "\f<(.-)>", icons)
+                end
+
+                return s
+            end
+
+            tools.gradient = function (text, colors)
+                local symbols, length = {}, #(text:gsub(".[\128-\191]*", "a"))
+                local s = 1 / (#colors - 1)
+
+                local i = 0
+                for letter in string.gmatch(text, ".[\128-\191]*") do
+                    i = i + 1
+
+                    local weight = i / length
+                    local cw = weight / s
+                    local j = math.ceil(cw)
+                    local w = (cw / j)
+                    local L, R = colors[j], colors[j+1]
+
+                    local r = L.r + (R.r - L.r) * w
+                    local g = L.g + (R.g - L.g) * w
+                    local b = L.b + (R.b - L.b) * w
+                    local a = L.a + (R.a - L.a) * w
+
+                    symbols[#symbols+1] = ("\a%02x%02x%02x%02x%s"):format(r, g, b, a, letter)
+                end
+
+                symbols[#symbols+1] = "\aDEFAULT"
+
+                return table.concat(symbols)
+            end
+        end
+
+        --#endregion
+
+        --#region: elemence
+
+        do
+            elemence.new = function (ref)
+                local this = { ref = ref }
+                --
+
+                this.__depend = { {}, {} }
+                this[0], this[1] = {
+                    type = __mt.element.type(this.ref),
+                    events = {}, callbacks = {},
+                }, {}
+
+                this[0].savable = not elements[this[0].type].unsavable == true
+                --
+
+                if this[0].type ~= "button" then
+                    local v1, v2 = __mt.element.get(this.ref)
+                    if v2 ~= nil then
+                        this.value = { v1, v2 }
+                        __mt.element.set_callback(this.ref, function (self)
+                            this.value = { __mt.element.get(self) }
+                        end)
+                    else
+                        this.value = v1
+                        __mt.element.set_callback(this.ref, function (self)
+                            this.value = __mt.element.get(self)
+                        end)
+                    end
+                end
+
+                return setmetatable(this, methods_mt.element)
+            end
+
+            elemence.group = function (ref)
+                return setmetatable({
+                    ref = ref, par = ref:parent(),
+                    __depend = { {}, {} }
+                }, methods_mt.group)
+            end
+
+            elemence.dispense = function (key, ...)
+                local args, ctx = {...}, elements[key]
+
+                args.n = table.maxn(args)
+
+                local variable, counter = (ctx and ctx.variable) and type(args[2]) == "string", 1
+                args.req, args.misc = (ctx and not variable) and ctx.arg or args.n, {}
+
+                for i = 1, args.n do
+                    local v = args[i]
+                    local kind = type(v)
+
+                    if i == 2 and ctx.variable and not variable then
+                        for j = 1, #v do
+                            v[j] = tools.format(v[j])
+                        end
+                    else
+                        args[i] = tools.format(v)
+                    end
+
+                    if kind == "userdata" and v.__name == "sol.Vector" then  args[i] = v * dpi  end
+
+                    if i > args.req then
+                        args.misc[counter], counter = v, counter + 1
+                    end
+                end
+
+                return args
+            end
+
+            elemence.memorize = function (self, path, location)
+                if type(self) ~= "table" or self.__name ~= "pui::element" or self[0].skipsave then return end
+
+                location = location or config
+                local main = false
+                if self[0].savable then
+                    dirs.pave(location, self.ref, path)
+                    main = true
+                end
+
+                if rawget(self, "color") then
+                    local pathc = table.copy(path)
+                    pathc[#pathc] = (main and "*" or "") .. path[#path]
+                    dirs.pave(location, self.color.ref, pathc)
+                elseif next(self[1]) then
+                    local pathc, gear = table.copy(path), {}
+                    pathc[#pathc] = (main and "~" or "") .. path[#path]
+                    for k, v in next, self[1] do
+                        if v[0].savable and not v[0].skipsave then
+                            gear[k] = v.ref
+                            if rawget(v, "color") then gear["*"..k] = v.color.ref end
+                        end
+                    end
+                    dirs.pave(location, gear, pathc)
+                end
+            end
+
+            elemence.features = function (self, args)
+                if self[0].type == "image" or self[0].type == "value" then return end
+
+                local had_child, had_tooltip = false, false
+
+                for i = 1, table.maxn(args) do
+                    local v = args[i]
+                    local t = type(v)
+
+                    if not had_child and t == "function" then
+                        local c
+                        methods_mt.element.create(self)
+                        self[1], c = v(self[0].gear, self)
+                        if c ~= nil then self[0].gear:depend{self, c} end
+                        had_child = true
+
+                    elseif not had_child and (t == "userdata" and v.__name == "sol.ImColor") or (t == "table" and (v[1] and v[1].__name == "sol.ImColor" or v[next(v)] and v[next(v)][1].__name == "sol.ImColor")) then
+                        local im = t == "table"
+                        local g = im and v[1] or v
+                        local d = v[2]
+
+                        methods_mt.element.color_picker(self, g)
+                        if d ~= nil then self.color:depend{self, d} end
+                        had_child = true
+
+                    elseif not had_tooltip and t == "string" or (t == "table" and type(v[1]) == "string") then
+                        __mt.element.tooltip(self.ref, tools.format(v))
+                        had_tooltip = true
+                    elseif i == 2 and v == false then
+                        self[0].skipsave = true
+                    end
+                end
+            end
+
+            --#region: .depend
+
+            local cases = {
+                combo = function (v)
+                    if v[3] == true then
+                        return v[1].value ~= v[2]
+                    else
+                        for i = 2, #v do
+                            if v[1].value == v[i] then return true end
+                        end
+                    end
+                    return false
+                end,
+                list = function (v)
+                    if v[3] == true then
+                        return v[1].value ~= v[2]
+                    else
+                        for i = 2, #v do
+                            if v[1].value == v[i] then return true end
+                        end
+                    end
+                    return false
+                end,
+                selectable = function (v)
+                    if v[2] == true then
+                        return #v[1].value > 0
+                    elseif v[3] == true then
+                        return not table.ihas(v[1].value, unpack(v, 2))
+                    else
+                        return table.ihas(v[1].value, unpack(v, 2))
+                    end
+                end,
+                listable = function (v)
+                    if v[2] == true then
+                        return #v[1].value > 0
+                    elseif v[3] == true then
+                        return not table.ihas(v[1].value, unpack(v, 2))
+                    else
+                        return table.ihas(v[1].value, unpack(v, 2))
+                    end
+                end,
+                slider = function (v)
+                    return v[2] <= v[1].value and v[1].value <= (v[3] or v[2])
+                end,
+            }
+
+            local depend = function (v)
+                local condition = false
+
+                if type(v[2]) == "function" then
+                    condition = v[2]( v[1] )
+                else
+                    local f = cases[v[1][0].type]
+                    if f then condition = f(v)
+                    else condition = v[1].value == v[2] end
+                end
+
+                return condition and true or false
+            end
+
+            elemence.dependant = function (__depend, dependant, disabler)
+                local count = 0
+
+                for i = 1, #__depend do
+                    count = count + ( depend(__depend[i]) and 1 or 0 )
+                end
+
+                local eligible = count >= #__depend
+                local kind = dependant.__name == "sol.lua::LuaGroup" and "group" or "element"
+                __mt[kind][disabler and "disabled" or "visibility"](dependant, ternary(disabler, not eligible, eligible))
+            end
+
+            --#endregion
+        end
+
+        --#endregion
+
+        -- #endregion
+        --
 
 
-			local flags = entity.get_prop(my.entity, "m_fFlags")
+        -- #endregion ------------------------------------------------------------------
+        --
 
-			my.using, my.in_score = cmd.in_use == 1, cmd.in_score == 1
-			my.jumping = not my.on_ground or (cmd.in_jump == 1)
-			my.walking = my.velocity > 5 and (cmd.in_speed == 1)
-			my.on_ground = bit.band(flags, bit.lshift(1, 0)) == 1
-			my.crouching = cmd.in_duck == 1
 
-			my.side = (cmd.in_moveright == 1) and -1 or (cmd.in_moveleft == 1) and 1 or 0
-			my.state = get_state(cmd)
-		end
-	end)
+
+        --------------------------------------------------------------------------------
+        -- #region :: PUI
+
+
+        --
+        -- #region : pui
+
+        --#region: variables
+
+        pui.version = _PUIVERSION
+
+        pui.colors = {}
+        pui.accent, pui.alpha = ui.get_style("Link Active"), ui.get_alpha()
+        pui.menu_position, pui.menu_size = ui.get_position(), ui.get_size()
+
+        events.render:set(function ()
+            pui.accent, pui.alpha = ui.get_style("Link Active"), ui.get_alpha()
+            pui.menu_position, pui.menu_size = ui.get_position(), ui.get_size()
+        end)
+
+        --#endregion
+
+        --#region: features
+
+        pui.string = tools.format
+
+        pui.create = function (tab, name, align)
+            if type(name) == "table" then
+                local collection = {}
+                for k, v in ipairs(name) do
+                    collection[ v[1] or k ] = elemence.group( groups[{tab, v[2], v[3]}] )
+                end
+                return collection
+            else
+                return elemence.group( groups[name and {tab, name, align} or tab] )
+            end
+        end
+
+        pui.find = function (...)
+            local arg = {...}
+            local children for i, v in ipairs(arg) do
+                if type(v) == "table" then
+                    children, arg[i] = v, nil
+                break end
+            end
+
+            local found = { ui.find( unpack(arg) ) }
+
+            for i, v in ipairs(found) do
+                found[i] = elemence[v.__name == "sol.lua::LuaGroup" and "group" or "new"](v)
+            end
+
+            if found[2] and found[2].ref.__name == "sol.lua::LuaVar" then
+                found[1].color, found[2] = found[2], nil
+            elseif children and found[1] then
+                for k, v in next, children do
+                    local path = {...}
+                    path[#path] = v
+                    found[1][1][k] = pui.find( unpack(path) )
+                end
+            end
+
+            return found[1]
+        end
+
+        pui.sidebar = function (name, icon)
+            name, icon = tools.format(name), icon and tools.format(icon) or nil
+
+            ui.sidebar(name, icon)
+        end
+
+        pui.get_icon = function (name)
+            return icons[name]
+        end
+
+        pui.traverse = function (t, f, p)
+            p = p or {}
+
+            if type(t) == "table" and (t.__name ~= "pui::element" and t.__name ~= "pui::group") and t[#t] ~= "~" then
+                for k, v in next, t do
+                    local np = table.copy(p); np[#np+1] = k
+                    pui.traverse(v, f, np)
+                end
+            else
+                f(t, p)
+            end
+        end
+
+        pui.translate = function (original, translations)
+            original = tools.format(original)
+            for k, v in next, translations or {} do
+                ui.localize(k, original, tools.format(v))
+            end
+            return original
+        end
+
+        do -- categories
+            local mt = {
+                create = function (self, name, align)
+                    return elemence.group(__mt.group.create(self[1], tools.format(name), align))
+                end
+            }	mt.__index = mt
+
+            local sidebar = ui.find("Aimbot", "Anti Aim"):parent():parent()
+            local cats = {}
+
+            pui.category = function (name, tab)
+                name, tab = tostring(tools.format(name)), tostring(tools.format(tab))
+                local ref = contend(ui.find, function () end, name, tab)
+
+                if not cats[name] then
+                    cats[name] = {}
+                    if not ref then cats[name][0] = sidebar:create(name) end
+                end
+                if not cats[name][tab] then
+                    if ref then cats[name][tab] = ref
+                    else cats[name][tab] = cats[name][0]:create(tab) end
+                end
+
+                return setmetatable({cats[name][tab]}, mt)
+            end
+        end
+
+        pui.string_recorder = {
+            open = function () stringlist = {} end,
+            close = function ()
+                if stringlist then
+                    local list, count = {}, 0
+                    for k, v in next, stringlist do
+                        count = count + 1
+                        list[count] = k
+                    end
+                    stringlist = nil
+                    return list
+                end
+            end
+        }
+
+        --#endregion
+
+        --#region: config system
+
+        do
+            pui.is_loading_config, pui.is_saving_config = false, false
+
+            local function traverse_b (t, f, p)
+                p = p or {}
+
+                if type(t) == "table" and t._S == nil then
+                    for k, v in next, t do
+                        local np = table.copy(p); np[#np+1] = k
+                        traverse_b(v, f, np)
+                    end
+                else
+                    f(t, p)
+                end
+            end
+
+            local convert = function (t)
+                local new = {}
+                traverse_b(t, function (v, p)
+                    if type(v) == "table" and v._S ~= nil then
+                        if v._C then
+                            local col = table.copy(p)
+                            col[#col] = "*" .. col[#col]
+                            dirs.pave(new, v._C, col)
+                            dirs.pave(new, v._S, p)
+                        else
+                            local gear = table.copy(v)
+                            gear._S = nil
+                            for gk, gv in next, gear do
+                                if type(gv) == "table" and gv._C then
+                                    gear["*"..gk], gear[gk] = gv._C, gv._S
+                                end
+                            end
+
+                            local gearpath = table.copy(p)
+                            gearpath[#gearpath] = "~" .. gearpath[#gearpath]
+                            dirs.pave(new, gear, gearpath)
+                            dirs.pave(new, v._S, p)
+                        end
+                    else
+                        dirs.pave(new, v, p)
+                    end
+                end)
+                return new
+            end
+
+            local locate = function (init, arg)
+                if type(arg[1]) == "table" then
+                    local r = {}
+                    for i, v in ipairs(arg) do
+                        local d = dirs.find(init, v)
+                        dirs.pave(r, d, v)
+                    end
+
+                    return r
+                else
+                    return dirs.extract(init, arg)
+                end
+            end
+
+            local save = function (location, ...)
+                pui.is_saving_config = true
+
+                local arg, packed = {...}, {}
+
+                pui.traverse(locate(location, arg), function (ref, path)
+                    local etype = __mt.element.type(ref)
+                    local value, value2 = __mt.element[etype == "hotkey" and "key" or "get"](ref)
+                    local vtype, v2type = type(value), type(value2)
+
+                    if etype == "color_picker" then
+                        if vtype == "table" then
+                            value2, v2type = value, vtype
+                            value, vtype = __mt.element.list(ref)[1], "string"
+                        end
+
+                        if value2 then
+                            value = { value }
+                            if v2type == "table" then
+                                for i = 1, #value2 do
+                                    value[#value+1] = "#".. value2[i]:to_hex()
+                                end
+                            else
+                                value[2] = "#".. value2:to_hex()
+                            end
+                            value[#value+1] = "~"
+                        else
+                            value = "#".. value:to_hex()
+                        end
+                    elseif vtype == "table" then
+                        value[#value+1] = "~"
+                    end
+
+                    dirs.pave(packed, value, path)
+                end)
+
+                pui.is_saving_config = false
+                return packed
+            end
+            local load = function (location, data, ...)
+                if not data then return end
+
+                local arg, reset = {...}, true
+                if arg[1] == false then table.remove(arg, 1); reset = false end
+
+                pui.is_loading_config = true
+
+                local packed = convert(locate(data, arg))
+                pui.traverse(locate(location, arg), function (ref, path)
+                    local value = dirs.find(packed, path)
+
+                    local multicolor
+                    local vtype, etype = type(value), __mt.element.type(ref)
+                    local object = elements[etype] or elements[ref.__name]
+
+                    if etype == "color_picker" then
+                        if vtype == "string" and value:sub(1, 1) == "#" then
+                            value = color(value)
+                            vtype = "userdata"
+                        elseif vtype == "table" then
+                            value[#value] = nil
+                            for i = 2, #value do value[i] = color(value[i]) end
+                            multicolor = true
+                            vtype = "userdata"
+                        end
+                    elseif vtype == "table" and value[#value] == "~" then
+                        value[#value] = nil
+                    end
+
+                    if not object or (object.type ~= "any" and object.type ~= vtype) then
+                        return reset and __mt.element.reset(ref) or nil
+                    end
+
+                    pcall(function ()
+                        if etype == "hotkey" then
+                            __mt.element.key(ref, value)
+                        elseif etype == "color_picker" and multicolor then
+                            __mt.element.set(ref, value[1])
+                            __mt.element.set(ref, value[1], table.range(value, 2))
+                        else
+                            __mt.element.set(ref, value)
+                        end
+                    end)
+                end)
+
+                pui.is_loading_config = false
+            end
+
+            local package_mt = {
+                __type = "pui::package", __metatable = false,
+                __call = function (self, raw, ...)
+                    return (type(raw) == "table" and load or save)(self[0], raw, ...)
+                end,
+                save = function (self, ...) return save(self[0], ...) end,
+                load = function (self, ...) load(self[0], ...) end,
+            }	package_mt.__index = package_mt
+
+            pui.setup = function (t, isolate)
+                if isolate == true then
+                    local package = { [0] = {} }
+                    pui.traverse(t, function (r, p) elemence.memorize(r, p, package[0]) end)
+                    return setmetatable(package, package_mt)
+                else
+                    if is_setup then return debug.warning("config is already setup by this or another script") end
+                    pui.traverse(t, elemence.memorize)
+                    is_setup = true
+                    return t
+                end
+            end
+
+            pui.save = function (...) return save(config, ...) end
+            pui.load = function (...) load(config, ...) end
+        end
+
+        --#endregion
+
+        -- #endregion
+        --
+
+        --
+        -- #region : methods
+
+        methods_mt.element = {
+            __metatable = false,
+            __type = "pui::element", __name = "pui::element",
+            __tostring = function (self) return string.format("pui::element.%s \"%s\"", self[0].type, self.ref:name()) end,
+            __eq = function (a, b) return __mt.element.__eq(a.ref, b.ref) end,
+            __index = function (self, key)
+                return rawget(methods_mt.element, key) or rawget(__mt.wrp_element, key) or rawget(self[1], key)
+            end,
+            __call = function (self, ...)
+                return (#{...} == 0 and __mt.element.get or __mt.element.set)(self.ref, ...)
+            end,
+
+            --
+
+            create = function (self)
+                self[0].gear = self[0].gear or elemence.group(__mt.element.create(self.ref))
+                return self[0].gear
+            end,
+
+            depend = function (self, ...)
+                local arg = {...}
+                local disabler = arg[1] == true
+
+                local __depend = self.__depend[disabler and 2 or 1]
+                for i = disabler and 2 or 1, table.maxn(arg) do
+                    local v = arg[i]
+                    if v then
+                        if v.__name == "pui::element" then v = {v, true} end
+
+                        v[0] = false
+                        __depend[#__depend+1] = v
+
+                        local check = function () elemence.dependant(__depend, self.ref, disabler) end
+                        check()
+
+                        __mt.element.set_callback(v[1].ref, check)
+                    end
+                end
+
+                return self
+            end,
+
+            --
+
+            name = function (self, s)
+                if s then	__mt.element.name(self.ref, tools.format(s))
+                else		return __mt.element.name(self.ref) end
+            end,
+            set_name = function (self, s)
+                __mt.element.name(self.ref, tools.format(s))
+            end,
+            get_name = function (self)
+                return __mt.element.name(self.ref)
+            end,
+
+            type = function (self) return self[0].type end,
+            get_type = function (self) return self[0].type end,
+
+            list = function (self)
+                return __mt.element.list(self.ref)
+            end,
+            get_list = function (self)
+                return __mt.element.list(self.ref)
+            end,
+            update = function (self, ...)
+                __mt.element.update(self.ref, ...)
+
+                if self[0].type == "list" or self[0].type == "listable" then
+                    local value, list = __mt.element.get(self.ref), __mt.element.list(self.ref)
+                    if not list then return end
+                    local max = #list
+
+                    if type(value) == "number" then
+                        if value > max then
+                            __mt.element.set(self.ref, max)
+                            self.value = max
+                        end
+                    else
+                        local id = table.ifind(list, value)
+
+                        if id == nil or id > max then
+                            __mt.element.set(self.ref, list[max])
+                            self.value = list[max]
+                        end
+                    end
+                end
+            end,
+
+            tooltip = function (self, t)
+                if t then	__mt.element.tooltip(self.ref, tools.format(t))
+                else		return __mt.element.tooltip(self.ref) end
+            end,
+            set_tooltip = function (self, t)
+                __mt.element.tooltip(self.ref, tools.format(t))
+            end,
+            get_tooltip = function (self)
+                return __mt.element.tooltip(self.ref)
+            end,
+
+            set_visible = function (self, v)
+                __mt.element.visibility(self.ref, v)
+            end,
+            get_visible = function (self)
+                __mt.element.visibility(self.ref)
+            end,
+
+            set_disabled = function (self, v)
+                __mt.element.disabled(self.ref, v)
+            end,
+            get_disabled = function (self)
+                __mt.element.disabled(self.ref)
+            end,
+
+            get_color = function (self)
+                return rawget(self, "color") and self.color.value
+            end,
+            color_picker = function (self, default)
+                self.color = elemence.new(__mt.element.color_picker(self.ref, default))
+
+                return self.color
+            end,
+
+            set_event = function (self, event, fn, condition)
+                if condition == nil then condition = true end
+                local fncond, latest = type(condition) == "function", fn
+
+                self[0].events[fn] = function ()
+                    local permission
+
+                    if fncond then permission = condition(self) and true or false
+                    else permission = self.value == condition end
+
+                    if latest ~= permission then
+                        events[event](fn, permission)
+                        latest = permission
+                    end
+                end
+                self[0].events[fn]()
+                __mt.element.set_callback(self.ref, self[0].events[fn])
+            end,
+            unset_event = function (self, event, fn)
+                events[event].unset(events[event], fn)
+                __mt.element.unset_callback(self.ref, self[0].events[fn])
+                self[0].events[fn] = nil
+            end,
+
+            set_callback = function (self, fn, once)
+                self[0].callbacks[fn] = function () fn(self) end
+                __mt.element.set_callback(self.ref, self[0].callbacks[fn], once)
+            end,
+            unset_callback = function (self, fn)
+                if self[0].callbacks[fn] then
+                    __mt.element.unset_callback(self.ref, self[0].callbacks[fn])
+                    self[0].callbacks[fn] = nil
+                end
+            end,
+
+            override = function (self, ...)
+                __mt.element.override(self.ref, ...)
+            end,
+            get_override = function (self)
+                return __mt.element.get_override(self.ref)
+            end,
+        }
+
+        methods_mt.group = {
+            __name = "pui::group", __metatable = false,
+            __index = function (self, key)
+                return methods_mt.group[key] or (elements[key] and pui_mt.__index(self, key) or __mt.wrp_group[key])
+            end,
+
+            name = function (self, s, t)
+                local ref = t == true and self.par or self.ref
+                if s then	__mt.group.name(ref, tools.format(s))
+                else		return __mt.group.name(ref) end
+            end,
+            set_name = function (self, s, t)
+                __mt.group.name(t == true and self.par or self.ref, tools.format(s))
+            end,
+            get_name = function (self, t)
+                return __mt.group.name(t == true and self.par or self.ref)
+            end,
+
+            disabled = function (self, b, t)
+                local ref = t == true and self.par or self.ref
+                if b ~= nil then   __mt.group.disabled(ref, b)
+                else		return __mt.group.disabled(ref) end
+            end,
+            set_disabled = function (self, b, t)
+                __mt.group.disabled(t == true and self.par or self.ref, b and true or false)
+            end,
+            get_disabled = function (self, t)
+                return __mt.group.disabled(t == true and self.par or self.ref)
+            end,
+
+            set_visible = function (self, b)
+                __mt.group.visibility(self.ref, b and true or false)
+            end,
+            get_visible = function (self)
+                return __mt.group.visibility(self.ref)
+            end,
+
+            depend = methods_mt.element.depend
+        }
+
+        -- #endregion
+        --
+
+        --
+        -- #region : pui_mt
+
+        do
+            local cached = {} for key in next, elements do
+                cached[key] = function (origin, ...)
+                    local is_child = origin.__name == "pui::group"
+                    local group = is_child and origin.ref or groups[origin]
+
+                    local args = elemence.dispense(key, ...)
+                    local this = elemence.new( __mt.group[key]( group, unpack(args, 1, args.n < args.req and args.n or args.req) ) )
+
+                    elemence.features(this, args.misc)
+
+                    return this
+                end
+            end
+
+            pui_mt.__metatable = false
+            pui_mt.__name = "pui::basement"
+            pui_mt.__index = function (self, key)
+                if not elements[key] then return ui[key] end
+                return cached[key]
+            end
+        end
+
+        -- #endregion
+        --
+
+
+        -- #endregion ------------------------------------------------------------------
+        --
+
+
+
+
+        return setmetatable(pui, pui_mt) ---------------------------<  enQ • 1927  >----
+    end,
+
+["neverlose/smoothy"] = function(require)
+        local native_GetTimescale = utils.get_vfunc('engine.dll', 'VEngineClient014', 91, 'float(__thiscall*)(void*)')
+
+        local to_pairs = {
+            vector = { 'x', 'y', 'z' },
+            imcolor =  { 'r', 'g', 'b', 'a' }
+        }
+
+        local function get_type(value)
+            local val_type = type(value)
+
+            if val_type == 'userdata' and value.__type then
+                return string.lower(value.__type.name)
+            end
+
+            if val_type == 'boolean' then
+                value = value and 1 or 0
+            end
+
+            return val_type
+        end
+
+        local function copy_tables(destination, keysTable, valuesTable)
+            valuesTable = valuesTable or keysTable
+            local mt = getmetatable(keysTable)
+
+            if mt and getmetatable(destination) == nil then
+                setmetatable(destination, mt)
+            end
+
+            for k,v in pairs(keysTable) do
+                if type(v) == 'table' then
+                    destination[k] = copy_tables({}, v, valuesTable[k])
+                else
+                    local value = valuesTable[k]
+
+                    if type(value) == 'boolean' then
+                        value = value and 1 or 0
+                    end
+
+                    destination[k] = value
+                end
+            end
+
+            return destination
+        end
+
+        local function resolve(easing_fn, previous, new, clock, duration)
+            if type(new) == 'boolean' then new = new and 1 or 0 end
+            if type(previous) == 'boolean' then previous = previous and 1 or 0 end
+
+            local previous = easing_fn(clock, previous, new - previous, duration)
+
+            if type(new) == 'number' then
+                if math.abs(new-previous) <= .001 then
+                    previous = new
+                end
+
+                if previous % 1 < .0001 then
+                    previous = math.floor(previous)
+                elseif previous % 1 > .9999 then
+                    previous = math.ceil(previous)
+                end
+            end
+
+            return previous
+        end
+
+        local function perform_easing(ntype, easing_fn, previous, new, clock, duration)
+            if to_pairs[ntype] then
+                for _, key in ipairs(to_pairs[ntype]) do
+                    previous[key] = perform_easing(
+                        type(v), easing_fn,
+                        previous[key], new[key],
+                        clock, duration
+                    )
+                end
+
+                return previous
+            end
+
+            if ntype == 'table' then
+                for k, v in pairs(new) do
+                    previous[k] = previous[k] or v
+                    previous[k] = perform_easing(
+                        type(v), easing_fn,
+                        previous[k], v,
+                        clock, duration
+                    )
+                end
+
+                return previous
+            end
+
+            return resolve(easing_fn, previous, new, clock, duration)
+        end
+
+        local adjusted_speed
+
+        local new = function(default, easing_fn)
+            if type(default) == 'boolean' then
+                default = default and 1 or 0
+            end
+
+            local mt = { }
+            local mt_data = {
+                value = default or 0,
+                easing = easing_fn or function(t, b, c, d)
+                    return c * t / d + b
+                end
+            }
+
+            function mt.update(self, duration, value, easing, ignore_adj_speed)
+                if type(value) == 'boolean' then
+                    value = value and 1 or 0
+                end
+
+                local clock = globals.frametime / native_GetTimescale()
+                local duration = duration or .15
+                local value_type = get_type(value)
+                local target_type = get_type(self.value)
+
+                assert(value_type == target_type, string.format('type mismatch. expected %s (received %s)', target_type, value_type))
+
+                if self.value == value then
+                    return value
+                end
+
+                if adjusted_speed and ignore_adj_speed ~= true then
+                    duration = duration * adjusted_speed
+                end
+
+                if clock <= 0 or clock >= duration then
+                    if target_type == 'imcolor' or target_type == 'vector' then
+                        self.value = value:clone()
+                    elseif target_type == 'table' then
+                        copy_tables(self.value, value)
+                    else
+                        self.value = value
+                    end
+                else
+                    local easing = easing or self.easing
+
+                    self.value = perform_easing(
+                        target_type, easing,
+                        self.value, value,
+                        clock, duration
+                    )
+                end
+
+                return self.value
+            end
+
+            return setmetatable(mt, {
+                __metatable = false,
+                __call = mt.update,
+                __index = mt_data
+            })
+        end
+
+        local new_interp = function(initial_value)
+            return setmetatable({
+                previous = initial_value or 0
+            }, {
+                __call = function(self, new_value, mul)
+                    local mul = mul or 1
+                    local tickinterval = globals.tickinterval * mul
+                    local difference = math.abs(new_value - self.previous)
+
+                    if difference > 0 then
+                        local clock = globals.frametime / native_GetTimescale()
+                        local time = math.min(tickinterval, clock) / tickinterval
+
+                        self.previous = self.previous + time * (new_value - self.previous)
+                    else
+                        self.previous = new_value
+                    end
+
+                    self.previous = (self.previous % 1 < .0001) and 0 or self.previous
+
+                    return self.previous
+                end
+            })
+        end
+
+        local set_speed = function(new_speed)
+            if new_speed == true then return adjusted_speed or 1 end
+            if new_speed == nil then adjusted_speed = nil end
+
+            if type(new_speed) == 'number' and new_speed >= 0 then
+                adjusted_speed = new_speed
+            end
+
+            return adjusted_speed
+        end
+
+        return {
+            new = new,
+            new_interp = new_interp,
+            set_speed = set_speed
+        }
+    end,
+
+    ["ffi"] = function()
+        return ffi
+    end,
+
+["neverlose/inspect"] = function(require)
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local math = _tl_compat and _tl_compat.math or math; local pcall = _tl_compat and _tl_compat.pcall or pcall; local string = _tl_compat and _tl_compat.string or string; local table = _tl_compat and _tl_compat.table or table; local type = type
+local inspect = { Options = {} }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+inspect._VERSION = 'inspect.lua 3.1.0'
+inspect._URL = 'http://github.com/kikito/inspect.lua'
+inspect._DESCRIPTION = 'human-readable representations of tables'
+inspect._LICENSE = [[
+  MIT LICENSE
+
+  Copyright (c) 2022 Enrique García Cota
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+]]
+inspect.KEY = setmetatable({}, { __tostring = function() return 'inspect.KEY' end })
+inspect.METATABLE = setmetatable({}, { __tostring = function() return 'inspect.METATABLE' end })
+
+local tostring = tostring
+local rep = string.rep
+local match = string.match
+local char = string.char
+local gsub = string.gsub
+local fmt = string.format
+
+
+local sbavailable, stringbuffer = pcall(require, "string.buffer")
+local buffnew
+local puts
+local render
+
+if sbavailable then
+   buffnew = stringbuffer.new
+   puts = function(buf, str)
+      buf:put(str)
+   end
+   render = function(buf)
+      return buf:get()
+   end
+else
+   buffnew = function()
+      return { n = 0 }
+   end
+   puts = function(buf, str)
+      buf.n = buf.n + 1
+      buf[buf.n] = str
+   end
+   render = function(buf)
+      return table.concat(buf)
+   end
 end
 
--- #endregion
-
--- #endregion
---
-
-
--- #endregion ------------------------------------------------------------------
---
-
-
-
-
---------------------------------------------------------------------------------
--- #region :: Menu
-
-
---
--- #region : GS References
-
-refs = {
-	rage = {
-		aimbot = {
-			force_baim = pui.reference("RAGE", "Aimbot", "Force body aim"),
-			force_sp = pui.reference("RAGE", "Aimbot", "Force safe point"),
-			hit_chance = pui.reference("RAGE", "Aimbot", "Minimum hit chance"),
-			damage = pui.reference("RAGE", "Aimbot", "Minimum damage"),
-			damage_ovr = { pui.reference("RAGE", "Aimbot", "Minimum damage override") },
-			double_tap = { pui.reference("RAGE", "Aimbot", "Double tap") },
-			dt_fl = { pui.reference("RAGE", "Aimbot", "Double tap fake lag limit") },
-		},
-		other = {
-			peek = pui.reference("RAGE", "Other", "Quick peek assist"),
-			duck = pui.reference("RAGE", "Other", "Duck peek assist"),
-			log_misses = pui.reference("RAGE", "Other", "Log misses due to spread"),
-		}
-	},
-	aa = {
-		angles = {
-			enable = pui.reference("AA", "Anti-Aimbot angles", "Enabled"),
-			pitch = { pui.reference("AA", "Anti-Aimbot angles", "Pitch") },
-			yaw = { pui.reference("AA", "Anti-Aimbot angles", "Yaw") },
-			base = pui.reference("AA", "Anti-Aimbot angles", "Yaw base"),
-			jitter = { pui.reference("AA", "Anti-Aimbot angles", "Yaw jitter") },
-			body = { pui.reference("AA", "Anti-Aimbot angles", "Body yaw") },
-			edge = pui.reference("AA", "Anti-Aimbot angles", "Edge yaw"),
-			fs_body = pui.reference("AA", "Anti-Aimbot angles", "Freestanding body yaw"),
-			freestand = pui.reference("AA", "Anti-Aimbot angles", "Freestanding"),
-			roll = pui.reference("AA", "Anti-Aimbot angles", "Roll"),
-		},
-		fakelag = {
-			enable = pui.reference("AA", "Fake lag", "Enabled"),
-			amount = pui.reference("AA", "Fake lag", "Amount"),
-			variance = pui.reference("AA", "Fake lag", "Variance"),
-			limit = pui.reference("AA", "Fake lag", "Limit"),
-		},
-		other = {
-			slowmo = pui.reference("AA", "Other", "Slow motion"),
-			legs = pui.reference("AA", "Other", "Leg movement"),
-			onshot = pui.reference("AA", "Other", "On shot anti-aim"),
-			fp = pui.reference("AA", "Other", "Fake peek"),
-		}
-	},
-	misc = {
-		clantag = pui.reference("MISC", "Miscellaneous", "Clan tag spammer"),
-		log_damage = pui.reference("MISC", "Miscellaneous", "Log damage dealt"),
-		ping_spike = pui.reference("MISC", "Miscellaneous", "Ping spike"),
-		settings = {
-			dpi = pui.reference("MISC", "Settings", "DPI scale"),
-			accent = pui.reference("MISC", "Settings", "Menu color"),
-			maxshift = pui.reference("MISC", "Settings", "sv_maxusrcmdprocessticks2")
-		}
-	}
-}
-
-defer(function ()
-	pui.traverse(refs, function (ref)
-		ref:override()
-		ref:set_enabled(true)
-		if ref.hotkey then ref.hotkey:set_enabled(true) end
-	end)
-	refs.misc.settings.maxshift:set_visible(false)
-end)
-
--- #endregion
---
-
---
--- #region : Script menu
-
--- #region - Base
-
-pui.macros.silent = "\aCDCDCD40"
-pui.macros.p = "\aCDCDCD40•\r  "
-pui.macros.zazahook = colors.hex
-pui.macros.zazahookb = string.sub(colors.hex, 2, 7)
-
--- pui.accent = "74A6A9FF"
-
-local menu, groups = {
-	x = 0, y = 0, w = 0, h = 0,
-	set_visible = function (bool, aa)
-		pui.traverse(refs.aa, function (r, path)
-			if aa and zazahook.build == "stable" and vars.antiaim.global.value and path[1] == "angles" then
-				r:set_visible(false)
-			else
-				r:set_visible(bool == nil and true or bool)
-			end
-		end)
-	end,
-	tabs = {
-		{"general", "Home"},
-		{"settings", "Settings"},
-		{"antiaim", "Anti-aim"},
-	},
-	header = function (group, text)
-		local r = {}
-		if text then r[#r+1] = group:label("\v•\r  ".. text) end
-		r[#r+1] = group:label("\a373737FF‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾")
-		return r
-	end,
-	feature = function (main, settings)
-		main = main.__type == "pui::element" and {main} or main
-		local feature, g_depend = settings(main[1])
-
-		for k, v in pairs(feature) do
-			v:depend({main[1], g_depend})
-		end
-		feature[main.key or "on"] = main[1]
-
-		return feature
-	end,
-	space = function (group) return group:label "\n" end,
-	lock = function (id, item, to, min)
-		if _LEVEL < (min or 2) then
-			local cb = function (this) client.delay_call(.1, function() this:set(to or false) end) end
-			item:set_callback(cb, true)
-			item:set_enabled(false)
-		end
-
-		return item
-	end
-}, {
-	angles = pui.group("AA", "Anti-aimbot angles"),
-	fakelag = pui.group("AA", "Fake lag"),
-	other = pui.group("AA", "Other"),
-}
-
-do -- auto-hide
-	refs.aa.angles.yaw[2]:depend({refs.aa.angles.yaw[1], 1})
-	refs.aa.angles.pitch[2]:depend({refs.aa.angles.pitch[1], 1})
-	refs.aa.angles.jitter[1]:depend({refs.aa.angles.yaw[1], 1})
-	refs.aa.angles.jitter[2]:depend({refs.aa.angles.jitter[1], 1})
-	refs.aa.angles.body[2]:depend({refs.aa.angles.body[1], 1})
-	refs.aa.angles.fs_body:depend({refs.aa.angles.body[1], 1})
+local _rawget
+if rawget then
+   _rawget = rawget
+else
+   _rawget = function(t, k) return t[k] end
 end
 
-callbacks.paint_ui:set(function ()
-	menu.x, menu.y = ui.menu_position()
-	menu.w, menu.h = ui.menu_size()
-end)
-
--- #endregion
-
--- #region - Unsavable
-
-menu.main = {
-	menu.space(groups.fakelag),
-	global = groups.fakelag:checkbox(_AZAZI and "\f<silent>-----------  \vазази\rазаза  \f<silent>-----------" or "\f<silent>-------------  \vzaza\rhook  \f<silent>-------------"),
-	bar = groups.fakelag:label("\f<silent>‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾"),
-	tab = groups.fakelag:combobox("\n", table.distribute(menu.tabs, 2)),
-	-- menu.space(groups.fakelag),
-}
-
-menu.misc = {
-	overridden = groups.angles:label("Overridden by \vzazahook")
-}
-
-menu.info = {
-	user = groups.fakelag:label(" \f<silent>User   \v".. zazahook.user.name),
-	version = groups.fakelag:label( (zazahook.build == "stable" and " \f<silent>Version   \v%s" or " \f<silent>Version   \v%s • %s"):format(zazahook.version, zazahook.build) ),
-	menu.header(groups.fakelag)
-}
-
-menu.general = {
-	config = {
-		menu.header(groups.other, "New config"),
-		name = groups.other:textbox("Name"),
-		create = groups.other:button("Create", NILFN),
-		import = groups.other:button("Import", NILFN),
-
-		menu.header(groups.angles, "Your configs"),
-		list = groups.angles:listbox("Configs", {"Default"}),
-		selected = groups.angles:label("Selected: \vDefault"),
-		list_report = groups.angles:label("REPORT"),
-		load = groups.angles:button("\f<zazahook>Load", NILFN),
-		loadaa = groups.angles:button("Load AA only", NILFN),
-		save = groups.angles:button("Save", NILFN),
-		export = groups.angles:button("Export", NILFN),
-		delete = groups.angles:button("\aD95148FFDelete", NILFN),
-		deleteb = groups.angles:button("\aD9514840Delete", NILFN),
-	},
-	verify = {
-		menu.space(groups.other),
-		menu.header(groups.other, "Discord"),
-		groups.other:button("Join us", function () network.open_link("https://discord.gg/eC82SmcF9E") end),
-		auth = groups.other:button("Copy authcode", NILFN),
-	},
-}
-
-menu.stats = {
-	menu.header(groups.other, "Statistics"),
-	loaded = groups.other:label("\f<silent>Times loaded\t\v" .. db.stats.loaded),
-	playtime = groups.other:label("\f<silent>Hours played\t\v" .. math.floor(db.stats.playtime), ":", math.floor(db.stats.playtime % 1 * 60)),
-	killed = groups.other:label("\f<silent>Enemies eliminated\t\v" .. db.stats.killed),
-	evaded = groups.other:label("\f<silent>Evaded shots\t\v" .. db.stats.evaded),
-	candies = groups.other:label("\f<silent>Candies gathered\t\v" .. (database.read("zazahook::candies") or 0)),
-}
-
-menu.candyshop = {}
-
--- #endregion
-
--- #region - Vars
-
-vars.rage = {
-	menu.header(groups.angles, "Ragebot"),
-
-	resolver = groups.angles:checkbox("Jitter resolver"),
-	menu.space(groups.angles)
-}
-
-vars.visuals = {
-	menu.header(groups.angles, "Visuals"),
-	groups.angles:label("Accent color"),
-	accent = groups.angles:color_picker("Accent color", colors.accent.r, colors.accent.g, colors.accent.b, 255),
-	crosshair = { on = groups.angles:checkbox("Crosshair indicators") },
-	damage = groups.angles:checkbox("Damage indicator"),
-	arrows = groups.angles:checkbox("Anti-aim arrows"),
-	water = menu.feature(groups.angles:checkbox("Watermark"), function ()
-		return {
-			name = groups.angles:textbox("\f<p>Custom name"),
-			hide = groups.angles:checkbox("\f<p>Hide logo"),
-		}, true
-	end),
-	marker = groups.angles:checkbox("Hitmarker"),
-	slowdown = groups.angles:checkbox("Slowdown warning"),
-	cheap = groups.angles:checkbox("Performance mode"),
-	dpi = groups.angles:checkbox("DPI scaling"),
-	menu.space(groups.angles),
-}
-
-vars.misc = {
-	menu.header(groups.angles, "Miscellaneous"),
-	aspect = menu.feature(groups.angles:checkbox("Aspect ratio"), function ()
-		return {
-			ratio = groups.angles:slider("\naratio", 80, 200, 133, true, nil, .01, table.distribute(enums.aspect_ratios, 2, 1))
-		}, true
-	end),
-	ladder = groups.angles:checkbox("Fast ladder"),
-	clantag = groups.angles:checkbox("Clantag"),
-	filter = groups.angles:checkbox("Console filter"),
-	logs = menu.feature(groups.angles:checkbox("Eventlogger"), function (parent)
-		return {
-			events = groups.angles:multiselect("\f<p>Events", {"Ragebot shots", "Harming enemies", "Getting harmed", "Anti-aim info"}),
-			output = groups.angles:multiselect("\f<p>Output", {"Console", "Screen"}),
-		}, true
-	end),
-	breaker = menu.feature(groups.angles:checkbox("Animation breaker"), function (parent)
-		return {
-			pitch = groups.angles:checkbox("\f<p>Pitch 0 on land"),
-			slia = groups.angles:checkbox("\f<p>Static legs in air"),
-			legs = groups.angles:combobox("\f<p>Legs", {"None", "Static", "Jitter", "No step back"}),
-		}, true
-	end)
-}
-
-vars.drag = {}
-
-
--- #endregion
-
--- #region - Anti-aim
-
-vars.antiaim = {
-	global = groups.fakelag:checkbox("Enable"),
-	tab = groups.fakelag:combobox("\n", {"General", "Builder"}, nil, false),
-
-	general = {
-		menu.header(groups.angles, "General"),
-		inverter = groups.angles:hotkey("Inverter", false),
-		yaw = groups.angles:combobox("Yaw base", {"At targets", "Local view"}),
-		head = groups.angles:multiselect("Safe head", {"Air melee", "Height difference"}),
-		manual = menu.feature(groups.angles:checkbox("Manual yaw"), function ()
-			return {
-				st = groups.angles:checkbox("\f<p>Static manual yaw"),
-				left = groups.angles:hotkey("\f<p>Left", false, 0),
-				right = groups.angles:hotkey("\f<p>Right", false, 0),
-				reset = groups.angles:hotkey("\f<p>Reset", false, 0),
-				edge = groups.angles:hotkey("\f<p>Edge yaw", false, 0),
-				fs = groups.angles:hotkey("\f<p>Freestanding", false, 0),
-			}, true
-		end),
-		stab = groups.angles:checkbox("Anti-backstab"),
-		use = groups.angles:checkbox("On use AA"),
-		warmup = groups.angles:checkbox("Warmup AA"),
-		menu.space(groups.angles)
-	},
-	exploits = {
-		menu.header(groups.angles, "Exploits"),
-		vulnlc = groups.angles:multiselect("\aB6B665FFLC breaker", {"Can't shoot", "Jumping", "Crouching"}),
-		snap = menu.feature(groups.angles:checkbox("\aB6B665FFDefensive snap", 0x00), function ()
-			return {
-				lp = groups.angles:checkbox("\f<p>Ping-safe"),
-				os = groups.angles:checkbox("\f<p>Allow with On shot AA"),
-				groups.angles:label("\f<p>See \vBuilder\r for more settings.")
-			}, true
-		end),
-		menu.space(groups.angles)
-	},
-	lag = {
-		menu.header(groups.other, "Lag settings"),
-		fakelag = menu.feature(groups.other:checkbox("Fake lag"), function ()
-			return {
-				mode = groups.other:combobox("\nflmode", {"Dynamic", "Maximum", "Fluctuate"}),
-				limit = groups.other:slider("\f<p>Limit", 1, 15, 14, true, "t")
-			}, true
-		end),
-	},
-
-	builder = {
-		state = groups.angles:combobox("\v•\r  State  \a373737FF----------------------------", table.distribute(antiaim.states, 2), nil, false),
-		-- menu.header(groups.other, "Actions with this state"),
-		-- import = groups.other:button("Import", function () end),
-		-- export = groups.other:button("Export", function () end),
-	},
-	states = {},
-	venture = {
-		long = {
-			menu.header(groups.other, "Long-term"),
-			gaslight = groups.other:checkbox("Gaslighting")
-		},
-		short = {
-			menu.header(groups.angles, "In-time"),
-		}
-	}
-}
-
-do -- states
-	local new = function (path, ref)
-		ref:set_callback(function (self) table.place(antiaim.presets.custom, path, self.value) end, true)
-		return ref
-	end
-
-	local tooltips = {
-		delay = { [1] = "Off", [15] = "RS", [16] = "RL", [17] = "AB" }
-	}
-
-	for i, v in ipairs(antiaim.states) do
-		local id, name, short = v[1], v[2], v[3]
-
-		vars.antiaim.states[id], pui.macros._p = {}, "\n"..short
-		local ctx = vars.antiaim.states[id]
-		--
-
-		if id ~= "default" then
-			ctx.override = new({id, "override"}, groups.angles:checkbox("Override \v".. name:lower()))
-		end
-
-		ctx[#ctx+1] = menu.space(groups.angles)
-		ctx[#ctx+1] = menu.header(groups.angles, "Yaw")
-
-		--
-		ctx.y_off	= new({id, "yaw", "offset"}, groups.angles:slider("Offset\f<_p>", -60, 60, 0, true, "°"))
-
-		ctx[#ctx+1] = menu.space(groups.angles)
-		ctx.mod		= new({id, "mod", "type"}, groups.angles:combobox("Modifier\f<_p>", {"None", "Jitter", "X-way", "Rotate", "Random", _AZAZI and "пердельта" or nil}))
-		ctx.w_m		= new({id, "ways", "manual"}, groups.angles:checkbox("\f<p>Manual ways\f<_p>"))
-		ctx.m_r		= new({id, "mod", "range"}, groups.angles:checkbox("\f<p>Range\f<_p>"))
-		ctx.m_a		= new({id, "mod", "add"}, groups.angles:checkbox("\f<p>Add yaw\f<_p>"))
-
-		--
-		ctx.w_num	= new({id, "ways", "total"}, groups.angles:slider("\nwnum".. id, 3, 7, 3, true, "-w"))
-		ctx.w_label = groups.angles:label("Each way\f<_p>") ctx.w_label:depend({ctx.mod, "X-way"}, ctx.w_m)
-		ctx.w_num:set_callback(function (this) ctx.w_label:set("Each way \aCDCDCD60" .. this.value) end, true)
-
-		ctx.ways = {} for w = 1, 7 do
-			ctx.ways[w] = new({id, "way", w}, groups.angles:slider("\n"..w..id, -60, 60, 0, true, "°", 1, {[0] = "R"}))
-			ctx.ways[w]:depend({ctx.mod, "X-way"}, ctx.w_m, {ctx.w_num, w, 7})
-		end
-
-		--
-		ctx.m_d		= new({id, "mod", "degree"}, groups.angles:slider("Degree\f<_p>", -60, 60, 0, true, "°"))
-		ctx.m_min	= new({id, "mod", "min"}, groups.angles:slider("Range \aCDCDCD60min/max\f<_p>", -60, 60, 0, true, "°"))
-		ctx.m_max	= new({id, "mod", "max"}, groups.angles:slider("\nmodmax\f<_p>", -60, 60, 0, true, "°"))
-		ctx.m_al	= new({id, "mod", "left"}, groups.angles:slider("Add \aCDCDCD60left/right\f<_p>", -60, 60, 0, true, "°"))
-		ctx.m_ar	= new({id, "mod", "right"}, groups.angles:slider("\nar\f<_p>", -60, 60, 0, true, "°"))
-
-
-		--
-		ctx[#ctx+1]	= menu.space(groups.angles)
-		ctx[#ctx+1]	= menu.header(groups.angles, "Desync")
-		ctx.d_on	= new({id, "body", "on"}, groups.angles:checkbox("Body yaw\f<_p>"))
-		ctx.d_sw	= new({id, "body", "jitter"}, groups.angles:checkbox("\f<p>Jitter\f<_p>"))
-		ctx.d_rw	= new({id, "body", "relative"}, groups.angles:checkbox("\f<p>Relative X-way\f<_p>"))
-		ctx.d_mode	= new({id, "body", "mode"}, groups.angles:combobox("Body yaw mode\f<_p>", {"Auto", "Default", "Side-based"}))
-		ctx.d_d		= new({id, "body", "degree"}, groups.angles:slider("\nfdeg\f<_p>", -180, 180, 0, true, "°"))
-		ctx.d_l		= new({id, "body", "left"}, groups.angles:slider("Range \aCDCDCD60left/right\nbodyl\f<_p>", -180, 180, 0, true, "°"))
-		ctx.d_r		= new({id, "body", "right"}, groups.angles:slider("\nbodyr\f<_p>", -180, 180, 0, true, "°"))
-		-- ctx.d_dbase	= groups.angles:slider("Foot base\f<_p>", -180, 180, 0, true, "°")
-		-- ctx.d_dpow	= groups.angles:slider("Overdrive\f<_p>", 0, 50, 0, true, "ω", 0.1)
-
-		--
-		ctx[#ctx+1]	= menu.header(groups.other, "Advanced")
-		ctx.r_ir	= new({id, "adv", "irreg"}, groups.other:slider("Irregularity\f<_p>", 0, 100, 0, true, "%"))
-		ctx.r_dt	= new({id, "adv", "delay"}, groups.other:slider("Delay tick\f<_p>", 1, 17, 0, true, "t", 1, tooltips.delay))
-		ctx.ds		= new({id, "snap", "on"}, groups.other:combobox("Defensive snap\f<_p>", id == "default" and {"Off", "Custom"} or {"Default", "Off", "Custom"}))
-		ctx.dsp 	= new({id, "snap", "pitch"}, groups.other:combobox("\f<p>Pitch\f<_p>", {"None", "Switch", "Random", "Spin"}))
-		ctx.dsp1	= new({id, "snap", "pitch_min"}, groups.other:slider("\f<_p>pmin", -89, 89, -45, true, "°"))
-		ctx.dsp2	= new({id, "snap", "pitch_max"}, groups.other:slider("\f<_p>pmax", -89, 89, -45, true, "°"))
-		ctx.dsy		= new({id, "snap", "yaw"}, groups.other:combobox("\f<p>Yaw\f<_p>", {"None", "Switch", "Random", "Spin", _AZAZI and "азазой" or nil}))
-		ctx.dsy1	= new({id, "snap", "yaw_min"}, groups.other:slider("\f<_p>ymin", 0, 360, 180, true, "°"))
-		-- ctx.dsy2	= new({id, "snap", "yaw_max"}, groups.other:slider("\f<_p>ymax", -180, 180, 90, true, "°"))
-
-		--
-		do
-			ctx.d_sw:depend(ctx.d_on)
-			ctx.d_mode:depend(ctx.d_on)
-			ctx.d_d:depend(ctx.d_on, {ctx.d_mode, "Default"})
-			ctx.d_l:depend(ctx.d_on, {ctx.d_mode, "Side-based"})
-			ctx.d_r:depend(ctx.d_on, {ctx.d_mode, "Side-based"})
-			-- ctx.d_dbase:depend(ctx.d_on, {ctx.d_mode, "Dynamic"})
-			-- ctx.d_dpow:depend(ctx.d_on, {ctx.d_mode, "Dynamic"})
-			ctx.d_rw:depend(ctx.d_on, {ctx.mod, "X-way"})
-		end
-		do
-			local ways_check = function () return not (ctx.mod.value == "X-way" and ctx.w_m.value) end
-
-			ctx.w_m:depend({ctx.mod, "X-way"})
-			ctx.m_r:depend({ctx.mod, "None", true}, {ctx.w_m, ways_check})
-			ctx.m_a:depend({ctx.mod, "None", true})
-
-			ctx.m_d:depend({ctx.m_r, false}, {ctx.mod, "None", true}, {ctx.w_m, ways_check})
-			ctx.m_min:depend({ctx.m_r, true}, {ctx.mod, "None", true}, {ctx.w_m, ways_check})
-			ctx.m_max:depend({ctx.m_r, true}, {ctx.mod, "None", true}, {ctx.w_m, ways_check})
-			ctx.m_al:depend({ctx.m_a, true}, {ctx.mod, "None", true})
-			ctx.m_ar:depend({ctx.m_a, true}, {ctx.mod, "None", true})
-
-			ctx.w_num:depend({ctx.mod, "X-way"})
-		end
-		do
-			ctx.ds:depend({vars.antiaim.exploits.snap.on, true})
-			ctx.dsp:depend({vars.antiaim.exploits.snap.on, true}, {ctx.ds, "Custom"})
-			ctx.dsy:depend({vars.antiaim.exploits.snap.on, true}, {ctx.ds, "Custom"})
-			ctx.dsp1:depend({vars.antiaim.exploits.snap.on, true}, {ctx.ds, "Custom"}, {ctx.dsp, "None", true})
-			ctx.dsp2:depend({vars.antiaim.exploits.snap.on, true}, {ctx.ds, "Custom"}, {ctx.dsp, "None", true})
-			ctx.dsy1:depend({vars.antiaim.exploits.snap.on, true}, {ctx.ds, "Custom"}, {ctx.dsy, "None", true})
-			-- ctx.dsy2:depend({vars.antiaim.exploits.snap.on, true}, {ctx.ds, "Custom"}, {ctx.dsy, "None", true})
-		end
-
-		--
-		pui.traverse(ctx, function (ref, path)
-			ref:depend({vars.antiaim.builder.state, name}, path[#path] ~= "override" and ctx.override or nil)
-		end)
-	end
-
-	pui.macros._p = nil
-
-	-- vars.antiaim.builder.state:set_callback(function (this)
-	-- 	vars.antiaim.builder[1][1]:set(pui.format "\v•\r  Actions with \v" .. this.value)
-	-- end, true)
+local function rawpairs(t)
+   return next, t, nil
 end
 
-do -- brute
 
+
+local function smartQuote(str)
+   if match(str, '"') and not match(str, "'") then
+      return "'" .. str .. "'"
+   end
+   return '"' .. gsub(str, '"', '\\"') .. '"'
 end
 
--- #endregion
 
--- #region - Handle
-
-if not _BLISS then
-	menu.lock("jr", vars.rage.resolver)
-	menu.lock("hm", vars.visuals.marker)
-	menu.lock("ab", vars.misc.breaker.on)
-	menu.lock("fl", vars.misc.ladder)
-	menu.lock("sh", vars.antiaim.general.head, {})
+local shortControlCharEscapes = {
+   ["\a"] = "\\a", ["\b"] = "\\b", ["\f"] = "\\f", ["\n"] = "\\n",
+   ["\r"] = "\\r", ["\t"] = "\\t", ["\v"] = "\\v", ["\127"] = "\\127",
+}
+local longControlCharEscapes = { ["\127"] = "\127" }
+for i = 0, 31 do
+   local ch = char(i)
+   if not shortControlCharEscapes[ch] then
+      shortControlCharEscapes[ch] = "\\" .. i
+      longControlCharEscapes[ch] = fmt("\\%03d", i)
+   end
 end
 
-do
-	defer(menu.set_visible)
-
-	vars.visuals.dpi:set_callback(function (this)
-		_DPI.scalable = this.value
-		_DPI.callback()
-	end, true)
-
-	menu.main.global:set_callback(function (this) menu.set_visible(not this.value, true) end, true)
-	menu.main[1]:depend({menu.main.global, false})
-	menu.main.tab:depend(menu.main.global)
-	menu.main.bar:depend(menu.main.global)
-
-	--
-
-	menu.misc.overridden:depend({menu.main.global, false}, vars.antiaim.global)
-	pui.traverse(menu.info, function (ref, path)
-		ref:depend(menu.main.global)
-	end)
-	pui.traverse(menu.general, function (ref, path)
-		ref:depend(menu.main.global, {menu.main.tab, "Home"})
-	end)
-	pui.traverse(menu.stats, function (ref, path)
-		ref:depend(menu.main.global, {menu.main.tab, "Settings"})
-	end)
-	pui.traverse({vars.rage, vars.visuals, vars.misc}, function (ref, path)
-		ref:depend(menu.main.global, {menu.main.tab, "Settings"})
-	end)
-	pui.traverse(vars.antiaim, function (ref, path)
-		ref:depend(menu.main.global, {menu.main.tab, "Anti-aim"}, (path[#path] ~= "global") and vars.antiaim.global or nil)
-
-		if path[1] == "global" or path[1] == "tab" then return end
-
-		if path[1] == "builder" or path[1] == "states" then
-			ref:depend({vars.antiaim.tab, "Builder"})
-		elseif path[1] == "venture" then
-			ref:depend({vars.antiaim.tab, "Anti-bruteforce"})
-		else
-			ref:depend({vars.antiaim.tab, "General"})
-		end
-	end)
-
-	--
-
-	local gray, accent = color.rgb(69), color.hex(pui.accent)
-	callbacks.paint_ui:set(function ()
-		if not ui.is_menu_open() then return end
-
-		local pulse = math.abs(globals.realtime() * 0.5 % 2 - 1)
-		local col = gray:lerp(accent, anima.easings.pow[1](pulse, 4))
-
-		menu.main.bar:set("\a".. col:to_hex() .. "‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾")
-	end)
-	client.set_event_callback("pui::accent_color", function (new)
-		accent = color.rgb(new[1], new[2], new[3], 255)
-	end)
-
-	vars.visuals.accent:set_callback(function (this)
-		local r, g, b = unpack(this.value)
-		colors.accent = color.rgb(r, g, b, 255)
-		colors.hex = "\a".. colors.accent:to_hex()
-		colors.hexs = string.sub(colors.hex, 1, -3)
-	end, true)
-
-	vars.visuals.cheap:set_callback(function (this)
-		render.cheap = this.value
-	end, true)
+local function escape(str)
+   return (gsub(gsub(gsub(str, "\\", "\\\\"),
+   "(%c)%f[0-9]", longControlCharEscapes),
+   "%c", shortControlCharEscapes))
 end
 
--- #endregion
-
--- #endregion
---
-
---
--- #region : Config system
-
-local configs = {
-	system = nil,
-	default = "zazahook::GS::KGRlZmF1bHQpW2VuUV17haRkcmFniKhzcGVjbGlzdIKhec0TiKF4zQtkpmFycm93c4Khec0TYqF4zRKYqWNyb3NzaGFpcoKhec0UlKF4zRMLqHNsb3dkb3dugqF5zQlLoXjNEkz113Zna2V5bGlzdIKhec0TiKF4zQtkpmRhbWFnZYKhec0TraF4zROcqXdhdGVybWFya4Ohecy5oXjNJp2hYQKkbG9nc4Khec0azaF4zRB6p3Zpc3VhbHOLo2RwacKlY2hlYXDCpm1hcmtlcsOoc3BlY2xpc3TCpmFycm93c8Kna2V5bGlzdMKoc2xvd2Rvd27DpmRhbWFnZcOmYWNjZW50qSM3NEE2QTlGRqV3YXRlcoOkaGlkZcKkbmFtZaCib27DqWNyb3NzaGFpcoOkbG9nb8Olc3R5bGWnQ2xhc3NpY6JvbsOkbWlzY4amZmlsdGVyw6ZsYWRkZXLDp2NsYW50YWfCp2JyZWFrZXKEpHNsaWHDpXBpdGNowqJvbsKkbGVnc6ROb25lpmFzcGVjdIKlcmF0aWz143ZMhaJvbsOkbG9nc4OmZXZlbnRzla1SYWdlYm90IHNob3Rzr0hhcm1pbmcgZW5lbWllc65HZXR0aW5nIGhhcm1lZK1BbnRpLWFpbSBpbmZvoX6mb3V0cHV0k6dDb25zb2xlplNjcmVlbqFz113Zom9uw6dhbnRpYWlthqd2ZW50dXJlgaRsb25ngahnYXNsaWdodMKmZ2xvYmFsw6NsYWeBp2Zha2VsYWeDpWxpbWl0D6Rtb2Rlp0R5bmFtaWOib27Dp2dlbmVyYWyHpHN0YWLDpGhlYWSRoX6jdXNlw6ZtYW51YWyHpXJpZ2h0kwIAoX6kbGVmdJMCAKFz113ZpGVkZ2WTAgChfqJzdMKiZnOTAgChfqJvbsOlcmVzZXSTAgChfqhpbnZlcnRlcpMBAKFz113Zo3lhd6pBdCB0YXJnZXRzpndhcm11cMKoZXhwbG9pdHOCpnZ1bG5sY5SrQ2FuJ3Qgc2hvb3SnSnVtcGluZ6lDcm91Y2hpbmehfqRzbmFwhKJvc8OibHDDom9uw6Rvbl9okwAAoX6mc3RhdGVziKR3YWxr3gAco2RfZAClbV9taW7lpG1fYXIApG1fYWwApHJfZHQFo21vZKZKaXR0ZXKkcl9pcgqjbV9hwqVtX21heCOjZHN5pE5vbmWob3ZlcnJpZGXDomRzp0RlZmF1bHSkZF9yd8KkZF9zd8OkZF9vbsOjZHNwpE5vbmWkZHNwMtDTo2RfcgCjZF9sAKNtX2QApXdfbnVtA6V5X29mZgCmZF9tb2RlpEF1dGz113ZjbV9yw6Rkc3Ax0NOkd2F5c5cAAAAAAAAApGRzeTHMtKN3X23Cp2FpcmR1Y2veAByjZF9kAKVtX21pbuqkbV9hcgCkbV9hbACkcl9kdAOjbW9kpkppdHRlcqRyX2lyBqNtX2HCpW1fbWF4JKNkc3mmU3dpdGNoqG92ZXJyaWRlw6Jkc6ZDdXN0b22kZF9yd8KkZF9zd8OkZF9vbsOjZHNwplN3aXRjaKRkc3AyAKNkX3IAo2RfbACjbV9kAKV3X251bQOleV9vZmYDpmRfbW9kZaRBdXRvo21fcsOkZHNwMdCnpHdheXOXAAAAAAAAAKRkc3kxzPCjd19twqNhaXLeAByjZF9kAKVtX21pbgCkbV9hcgCkbV9hbACkcl9kdBGjbW9kpkppdHRlcqRyX2lyAKNtX2HCpW1fbWF4AKNkc3mmU3dpdGNoqG92ZXJyaWRlw6Jkc6ZDdXN0b22kZF9yd8KkZF9zd8OkZF9vbsOjZHNwplN3aXRjaKRkc3AyAKNkX3IAo2RfbACjbV9kHKV3X251bQOleV9vZmYDpmRfbW9kZaRBdXRvo21fcsKkZHNwMQCkd2F5c5cAAAAAAAAApGRzeTHMtKN3X23CpXNuZWFr3gAco2RfZAClbV9taW7rpG1fYXIApG1fYWwApHJfZHQRo21vZKZKaXR0ZXKkcl9pcgajbV9hwqVtX21heCSjZHN5pE5vbmWob3ZlcnJpZGXDomRzp0RlZmF1bHSkZF9yd8KkZF9zd8OkZF9vbsOjZHNwpE5vbmWkZHNwMtDTo2RfcgCjZF9sAKNtX2QApXdfbnVtA6V5X29mZgCmZF9tb2RlpEF1dGz113ZjbV9yw6Rkc3Ax0NOkd2F5c5cAAAAAAAAApGRzeTHMtKN3X23CpXN0YW5k3gAco2RfZAilbV9taW4ApG1fYXIApG1fYWwApHJfZHQBo21vZKZKaXR0ZXKkcl9pcgCjbV9hwqVtX21heACjZHN5pE5vbmWob3ZlcnJpZGXDomRzp0RlZmF1bHSkZF9yd8KkZF9zd8KkZF9vbsOjZHNwpE5vbmWkZHNwMtDTo2RfcgCjZF9sAKNtX2QgpXdfbnVtA6V5X29mZgCmZF9tb2RlpEF1dGz113ZjbV9ywqRkc3Ax0NOkd2F5c5cAAAAAAAAApGRzeTHMtKN3X23CpmNyb3VjaN4AHKNkX2QApW1fbWluAKRtX2FyAKRtX2FsAKRyX2R0EaNtb2SmSml0dGVypHJfaXIAo21fYcKlbV9tYXgAo2RzeaROb25lqG92ZXJyaWRlw6Jkc6dEZWZhdWx0pGRfcnfCpGRfc3fDpGRfb27Do2RzcKROb25lpGRzcDLQ06NkX3IAo2RfbACjbV9kHqV3X251bQOleV9vZmYCpmRfbW9kZaRBdXRvo21fcsKkZHNwMdDTpHdheXOXAAAAAAAAAKRkc3kxzLSjd19twqNydW7eAByjZF9kAKVtX21pbuKkbV9hcgCkbV9hbACkcl9kdAOjbW9kpkppdHRlcqRyX2lyAKNtX2HCpW1fbWF4I6Nkc3mkTm9uZahvdmVycmlkZcOiZHOnRGVmYXVsdKRkX3J3wqRkX3N3w6RkX29uw6Nkc3CkTm9uZaRkc3Ay0NOjZF9yAKNkX2wAo21fZACld19udW0DpXlfb2ZmAKZkX21vZGWkQXV0b6NtX3LDpGRzcDHQ06R3YXlzlwAAAAAAAACkZHN5Mcy0o3dfbcKnZGVmYXVsdN4AG6NkX2QApW1fbWlu46RtX2FyAKRtX2FsAKRyX2R0AaNtX2HCpHJfaXIApW1fbWF4HaRkX3N3w6RkX29uw6Jkc6ZDdXN0b22kZF9yd8KkZHN5Mcy0o2RzeaZTd2l0Y2ijZF9sAKNkc3CmU3dpdGNopGRzcDLQp6NkX3IAo21fZB2ld19udW0DpXlfb2ZmAKZkX21vZGWkQXV0b6NtX3LCpGRzcDHQp6R3YXlzlwAAAAAAAACjbW9kpkppdHRlcqN3X23CpHJhZ2WDqHRlbGVwb3J0hKRvbl9okwEAoX6mcGlzdG9swqJvbsKkbGFuZMKoZXhzd2l0Y2iCpWFsbG93kaFz113Zom9uwqhyZXNvbHZlcsJ9",
-	badge = pui.format("\v•\r "),
-	selected = 0, name = "",
-	loaded = nil,
-	list = {}
-} do
-	local context = menu.general.config
-
-	context.save:depend(true, {context.list, 0, true})
-	context.export:depend(true, {context.list, 0, true})
-	context.delete:depend({context.list, 0, true})
-	context.deleteb:depend({context.list, 0})
-	context.deleteb:depend(true, {context.list, 0, true})
-
-	--#region: actions
-
-	local actions = {}
-
-	actions.eval = function (raw, noparse)
-		if not raw then return "\fConfig not found." end
-
-		local cheat, contents, pad = string.match(raw, "^zazahook::(%a+)::([%w%+%/]+)(_*)")
-		if cheat ~= "GS" then return "\fNot for gamesense" end
-
-		pad = pad and string.rep("=", #pad) or ""
-		contents = string.gsub(contents, "z%d%d%dZ", { ["z113Z"] = "+", ["z143Z"] = "/", })
-		contents = base64.decode(contents..pad)
-
-		local name, author, settings = string.match(contents, "^%((.*)%)%[(.*)%]%{(.+)%}")
-		return name, author, (noparse ~= true and settings ~= nil) and msgpack.unpack(settings) or {}
-	end
-
-	actions.save = function (name, new)
-		if name == "Default" then return "\fCan't overwrite Default" end
-		name = tostring(name)
-
-		local o_name, o_author if new == true then
-			o_name, o_author = actions.eval(db.configs[name], true)
-		end
-
-		local cfg = --[[ new and {} or ]] configs.system:save()
-		local contents = string.format("(%s)[%s]{%s}", name, o_author or zazahook.user.name, msgpack.pack(cfg))
-		local encoded = string.gsub(base64.encode(contents), "[%+%/%=]", { ["+"] = "z113Z", ["/"] = "z143Z", ["="] = "_" })
-
-		local ready = ("zazahook::GS::%s"):format(encoded)
-		db.configs[name] = ready
-
-		return "\a".. name .." saved"
-	end
-
-	actions.create = function (name)
-		if name == "" then  return "\fEnter the name"
-		elseif name == "Default" then  return "\fCan't overwrite Default"
-		elseif #name > 24 then  return "\fThis name is too long"
-		elseif db.configs[name] then  return "\f" .. name .. " is in the list"  end
-
-		return actions.save(name, true)
-	end
-
-	actions.delete = function (name)
-		db.configs[name] = nil
-	end
-
-	actions.export = function (name)
-		if not name or name == "" then return "\fNot selected" end
-
-		clipboard.set(db.configs[name])
-		return "\aCopied to clipboard."
-	end
-
-	actions.import = function ()
-		local copied = clipboard.get()
-		if not copied then return "\fEmpty clipboard" end
-
-		local name, author, settings = actions.eval(copied, true)
-		if not author then return name end
-
-
-		local cfg = copied:match("^zazahook::%a+::[%w%+%/]+_*")
-		if name == "Default" then return "\fCan't import default config" end
-		db.configs[name] = cfg
-		return "\a".. name .." by ".. author .." added"
-	end
-
-	actions.load = function (name, ...)
-		if not name or name == "" then return "ERR: can't load: not selected" end
-		local cfg = name == "Default" and configs.default or db.configs[name]
-
-		local cname, cauthor, settings = actions.eval(cfg)
-		if not cauthor then return cname end
-
-		if ({...})[1] == "antiaim" then
-			settings.antiaim.general.manual = nil
-		end
-
-		configs.system:load(settings, ...)
-		if ... then return end
-		configs.loaded = name
-	end
-
-	--#endregion
-
-	local report do
-		context.list_report:depend({context.list_report, 0})
-
-		local reportend, active = 0, false
-		local function wait ()
-			if reportend < globals.realtime() then
-				context.list_report:set_visible(false)
-				context.selected:set_visible(true)
-
-				callbacks.paint_ui:unset(wait)
-				active = false
-			end
-		end
-
-		report = function (code)
-			if not code then return end
-			reportend = globals.realtime() + 1
-
-			local text = code:gsub("[\f\a]", {
-				["\f"] = "\aFF4040FF",
-				["\a"] = "\aB6DE47FF",
-			})
-			context.list_report:set(text)
-			if not active then
-				context.list_report:set_visible(true)
-				context.selected:set_visible(false)
-
-				callbacks.paint_ui:set(wait)
-				active = true
-			end
-		end
-	end
-
-	local update = function (no_reval)
-		if no_reval ~= true then
-			configs.list = {}
-			for k in next, db.configs do configs.list[#configs.list+1] = k end
-
-			table.sort(configs.list)
-			table.insert(configs.list, 1, "Default")
-
-			local loaded = table.ifind(configs.list, configs.loaded)
-			if loaded then  configs.list[loaded] = configs.badge .. configs.list[loaded]
-			else  configs.loaded = 0  end
-
-			context.list:update(configs.list)
-		end
-
-		configs.selected = context.list.value + 1
-		configs.name = configs.list[configs.selected]:gsub("^\a%x%x%x%x%x%x%x%x•\a%x%x%x%x%x%x%x%x ", "")
-
-		context.selected:set( pui.format("Selected: \v") .. configs.name)
-		context.list:set(configs.selected - 1)
-	end
-
-	local act = function (action, ...)
-		local success, result, code, obj = pcall(actions[action], ...)
-
-		debug(action, ": ", success, ", ", result, ", ", code, ", ", obj)
-		report(code or result)
-		update()
-	end
-	update()
-
-	context.list:set_callback(function ()  update(true)  end)
-	context.create:set_callback(function ()  act("create", context.name:get())  end)
-	context.import:set_callback(function ()  act("import", context.name:get())  end)
-	context.load:set_callback(function ()  act("load", configs.name)  end)
-	context.loadaa:set_callback(function ()  act("load", configs.name, "antiaim")  end)
-	context.save:set_callback(function ()  act("save", configs.name)  end)
-	context.delete:set_callback(function ()  act("delete", configs.name)  end)
-	context.export:set_callback(function ()  act("export", configs.name)  end)
+local luaKeywords = {}
+for k in ([[ and break do else elseif end false for function goto if
+             in local nil not or repeat return then true until while
+]]):gmatch('%w+') do
+   luaKeywords[k] = true
 end
 
--- #endregion
---
+local function isIdentifier(str)
+   return type(str) == "string" and
+   not not str:match("^[_%a][_%a%d]*$") and
+   not luaKeywords[str]
+end
 
+local flr = math.floor
+local function isSequenceKey(k, sequenceLength)
+   return type(k) == "number" and
+   flr(k) == k and
+   1 <= (k) and
+   k <= sequenceLength
+end
 
--- #endregion ------------------------------------------------------------------
---
-
-
-
-
-
-
-
-
-----<  Features  >--------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- #region :: Anti-aim
-
-
---
--- #region : Definitions
-
-antiaim.my = {
-	switch = false, side = 0,
-	state = "default",
+local defaultTypeOrders = {
+   ['number'] = 1, ['boolean'] = 2, ['string'] = 3, ['table'] = 4,
+   ['function'] = 5, ['userdata'] = 6, ['thread'] = 7,
 }
 
-antiaim.refs = {
-	pitch = refs.aa.angles.pitch[2],
-	base = refs.aa.angles.base,
-	offset = refs.aa.angles.yaw[2],
-	body = refs.aa.angles.body[2],
-	pitch_mode = refs.aa.angles.pitch[1],
-	yaw = refs.aa.angles.yaw[1],
-	jitter = refs.aa.angles.jitter[1],
-	jitter_deg = refs.aa.angles.jitter[2],
-	body_yaw = refs.aa.angles.body[1],
-}
+local function sortKeys(a, b)
+   local ta, tb = type(a), type(b)
 
-antiaim.data, antiaim.latest = {
-	way = 1, lifetime = 0, using = false,
-	manual = nil,
-}, {}
 
--- #endregion
---
+   if ta == tb and (ta == 'string' or ta == 'number') then
+      return (a) < (b)
+   end
 
---
--- #region : System
+   local dta = defaultTypeOrders[ta] or 100
+   local dtb = defaultTypeOrders[tb] or 100
 
--- #region - Features
 
-antiaim.features = {
-	manual = {
-		current = nil,
-		buttons = {
-			{ "left", yaw = -90, item = vars.antiaim.general.manual.left },
-			{ "right", yaw = 90, item = vars.antiaim.general.manual.right },
-			{ "reset", yaw = nil, item = vars.antiaim.general.manual.reset },
-			-- { "edge", yaw = 0, item = vars.antiaim.general.manual.edge },
-			-- { "fs", yaw = 0, item = vars.antiaim.general.manual.fs },
-		},
-		work = function (self)
-			if not vars.antiaim.general.manual.on.value then return end
-
-			for i, v in ipairs(self.buttons) do
-				local active, mode = v.item:get()
-
-				if v.active == nil then v.active = active end
-				if v.active == active then goto done end
-
-				v.active = active
-
-				if v.yaw == nil then self.current = nil end
-
-				if mode == 1 then self.current = active and i or nil goto done
-				elseif mode == 2 then self.current = self.current ~= i and i or nil goto done end
-
-				::done::
-			end
-
-			local result = self.current ~= nil and self.buttons[self.current].yaw or nil
-			antiaim.data.manual = result
-
-			local is_fs, is_edge = vars.antiaim.general.manual.fs:get(), vars.antiaim.general.manual.edge:get()
-
-			refs.aa.angles.edge:override(is_edge)
-			refs.aa.angles.freestand:override(is_fs and not is_edge and not result)
-
-			return type(result) == "number" and result or nil
-		end
-	},
-	stab = {
-		work = function (self)
-			antiaim.data.backstab = false
-			if vars.antiaim.general.stab.value and my.threat and my.entity then
-				local threat_hitbox = entity.hitbox_position(my.threat, 3)
-				if not threat_hitbox then return end
-
-				local distance = my.origin:dist( vector(entity.get_prop(my.threat, "m_vecOrigin")) )
-				local weapon_t = weapondata(entity.get_player_weapon(my.threat))
-
-				if distance < 256 and (weapon_t and weapon_t.type == "knife") then antiaim.data.backstab = true return {180, -89} end
-			end
-		end
-	},
-	on_use = {
-		defuse = false,
-		overridden = false,
-		next = 0,
-		work = function (self, cmd)
-			if not vars.antiaim.general.use.value or not my.weapon then return end
-			local using = cmd.in_use == 1
-
-			local in_bombzone, is_ct = entity.get_prop(my.entity, "m_bInBombZone") == 1, entity.get_prop(my.entity, "m_iTeamNum") == 3
-
-			if in_bombzone or is_ct then
-				local bombs = entity.get_all("CPlantedC4")
-				if #bombs > 0 then
-					local c4 = bombs[#bombs]
-
-					local c4_origin = vector(entity.get_prop(c4, "m_vecOrigin"))
-					local dist = my.origin:dist(c4_origin)
-
-					if dist < 61 then self.defuse = true end
-				end
-			end
-
-			if entity.get_prop(my.entity, "m_bIsDefusing") == 1 or entity.get_prop(my.entity, "m_bIsGrabbingHostage") == 1 then
-				self.defuse = true
-			end
-			local block = self.defuse or (entity.get_prop(my.weapon, "m_iItemDefinitionIndex") == 49 and in_bombzone)
-
-			if using then
-				if not self.overridden then
-					self.next, self.overridden = globals.tickcount() + 1, true
-				end
-
-				if globals.tickcount() >= self.next and not block then
-					cmd.in_use = 0
-				end
-			else
-				self.overridden, self.defuse = false, false
-			end
-
-			local cam_y = client.camera_angles()
-			return (not block and using) and {180, cam_y} or nil
-		end
-	},
-	snap = {
-		dechoke = false,
-		check = function (cmd, settings, props)
-			if props and props.on == "Default" then
-				props = antiaim.data.scenery.default.snap
-			end
-
-			if not (settings.on.value and settings.on.hotkey:get()) or props.on == "Off" or antiaim.data.useaa or antiaim.data.backstab or adata.get_double_tap() then return false end
-			if not my.exploit.active or not (my.exploit.defensive or my.exploit.lagpeek) or (my.exploit.active == 1 and not settings.os.value) then return false end
-
-
-			if settings.lp.value and my.threat then
-				local resource = entity.get_player_resource(my.threat)
-				if not resource then return false end
-
-				local ping = entity.get_prop(resource, "m_iPing", my.threat)
-				if not ping or (ping < 15 or ping > 90) then return false end
-			end
-
-			return true, props
-		end,
-		yaw = {
-			["None"] = function () return 0, true end,
-			["Switch"] = function (props)
-				return .5 * (antiaim.my.switch and props.yaw_min or -props.yaw_min)
-			end,
-			["Static"] = function (props)
-				return props.yaw_min
-			end,
-			["Random"] = function (props)
-				return .5 * math.random(-props.yaw_min, props.yaw_min)
-			end,
-			["Spin"] = function (props)
-				return .5 * math.lerp(-props.yaw_min, props.yaw_min, globals.curtime() * 3 % 2 - 1)
-			end,
-			["азазой"] = function (props)
-				return .5 * math.lerp(-props.yaw_min, props.yaw_min, math.sin(globals.curtime() * 3 % 1))
-			end,
-		},
-		pitch = {
-			["None"] = function () return 89 end,
-			["Switch"] = function (props)
-				return antiaim.data.lifetime % 2 == 0 and props.pitch_max or props.pitch_min
-			end,
-			["Random"] = function (props)
-				return math.random(props.pitch_min, props.pitch_max)
-			end,
-			["Spin"] = function (props)
-				return math.lerp(props.pitch_min, props.pitch_max, globals.curtime() * 6 % 2 - 1)
-			end,
-		},
-		work = function (self, cmd, ctx)
-			local settings, props = vars.antiaim.exploits.snap or {}, nil
-			antiaim.latest.snapping, props = self.check(cmd, settings, antiaim.data.preset.snap)
-
-			if not antiaim.latest.snapping then return end
-
-			--
-			local yaw, dmf = self.yaw[props.yaw](props)
-			local pitch = self.pitch[props.pitch](props)
-
-			antiaim.latest.force_send = true
-			ctx.offset = math.normalize_yaw(yaw + (dmf and ctx.offset or 0))
-			ctx.pitch = math.normalize_pitch(pitch)
-			if not dmf then
-				-- ctx.body = 0
-			end
-			-- cmd.yaw = math.normalize_yaw(yaw + (dmf and ctx.offset or 0))
-			-- cmd.pitch = math.normalize_pitch(pitch)
-		end
-	},
-	restrict = {
-		ventured = 1,
-		modes = {
-			[15] = function ()
-				return antiaim.data.lifetime % client.random_int(1, 4) == 0
-			end,
-			[16] = function ()
-				return antiaim.data.lifetime % client.random_int(2, 6) == 0
-			end,
-			[17] = function ()
-				return antiaim.data.lifetime % antiaim.features.restrict.ventured == 0
-			end,
-		},
-		work = a(function (self, cmd, scene)
-			if scene.adv.delay == 1 or not my.exploit.active then return true end
-
-			if self.modes[scene.adv.delay] then
-				return self.modes[scene.adv.delay]()
-			else
-				return antiaim.data.lifetime % scene.adv.delay == 0
-			end
-		end)
-	},
-	fakelag = {
-		overridden = false,
-		work = a(function (self, cmd)
-			local rctx, hctx = refs.aa.fakelag, vars.antiaim.lag.fakelag
-
-			if antiaim.features.snap.dechoke then
-				self.overridden = true
-				rctx.enable:override(false)
-				cmd.no_choke = true
-				antiaim.latest.force_send = true
-				antiaim.features.snap.dechoke = false
-				debug "dechoke"
-			return end
-
-			if hctx.on.value then self.overridden = true end
-
-			if not self.overridden then return end
-
-			if hctx.on.value then
-				rctx.enable:override(true)
-				rctx.amount:override(hctx.mode.value)
-				rctx.limit:override(hctx.limit.value)
-			else
-				rctx.enable:override()
-				rctx.amount:override()
-				rctx.limit:override()
-				self.overridden = false
-			end
-		end)
-	},
-	head = {
-		work = a(function (self, ctx)
-			if antiaim.data.manual or antiaim.data.useaa or not my.threat or entity.is_dormant(my.threat) then return end
-
-			--
-			local weapon_t = weapondata(my.weapon)
-			local threat_origin = vector(entity.get_origin(my.threat))
-			local distance = my.origin:dist(threat_origin)
-			local height_diff = my.origin.z - threat_origin.z
-
-			local ex, ey, ez = client.eye_position()
-			local trace_fr, trace_ent = client.trace_line(my.entity, ex, ey, ez, threat_origin.x, threat_origin.y, threat_origin.z + 56)
-			local is_visible = trace_ent == my.threat
-			local is_melee = weapon_t and weapon_t.weapon_type_int == 0
-
-			--
-			local triggers = vars.antiaim.general.head
-			if (triggers:get "Air melee" and my.jumping and is_melee and height_diff > -32)
-			or (triggers:get "Height difference" and height_diff > 64 and (is_visible or distance < 1024)) then
-				ctx.offset, ctx.body, ctx.pitch = 20, 1, 89
-			end
-		end)
-	},
-	vulnlc = {
-		check = a(function (self, cmd)
-			if not my.exploit.active then return end
-
-			local settings = vars.antiaim.exploits.vulnlc
-			if not (#settings.value > 0 and my.weapon ~= nil) then return false end
-
-			if settings:get("Can't shoot") then
-				local next_attack = entity.get_prop(my.entity, "m_flNextAttack") or 0
-				local next_shot = entity.get_prop(my.weapon, "m_flNextPrimaryAttack") or 0
-				local simtime = entity.get_prop(my.entity, "m_flSimulationTime")
-
-				local attack_diff, shot_diff = toticks(next_attack - simtime - 1), toticks(next_shot - simtime - 1)
-
-				local weapon_t = weapondata(my.weapon)
-				local condition = (weapon_t and weapon_t.weapon_type_int ~= 9) and (cmd.quick_stop or attack_diff > 0 or shot_diff > 0)
-
-				if condition then return true end
-			end
-
-			local state_perm =
-			(my.jumping and settings:get("Jumping")) or
-			((my.crouching and my.on_ground) and settings:get("Crouching"))
-			-- (my.walking and settings:get("Walking"))
-
-			if not state_perm then return false end
-
-			return true
-		end),
-		work = a(function (self, cmd)
-			if self:check(cmd) then
-				cmd.force_defensive = true
-			end
-		end)
-	},
-	rubber = {
-		work = function ()
-
-		end
-	}
-}
-
--- #endregion
-
--- #region - Venture
-
-antiaim.venture = {
-	latest = 0, damaged = 0,
-	trigger = function (event)
-		if not my.valid or antiaim.venture.latest == globals.tickcount() then return end
-
-		local attacker = client.userid_to_entindex(event.userid)
-		if not attacker or not entity.is_enemy(attacker) or entity.is_dormant(attacker) then return end
-
-		--
-		local impact = vector(event.x, event.y, event.z)
-		local enemy_view = vector(entity.get_origin(attacker))
-		enemy_view.z = enemy_view.z + 64
-
-		local dists = {}
-		for i = 1, #players do
-			local v = players[i]
-
-			if not entity.is_enemy(v) then
-				local head = vector(entity.hitbox_position(v, 0))
-				local point = math.closest_ray_point(head, enemy_view, impact)
-				dists[#dists+1] = head:dist(point)
-				if v == my.entity then dists.mine = dists[#dists] end
-			end
-		end
-
-		local closest = math.min( unpack(dists) )
-
-		--
-		if (dists.mine and closest) and dists.mine < 40 or (closest == dists.mine and dists.mine < 128) then
-			client.delay_call(totime(1), function ()
-				client.fire_event("zazahook::enemy_shot", {
-					damaged = antiaim.venture.latest == antiaim.venture.damaged,
-					dist = dists.mine,
-					attacker = attacker,
-					userid = event.userid
-				})
-			end)
-
-			antiaim.venture.latest = globals.tickcount()
-			antiaim.features.restrict.ventured = math.random(1, 4)
-		end
-	end,
-	run = function (self)
-		callbacks.bullet_impact:set(self.trigger)
-		callbacks.player_hurt:set(function (event)
-			if client.userid_to_entindex(event.userid) == my.entity then self.damaged = globals.tickcount() end
-		end)
-	end
-}
-
-antiaim.venture:run()
-
--- #endregion
-
--- #region - Builder
-
-antiaim.builder = {
-	yaw = function (self, cmd, scene)
-		local use = antiaim.data.useaa					if use then return use[1], use[2], "Local view", {} end
-		local stab = antiaim.features.stab:work()		if stab then return stab[1], stab[2], nil, {} end
-		local manual = antiaim.features.manual:work()	if manual then return manual, nil, "Local view", {s = true} end
-
-		return scene.yaw.offset, 89, nil, {}
-	end,
-	modifier = function (self, scene)
-		if antiaim.data.static then return 0 end
-		local side, value = 1, 0
-
-		--
-		local modifier, degree, range, eachway = scene.mod.type, scene.mod.degree, scene.mod.range, scene.ways.manual
-		local random = client.random_int(-scene.adv.irreg * 0.5, scene.adv.irreg * 0.5)
-
-		local min, max = (range and scene.mod.min or -degree), (range and scene.mod.max or degree)
-		local addition = scene.mod.add and ((antiaim.my.side == 1 and scene.mod.right) or (antiaim.my.side == -1 and scene.mod.left)) or 0
-
-		--
-		if 	   modifier == "Jitter" then	value = (antiaim.my.switch and min or max) * side
-		elseif modifier == "Random" then	value = math.random(min, max)
-		elseif modifier == "Rotate" then	value = math.lerp(max, min, (globals.tickcount() * side) % 5 / 5)
-		elseif modifier == "пердельта" then
-			value = math.lerp(max, min, math.sin(globals.curtime() * 5 % 1))
-		elseif modifier == "X-way" then
-			-- if antiaim.my.side ~= 0 and not scene.mod.ws and scene.body.jitter and (antiaim.data.way % 2 == 0) ~= (antiaim.my.side == 1) then
-			-- 	antiaim.data.way = antiaim.data.way - 1
-			-- end
-
-			antiaim.data.way = antiaim.data.way < (scene.ways.total - 1) and (antiaim.data.way + 1) or 0
-
-			if eachway then
-				value = scene.way[antiaim.data.way+1]
-			else
-				local step = (antiaim.data.way) / (scene.ways.total - 1)
-				value = math.lerp(min, max, step)
-			end
-		end
-
-
-		--
-		return value + addition + random
-	end,
-	body = function (self, scene, modifier)
-		if not scene.body.on then return end
-		if vars.antiaim.general.warmup.value and entity.get_prop(my.game_rules, "m_bWarmupPeriod") == 1 then return end
-
-		local side, left, right = 0, 0, 0
-		local should_relate = scene.mod.type == "X-way" and scene.body.relative
-		-- local desync = math.normalize_yaw(adata.get_abs_yaw() - adata.get_body_yaw(1))
-
-		if scene.body.mode == "Default" then
-			left, right = scene.body.degree, scene.body.degree
-		elseif scene.body.mode == "Side-based" then
-			left, right = scene.body.left, scene.body.right
-		elseif scene.body.mode == "Auto" then
-			if should_relate then
-				left, right = 0, 0
-				goto processed
-			end
-			local overlap = adata.get_overlap(true)
-
-			local cur, old = entity.get_simtime(my.entity)
-			local fl = (cur and old) and toticks(cur - old) - 1 or 1
-
-			local max = overlap * (fl < 2 and 30 or 60)
-
-			left, right = modifier * math.gratio - max, modifier * math.gratio + max
-		end
-
-		::processed::
-
-		--
-		if should_relate then
-			side = math.clamp(modifier, -1, 1)
-		else
-			side = ternary(scene.body.jitter, antiaim.my.switch, vars.antiaim.general.inverter:get()) and 1 or -1
-		end
-
-		if antiaim.data.static then side = 1 end
-
-		--
-		local result = (side == 0 and 0) or (side > 0 and left) or (side < 0 and right)
-		antiaim.my.side = (result == 0 and (antiaim.my.switch and 1 or -1)) or (result > 0 and 1) or (result < 0 and -1)
-
-		return result
-	end,
-	work = function (self, cmd, scene, ctx)
-		local yaw, pitch, base, flags = self:yaw(cmd, scene)
-		antiaim.data.static = flags.s and vars.antiaim.general.manual.st.value
-		local modifier = self:modifier(scene)
-		local body = self:body(scene, modifier)
-
-		--
-		ctx.pitch_mode = "Custom"
-		ctx.pitch = pitch or 89
-
-		ctx.base = base or ctx.base
-		ctx.offset = math.normalize_yaw(yaw + modifier)
-
-		ctx.body_yaw = body and "Static" or "Off"
-		if body then
-			ctx.body = math.clamp(body, -180, 180)
-		end
-	end
-}
-
--- #endregion
-
--- #endregion
---
-
---
--- #region : Setup
-
--- #region - Main
-
-antiaim.arrange = a(function ()
-	local state = my.state
-	local preset
-
-	local is_custom = true
-
-	if is_custom then
-		preset = antiaim.presets.custom
-	end
-
-	state = preset[ antiaim.states[ state ][1] ].override and state or enums.states.default
-
-	if (my.crouching and my.on_ground and my.velocity > 5) and preset.sneak.override then
-		state = enums.states.sneak
-	elseif (my.jumping and my.crouching) and preset.airduck.override then
-		state = enums.states.airduck
-	end
-
-
-	antiaim.my.state = antiaim.states[ state ][1]
-	antiaim.data.scenery = preset
-	antiaim.data.preset = preset[antiaim.my.state]
-
-	if is_custom and not pui.menu_open then
-		local selected = vars.antiaim.builder.state.value
-		local current = antiaim.states[state][2]
-		if selected ~= current then
-			-- vars.antiaim.builder.state:set(current)
-		end
-	end
-
-	local ctx = {
-		pitch = -89,
-		base = vars.antiaim.general.yaw.value,
-		pitch_mode = nil,
-		yaw = "180",
-		offset = nil,
-		jitter = "Off",
-		jitter_deg = nil,
-		body_yaw = nil,
-		body = nil,
-	}
-
-	return antiaim.data.preset, ctx
-end)
-
-antiaim.dispatch = a(function (data)
-	for k, v in next, antiaim.refs do
-		v:override(data[k])
-	end
-end)
-
-antiaim.manage = a(function (cmd)
-	table.clear(antiaim.latest)
-	local scene, ctx = antiaim.arrange()
-
-	--
-	antiaim.builder:work(cmd, scene, ctx)
-
-	--
-	antiaim.data.useaa = antiaim.features.on_use:work(cmd)
-	antiaim.features.vulnlc:work(cmd)
-	antiaim.features.fakelag:work(cmd)
-	if not (antiaim.data.manual or antiaim.data.useaa) then
-		antiaim.features.snap:work(cmd, ctx)
-		antiaim.features.head:work(ctx)
-	end
-
-	--
-	if cmd.chokedcommands == 0 or antiaim.latest.force_send then
-		antiaim.dispatch(ctx)
-		if cmd.chokedcommands == 0 then
-			antiaim.data.lifetime = antiaim.data.lifetime + 1
-			if antiaim.features.restrict:work(cmd, scene) then
-				antiaim.my.switch = not antiaim.my.switch
-			end
-		end
-	end
-
-	--
-	antiaim.data.defensive = cmd.force_defensive
-end)
-
--- #endregion
-
--- #region - Finish
-
-antiaim.run = a(function ()
-	local dechoke = function ()
-		local fd, dt, os = refs.rage.other.duck:get(), refs.rage.aimbot.double_tap[1].value and refs.rage.aimbot.double_tap[1].hotkey:get(), refs.aa.other.onshot.value and refs.aa.other.onshot.hotkey:get()
-		if antiaim.latest.snapping and (fd or not (dt or os)) and not antiaim.features.snap.dechoke then
-			antiaim.features.snap.dechoke = true
-			refs.aa.fakelag.enable:override(false)
-		end
-	end
-
-	vars.antiaim.global:set_callback(function (this)
-		callbacks.setup_command(this.value, antiaim.manage)
-		callbacks.pre_render(this.value, dechoke)
-
-		refs.aa.angles.enable:override(this.value or nil)
-		refs.aa.angles.freestand:override(ternary(this.value, false, nil))
-		refs.aa.angles.fs_body:override(ternary(this.value, false, nil))
-		refs.aa.angles.freestand.hotkey:override(this.value and {"Always on", 0} or nil)
-
-		if not this.value then
-			antiaim.revert()
-		end
-	end, true)
-
-	defer(antiaim.revert)
-end)
-
-antiaim.revert = function ()
-	for k, v in pairs(antiaim.refs) do v:override() end
-	antiaim.data.manual = nil
-	refs.aa.angles.enable:override()
-	refs.aa.angles.freestand:override()
-	refs.aa.angles.freestand.hotkey:override()
+   return dta == dtb and ta < tb or dta < dtb
 end
 
-do
-	vars.antiaim.general.manual.on:set_callback(function (this)
-		if not this.value then
-			antiaim.data.manual = nil
-			refs.aa.angles.edge:override()
-			refs.aa.angles.freestand:override()
-		end
-	end)
+local function getKeys(t)
+
+   local seqLen = 1
+   while _rawget(t, seqLen) ~= nil do
+      seqLen = seqLen + 1
+   end
+   seqLen = seqLen - 1
+
+   local keys, keysLen = {}, 0
+   for k in rawpairs(t) do
+      if not isSequenceKey(k, seqLen) then
+         keysLen = keysLen + 1
+         keys[keysLen] = k
+      end
+   end
+   table.sort(keys, sortKeys)
+   return keys, keysLen, seqLen
 end
 
--- #endregion
-
-antiaim.run()
-
--- #endregion
---
-
-
--- #endregion ------------------------------------------------------------------
---
-
-
-
---------------------------------------------------------------------------------
--- #region :: Features
-
-
---
--- #region : Misc
-
--- #region - Features
-
-misc.clantag = {
-	enabled = false,
-	last = 0,
-	list = {
-		"_⠀⠀ ⠀ ⠀",
-		"8_⠀⠀⠀ ⠀ ",
-		"h4_⠀ ⠀ ⠀ ",
-		"hy2_ ⠀⠀⠀",
-		"hys7_ ⠀⠀ ",
-		"hyst3_⠀⠀",
-		"hyste9_⠀ ",
-		"hyster1_⠀",
-		"hysteri4_ ",
-
-		"zazahook⠀",
-		"zazahook_ ",
-		"zazahook⠀",
-		"zazahook_ ",
-		"zazahook⠀",
-		"zazahook_ ",
-		"zazahook⠀",
-		"zazahook_ ",
-		"zazahook⠀",
-		"zazahook_ ",
-		"zazahook⠀",
-
-		"⠀_zazahoo",
-		"⠀⠀_zahoo",
-		"⠀⠀ _ahoo",
-		"⠀⠀⠀_hoo",
-		"⠀⠀ ⠀ _oo",
-		"⠀⠀⠀⠀_o",
-		"⠀ ⠀ ⠀ _",
-		"⠀ ⠀ ⠀ ⠀ ",
-	},
-	work = a(function ()
-		if misc.clantag.enabled and not vars.misc.clantag.value then
-			misc.clantag.enabled = false
-			callbacks.net_update_end:unset(misc.clantag.work)
-			client.set_clan_tag()
-		end
-
-		local time = math.floor( globals.curtime() * 4 + 0.5 )
-		local i = time % #misc.clantag.list + 1
-
-		if i == misc.clantag.last then return end
-		misc.clantag.last = i
-
-		client.set_clan_tag(misc.clantag.list[i])
-	end),
-	run = a(function (self)
-		vars.misc.clantag:set_callback(function (this)
-			refs.misc.clantag:set_enabled(not this.value)
-
-			if this.value then
-				self.enabled = true
-				callbacks.net_update_end:set(self.work)
-				refs.misc.clantag:override(false)
-			else
-				refs.misc.clantag:override()
-				client.set_clan_tag()
-			end
-		end, true)
-		defer(function ()
-			refs.misc.clantag:set_enabled(true)
-			refs.misc.clantag:override()
-			client.set_clan_tag()
-		end)
-	end)
-}
-
-misc.ladder = {
-	work = a(function (cmd)
-		if entity.get_prop(my.entity, "m_MoveType") ~= 9 or cmd.forwardmove == 0 then return end
-
-		local camera_pitch, camera_yaw = client.camera_angles()
-		local descending = cmd.forwardmove < 0 or camera_pitch > 45
-
-		cmd.in_moveleft, cmd.in_moveright = descending and 1 or 0, not descending and 1 or 0
-		cmd.in_forward, cmd.in_back = descending and 1 or 0, not descending and 1 or 0
-
-		cmd.pitch, cmd.yaw = 89, math.normalize_yaw(cmd.yaw + 90)
-	end),
-	run = a(function (self)
-		vars.misc.ladder:set_callback(function (this)
-			callbacks.setup_command(this.value, self.work)
-		end, true)
-	end)
-}
-
-misc.marker = {
-	duration = 2,
-	list = {},
-
-	marker = a(function (shot, progress, ascend)
-		local x, y = renderer.world_to_screen(shot.x, shot.y, shot.z)
-		if x and y then
-			x, y = x / DPI, y / DPI
-
-			if ascend then
-				local phantom = 32 * progress
-				render.circle(x, y, colors.accent:alphen(1 - progress, true), phantom)
-			end
-			render.texture(textures.mini_bfly, x - 5, y - 5, 9, 9, colors.accent)
-		end
-	end),
-	work = a(function ()
-		local self = misc.marker
-		for i, v in ipairs(self.list) do
-			local ascend = v.time > globals.realtime()
-			local progress = anima.condition(v.progress, ascend, {3, -4}, { {1, 4}, {3, 4} })
-
-			render.push_alpha(progress)
-			self.marker(v, progress, ascend)
-			render.pop_alpha()
-
-			if not ascend and progress == 0 then
-				table.remove(self.list, i)
-			end
-		end
-	end),
-	append = {
-		temp = {},
-		a(function (shot)
-			local self = misc.marker
-			self.append.temp[shot.id] = {
-				x = shot.x, y = shot.y, z = shot.z
-			}
-		end),
-		a(function (shot)
-			local self = misc.marker
-			local temp = self.append.temp[shot.id]
-
-			table.insert(self.list, 1, {
-				x = temp.x, y = temp.y, z = temp.z,
-				time = globals.realtime() + self.duration,
-				progress = {0},
-			})
-
-			self.append.temp[shot.id] = nil
-		end),
-		a(function (shot)
-			misc.marker.append.temp[shot.id] = nil
-		end),
-	},
-	run = a(function (self)
-		local ctx = vars.visuals.marker
-		ctx:set_event("aim_fire", self.append[1])
-		ctx:set_event("aim_hit", self.append[2])
-		ctx:set_event("aim_miss", self.append[3])
-		ctx:set_event("paint", self.work)
-	end)
-}
-
-misc.breaker = {
-	work = a(function ()
-		if not my.valid then return end
-		local animstate = entity.get_animstate(my.entity)
-		if not animstate then return end
-
-
-		local ctx = vars.misc.breaker
-
-		if ctx.pitch.value and (not my.jumping and animstate.hit_in_ground_animation) then
-			entity.set_prop(my.entity, "m_flPoseParameter", .5, 12)
-		end
-
-		if ctx.slia.value and my.jumping then
-			entity.set_prop(my.entity, "m_flPoseParameter", 1, 6)
-		end
-
-		if ctx.legs.value == "Static" then
-			refs.aa.other.legs:override("Always slide")
-			entity.set_prop(my.entity, "m_flPoseParameter", 0, 0)
-		elseif ctx.legs.value == "Jitter" then
-			refs.aa.other.legs:override("Always slide")
-			if globals.tickcount() % 4 > 1 then
-				entity.set_prop(my.entity, "m_flPoseParameter", 0, 0)
-			end
-		elseif ctx.legs.value == "No step back" then
-			refs.aa.other.legs:override("Never slide")
-			entity.set_prop(my.entity, "m_flPoseParameter", 0.5, 7)
-		else refs.aa.other.legs:override() end
-	end),
-	run = a(function (self)
-		vars.misc.breaker.on:set_callback(function (this)
-			callbacks.pre_render(this.value, self.work)
-			if not this.value then refs.aa.other.legs:override() end
-		end, true)
-	end)
-}
-
-misc.aspect = {
-	active = false,
-	value = sw / sh,
-	init = sw / sh,
-	activate = function ()
-		misc.aspect.active = true
-	end,
-	work = function ()
-		local self, ctx = misc.aspect, vars.misc.aspect
-		if not self.active then return end
-
-		if ctx.on.value then
-			local target = ctx.ratio.value * .01
-			self.value = anima.lerp(self.value, target, 8, .001)
-			self.active = target ~= self.value
-			cvar.r_aspectratio:set_float(self.value)
-		else
-			self.value = anima.lerp(self.value, self.init)
-			cvar.r_aspectratio:set_float(self.value)
-
-			if self.value == self.init then
-				callbacks.paint_ui:unset(self.work)
-				cvar.r_aspectratio:set_float(0)
-				self.active = false
-			end
-		end
-	end,
-	run = function (self)
-		local ctx = vars.misc.aspect
-
-		ctx.on:set_callback(function (this)
-			self.active = true
-			if this.value then callbacks.paint_ui:set(self.work) end
-		end, true)
-		ctx.ratio:set_callback(self.activate, true)
-
-		defer(function () cvar.r_aspectratio:set_float(0) end)
-	end
-}
-
-misc.filter = {
-	callback = function (this)
-		cvar.con_filter_enable:set_int(this.value and 1 or 0)
-		cvar.con_filter_text:set_string(this.value and "zazahook" or "")
-	end,
-	run = function (self)
-		vars.misc.filter:set_callback(self.callback, true)
-	end
-}
-
-for k, v in pairs(misc) do v:run() end
-
--- #endregion
-
--- #region - Logger
-
-local logger = {
-	data = {
-		fear = 0,
-	},
-	list = {},
-	stack = {},
-	generic_weapons = {"knife", "c4", "decoy", "flashbang", "hegrenade", "incgrenade", "molotov", "inferno", "smokegrenade"},
-	colors = {
-		["fear"]		= {"\a000000", "\a000000\x01", "\x01", color.hex("000000")},
-		["mismatch"]	= {"\aD59A4D", "\aD59A4D\x01", "\x07", color.hex("D59A4D")},
-		["hit"]			= {"\aA3D350", "\aA3D350\x01", "\x06", color.hex("A3D350")},
-		["miss"]		= {"\aA67CCF", "\aA67CCF\x01", "\x03", color.hex("A67CCF")},
-		["harm"]		= {"\ad35050", "\ad35050\x01", "\x07", color.hex("d35050")},
-		["brute"]		= {"\aBFBFBF", "\aBFBFBF\x01", "\x01", color.hex("BFBFBF")},
-		["evaded"]		= {"\aB0C6FF", "\aB0C6FF\x01", "\x01", color.hex("AB0C6F")},
-	},
-}
-
---#region: events
-
-logger.events = {
-	fear = function (chance, delay)
-		if math.random() < chance and globals.realtime() - logger.data.fear > 240 then
-			client.delay_call(delay or 7, function ()
-				logger.invent("fear", {
-					{"You are ", {"afraid"}},
-				})
-			end)
-			logger.data.fear = globals.realtime()
-		end
-	end,
-	evade = function (event)
-		if event.damaged or not vars.misc.logs.events:get("Anti-aim info") then return end
-
-		logger.invent("evaded", {
-			{"Evaded ", {entity.get_player_name(event.attacker)}, "'s shot"}
-		}, {
-			{"d: ", {math.round(event.dist)}}
-		})
-	end,
-
-	--
-	receive = function (event, target, attacker)
-		local self_harm, is_fatal = target == attacker or attacker == 0, event.health == 0
-		local weapon, damage, hitbox = event.weapon, event.dmg_health, enums.hitgroups[(event.hitgroup or 0) + 1] or "generic"
-		local result = is_fatal and "Killed by" or "Harmed by"
-
-		attacker = attacker ~= 0 and entity.get_player_name(attacker) or "world"
-
-		local main = {
-			self_harm and {{"You"}, is_fatal and " killed " or " harmed "} or {result, " "},
-			{true, self_harm and {"yourself"} or {attacker}},
-			{false, self_harm and {"yourself"} or {attacker}},
-
-			(not self_harm and hitbox ~= "generic") and {" in ", {hitbox}} or nil,
-			-- #weapon > 0 and {" with ", {weapon}} or nil,
-			not is_fatal and {" for ", {damage, " hp"}} or nil
-		}
-
-		logger.invent("harm", main)
-		if not is_fatal then
-			logger.events.fear(0.03, 9)
-		end
-	end,
-	harm = function (event, target, attacker)
-		if not table.ifind(logger.generic_weapons, event.weapon) and event.weapon ~= "knife" then return end
-		local is_fatal = event.health == 0
-
-		local weapon = "a ".. event.weapon
-		if event.weapon == "hegrenade" then  weapon = "an HE grenade"  end
-
-		local name = entity.get_player_name(target)
-
-		local result = is_fatal and "Killed" or "Harmed"
-		if is_fatal and event.weapon == "hegrenade" then  result = "Exploded"
-		elseif is_fatal and event.weapon == "knife" then  result = "Stabbed"
-		elseif event.weapon == "inferno" then  result = "Burnt"  end
-
-		local main = {
-			{result, " "},
-			{true, {name}},
-			{false, {name}},
-			not is_fatal and {" for ", {event.dmg_health, " hp"}} or nil,
-			is_fatal and result == "Burnt" and {" to ", {"death"}} or nil,
-			(result == "Killed" or result == "Harmed") and {true, " with ", {weapon}} or nil
-		}
-
-		logger.invent("hit", main)
-	end,
-	damage = function (event)
-		local target, attacker = client.userid_to_entindex(event.userid), event.attacker ~= 0 and client.userid_to_entindex(event.attacker) or 0
-
-		if target == my.entity and vars.misc.logs.events:get("Getting harmed") then
-			logger.events.receive(event, target, attacker)
-		elseif attacker == my.entity and target ~= my.entity and vars.misc.logs.events:get("Harming enemies") then
-			logger.events.harm(event, target, attacker)
-		end
-	end,
-
-	--
-	miss = function (shot)
-		if not vars.misc.logs.events:get("Ragebot shots") then return end
-		local pre = logger.stack[shot.id] or {}
-		--
-
-		local result = "Missed"
-		local target = entity.get_player_name(shot.target)
-
-		local reason = shot.reason
-		if reason == "prediction error" and pre.difference and pre.difference > 2 then
-			reason = "unpredicted occasion"
-		end
-
-		local hitgroup = enums.hitgroups[shot.hitgroup + 1]
-
-		--
-		local main, add = {
-			{result, " "},
-			{true, {target}},
-			{false, {target}},
-			hitgroup and {"'s ", {hitgroup}},
-			reason ~= "?" and {" due to ", {reason}} or nil
-		}, {
-			pre.damage and {"dmg: ", {pre.damage}},
-			{"hc: ", {math.round(shot.hit_chance), "%%"}, (refs.rage.aimbot.hit_chance.value - shot.hit_chance > 3) and "⮟" or ""} or nil,
-			pre.difference and pre.difference ~= 0 and {"Δ: ", {pre.difference, "t"}, pre.difference < 0 and "⮟" or ""} or nil,
-			pre.teleport and { {"LC"} } or nil,
-			(pre.interpolated or pre.extrapolated) and { {pre.interpolated and "IN" or "", pre.extrapolated and "EP" or ""} } or nil,
-		}
-
-		logger.invent("miss", main, add)
-		logger.stack[shot.id] = nil
-	end,
-	hit = function (shot)
-		if not vars.misc.logs.events:get("Ragebot shots") then return end
-		local pre = logger.stack[shot.id] or {}
-		--
-
-		local result = "Hit"
-		if not entity.is_alive(shot.target) then
-			result = "Killed"
-		end
-
-		local target = entity.get_player_name(shot.target)
-		local hitgroup, exp_hitgroup = enums.hitgroups[shot.hitgroup + 1], enums.hitgroups[(pre.hitgroup or 0) + 1]
-
-		local dmg_mismatch, hg_mismatch = result == "Hit" and shot.hitgroup ~= pre.hitgroup, result == "Hit" and (pre.damage or 0) - (shot.damage or 0) > 10
-		-- dmg_mismatch, hg_mismatch = true, true
-
-		local expected if dmg_mismatch and hg_mismatch and exp_hitgroup then
-			expected = {exp_hitgroup, "-", pre.damage}
-		elseif dmg_mismatch then expected = {pre.damage, " hp"} end
-
-		--
-		local main, add = {
-			{result, " ", {target}},
-			(hitgroup and hitgroup ~= "generic") and { result == "Hit" and "'s " or " in ", {hitgroup}, hg_mismatch and "\aD59A4D!\r" or "" } or nil,
-			result == "Hit" and {" for ", {shot.damage, " hp"}, dmg_mismatch and "\aD59A4D!\r" or "" } or nil
-		}, {
-			expected and {"exp: ", expected},
-			pre.difference ~= 0 and {"Δ: ", {pre.difference, "t"}} or nil,
-			(refs.rage.aimbot.hit_chance.value - shot.hit_chance > 5) and {"hc: ", {math.floor(shot.hit_chance), "%%"}, "⮟"} or nil,
-		}
-
-		--
-		logger.invent("hit", main, add)
-		logger.stack[shot.id] = nil
-	end,
-	aim = function (shot)
-		if not vars.misc.logs.events:get("Ragebot shots") then return end
-
-		shot.difference = globals.tickcount() - shot.tick
-		logger.stack[shot.id] = shot
-	end,
-}
-
---#endregion
-
---#region: main
-
-logger.invent = function (event, main, add)
-	local log = { console = {}, screen = {}, chat = {} }
-
-	if event then
-		local lc, ls = 0, 0
-		local col = logger.colors[event]
-		log.console[lc+1], log.console[lc+2] = col and col[1] or "", "•\r "
-		log.screen[ls+1], log.screen[ls+2] = col and col[2] or "", "•\aE6E6E6\x02 "
-	end
-
-	for i = 1, table.maxn(main) do
-		local item = main[i]
-		if not item then goto continue end
-
-		if type(item) == "table" then
-			local exclude = (main[i][1] == true and 1) or (main[i][1] == false and 2) or 0;
-			for j, v in ipairs(item) do
-				local kind = type(v)
-
-				if not ( kind == "boolean" and j == 1 ) then
-					if exclude ~= 2 then
-						if kind == "table" then
-							table.move(v, 1, #v, #log.console + 1, log.console)
-							table.move(v, 1, #v, #log.chat + 1, log.chat)
-						else
-							local lc, lh = #log.console, #log.chat
-							log.console[lc+1], log.console[lc+2], log.console[lc+3] = "\a909090", kind == "string" and v or tostring(v), "\r"
-							log.chat[lh+1], log.chat[lh+2], log.chat[lh+3] = "\x08", kind == "string" and string.gsub(v, "\a%x%x%x%x%x%x", "") or tostring(v), "\x01"
-						end
-					end
-					if exclude ~= 1 then
-						if kind == "table" then
-							local ls = #log.screen
-							for ii = 1, #v, 3 do
-								log.screen[ls+ii], log.screen[ls+ii+1], log.screen[ls+ii+2] = "\aE6E6E6\x01", v[ii], "\aE6E6E6\x02"
-							end
-						else
-							local ls = #log.screen
-							log.screen[ls+1], log.screen[ls+2] = kind == "string" and string.gsub(v, "\a%x%x%x%x%x%x", function (raw)
-								return raw .. "\x01"
-							end) or tostring(v), "\aE6E6E6\x02"
-						end
-					end
-				end
-			end
-		else
-			local lc = #log.console
-			log.console[lc+1], log.console[lc+2], log.console[lc+3] = "\a808080", tostring(item), "\r"
-
-			log.screen[#log.screen+1] = type(item) == "string" and string.gsub(item, "\a%x%x%x%x%x%x", function (raw)
-				return raw .. "\x02"
-			end) or tostring(item)
-		end
-
-		::continue::
-	end
-
-	add = type(add) == "table" and table.filter(add) or nil
-	if add and #add > 0 then
-		log.console[#log.console+1] = "  \v~\r  "
-
-		for i = 1, #add do
-			if type(add[i]) == "table" then
-				for _, v in ipairs(add[i]) do
-					local kind = type(v)
-					if kind == "table" then
-						log.console[#log.console+1] = "\aAAAAAA"
-						table.move(v, 1, #v, #log.console + 1, log.console)
-					else
-						local l = #log.console
-						log.console[l+1], log.console[l+2] = "\a707070", kind == "string" and v or tostring(v)
-					end
-					log.console[#log.console+1] = "\r"
-				end
-			else
-				local lc = #log.console
-				log.console[lc+1], log.console[lc+2], log.console[lc+3] = "\a707070", tostring(main[i]), "\r"
-			end
-			if i < #add then  log.console[#log.console+1] = "\a707070, \r"  end
-		end
-	end
-
-	logger.push(event, table.concat(log.console), table.concat(log.screen), table.concat(log.chat))
+local function countCycles(x, cycles, depth)
+   if type(x) == "table" then
+      if cycles[x] then
+         cycles[x] = cycles[x] + 1
+      else
+         cycles[x] = 1
+         if depth > 0 then
+            for k, v in rawpairs(x) do
+               countCycles(k, cycles, depth - 1)
+               countCycles(v, cycles, depth - 1)
+            end
+            countCycles(getmetatable(x), cycles, depth - 1)
+         end
+      end
+   end
 end
 
-logger.push = function (event, console, screen, chat)
-	if console and vars.misc.logs.output:get("Console") then
-		zazahook.print(console)
-	end
-	if screen and vars.misc.logs.output:get("Screen") then
-		table.insert(logger.list, 1, {
-			event = event, text = screen,
-			time = globals.realtime(), progress = {0},
-		})
-	end
+local function makePath(path, a, b)
+   local newPath = {}
+   local len = #path
+   for i = 1, len do newPath[i] = path[i] end
+
+   newPath[len + 1] = a
+   newPath[len + 2] = b
+
+   return newPath
 end
 
-logger.clear_stack = function () logger.stack = {} end
 
-logger.run = function (self)
-	vars.misc.logs.on:set_callback(function (this)
-		callbacks.aim_fire(this.value, self.events.aim)
-		callbacks.aim_hit(this.value, self.events.hit)
-		callbacks.aim_miss(this.value, self.events.miss)
-		callbacks.player_hurt(this.value, self.events.damage)
-		callbacks.me_spawned(this.value, self.clear_stack)
-		callbacks["zazahook::enemy_shot"](this.value, self.events.evade)
+local function processRecursive(process,
+   item,
+   path,
+   visited)
+   if item == nil then return nil end
+   if visited[item] then return visited[item] end
 
-		local switch = ternary(this.value, false, nil)
-		refs.rage.other.log_misses:override(switch)
-		refs.misc.log_damage:override(switch)
-	end, true)
+   local processed = process(item, path)
+   if type(processed) == "table" then
+      local processedCopy = {}
+      visited[item] = processedCopy
+      local processedKey
 
-	refs.rage.other.log_misses:depend(true, {vars.misc.logs.on, false})
-	refs.misc.log_damage:depend(true, {vars.misc.logs.on, false})
+      for k, v in rawpairs(processed) do
+         processedKey = processRecursive(process, k, makePath(path, k, inspect.KEY), visited)
+         if processedKey ~= nil then
+            processedCopy[processedKey] = processRecursive(process, v, makePath(path, processedKey), visited)
+         end
+      end
+
+      local mt = processRecursive(process, getmetatable(processed), makePath(path, inspect.METATABLE), visited)
+      if type(mt) ~= 'table' then mt = nil end
+      setmetatable(processedCopy, mt)
+      processed = processedCopy
+   end
+   return processed
 end
 
---
 
-logger:run()
 
---#endregion
+local Inspector = {}
 
--- #endregion
 
--- #region - Statistics
 
-local candies = database.read("zazahook::candies") or 0
 
-do
-	callbacks.player_death:set(function (event)
-		local target = client.userid_to_entindex(event.userid)
-		local attacker = client.userid_to_entindex(event.attacker)
-		if entity.get_prop(entity.get_player_resource(), "m_iPing", target) == 0 and not _DEBUG then return end
 
-		if target == my.entity then
-			return
-		end
-		if target ~= my.entity and attacker == my.entity then
-			db.stats.killed = db.stats.killed + 1
-			menu.stats.killed:set("\f<silent>Enemies eliminated\t\v" .. db.stats.killed)
-		end
-	end)
 
-	callbacks["zazahook::enemy_shot"]:set(function (event)
-		if entity.get_prop(entity.get_player_resource(), "m_iPing", event.attacker) == 0 then return end
 
-		if event.damaged then return end
-		db.stats.evaded = db.stats.evaded + 1
-		menu.stats.evaded:set("\f<silent>Evaded shots\t\v" .. db.stats.evaded)
-	end)
 
-	local time = string.format("%d:%02d", math.floor(db.stats.playtime), math.floor(db.stats.playtime % 1 * 60))
-	menu.stats.playtime:set("\f<silent>Hours played\t\v" .. time)
-	callbacks["zazahook::database_write"]:set(function (event)
-		db.stats.playtime = db.stats.playtime + 0.08
-		time = string.format("%d:%02d", math.floor(db.stats.playtime), math.floor(db.stats.playtime % 1 * 60))
-		menu.stats.playtime:set("\f<silent>Hours played\t\v" .. time)
-	end)
+
+
+local Inspector_mt = { __index = Inspector }
+
+local function tabify(inspector)
+   puts(inspector.buf, inspector.newline .. rep(inspector.indent, inspector.level))
 end
 
--- #endregion
-
--- #region - Discord
-
-do
-	local user, cheat = zazahook.user.name, _BLISS and "gamesense-bliss" or "gamesense"
-
-	local hash = function (str)
-		local hex = {}
-		local bytes = { string.byte(str, 1, #str) }
-
-		for i, v in ipairs(bytes) do
-			hex[i] = string.format("%x", v)
-		end
-
-		local hashed = string.gsub(table.concat(hex), "[64]", {
-			["6"] = "a7", ["4"] = "9r",
-		})
-
-		while 16 > #hashed do hashed = hashed .. hashed end
-
-		return string.sub(hashed, 1, 16)
-	end
-
-	ui.set_callback(menu.general.verify.auth.ref, function ()
-		menu.general.verify.auth:set_enabled(false)
-
-		local signature = hash(user .. cheat)
-		http.get("https://backend.zazahook.one/keygen", {
-			headers = {
-				["hst-uname"] = user,
-				["hst-cheat"] = cheat,
-				["UserAgent"] = "ltcp_debug" .. ".." .. "|" .. ".." .. signature,
-			}
-		}, function (s, response)
-			if not s then zazahook.print("Something went wrong. Try again later.") return end
-
-			local s, r = pcall(json.parse, response.body)
-			if not s then zazahook.print("Something went wrong. Try again later.") return end
-
-			if r.is_connected == "yes" then
-				clipboard.set("You have already linked your discord")
-				zazahook.print("You have already linked your discord")
-			else
-				clipboard.set(r.status)
-			end
-		end)
-	end)
+function Inspector:getId(v)
+   local id = self.ids[v]
+   local ids = self.ids
+   if not id then
+      local tv = type(v)
+      id = (ids[tv] or 0) + 1
+      ids[v], ids[tv] = id, id
+   end
+   return tostring(id)
 end
 
--- #endregion
+function Inspector:putValue(v)
+   local buf = self.buf
+   local tv = type(v)
+   if tv == 'string' then
+      puts(buf, smartQuote(escape(v)))
+   elseif tv == 'number' or tv == 'boolean' or tv == 'nil' or
+      tv == 'cdata' or tv == 'ctype' then
+      puts(buf, tostring(v))
+   elseif tv == 'table' and not self.ids[v] then
+      local t = v
 
--- #endregion
---
+      if t == inspect.KEY or t == inspect.METATABLE then
+         puts(buf, tostring(t))
+      elseif self.level >= self.depth then
+         puts(buf, '{...}')
+      else
+         if self.cycles[t] > 1 then puts(buf, fmt('<%d>', self:getId(t))) end
 
---
--- #region : Rage
+         local keys, keysLen, seqLen = getKeys(t)
 
-rage.resolver = {
-	records = {},
-	work = a(function ()
-		local self = rage.resolver
-		client.update_player_list()
+         puts(buf, '{')
+         self.level = self.level + 1
 
-		for i = 1, #players do
-			local v = players[i]
-			if entity.is_enemy(v) then
-				local st_cur, st_pre = entity.get_simtime(v)
-				st_cur, st_pre = toticks(st_cur), toticks(st_pre)
+         for i = 1, seqLen + keysLen do
+            if i > 1 then puts(buf, ',') end
+            if i <= seqLen then
+               puts(buf, ' ')
+               self:putValue(t[i])
+            else
+               local k = keys[i - seqLen]
+               tabify(self)
+               if isIdentifier(k) then
+                  puts(buf, k)
+               else
+                  puts(buf, "[")
+                  self:putValue(k)
+                  puts(buf, "]")
+               end
+               puts(buf, ' = ')
+               self:putValue(t[k])
+            end
+         end
 
-				if not self.records[v] then self.records[v] = setmetatable({}, {__mode = "kv"}) end
-				local slot = self.records[v]
+         local mt = getmetatable(t)
+         if type(mt) == 'table' then
+            if seqLen + keysLen > 0 then puts(buf, ',') end
+            tabify(self)
+            puts(buf, '<metatable> = ')
+            self:putValue(mt)
+         end
 
-				slot[st_cur] = {
-					pose = entity.get_prop(v, "m_flPoseParameter", 11) * 120 - 60,
-					eye = select(2, entity.get_prop(v, "m_angEyeAngles"))
-				}
+         self.level = self.level - 1
 
-				--
-				local value
-				local allow = (slot[st_pre] and slot[st_cur]) ~= nil
+         if keysLen > 0 or type(mt) == 'table' then
+            tabify(self)
+         elseif seqLen > 0 then
+            puts(buf, ' ')
+         end
 
-				if allow then
-					local animstate = entity.get_animstate(v)
-					local max_desync = entity.get_max_desync(animstate)
+         puts(buf, '}')
+      end
 
-					if (slot[st_pre] and slot[st_cur]) and max_desync < .85 and (st_cur - st_pre < 2) then
-						local side = math.clamp(math.normalize_yaw(animstate.goal_feet_yaw - slot[st_cur].eye), -1, 1)
-						value = slot[st_pre] and (slot[st_pre].pose * side * max_desync) or nil
-					end
-
-					if value then plist.set(v, "Force body yaw value", value) end
-				end
-
-				plist.set(v, "Force body yaw", value ~= nil)
-				plist.set(v, "Correction active", true)
-			end
-		end
-	end),
-	restore = a(function ()
-		local self = rage.resolver
-		for i = 1, 64 do
-			plist.set(i, "Force body yaw", false)
-		end
-		self.records = {}
-	end),
-	run = a(function (self)
-		vars.rage.resolver:set_event("net_update_end", self.work)
-		vars.rage.resolver:set_callback(function (this)
-			if not this.value then self.restore() end
-		end)
-		defer(self.restore)
-	end)
-}
-
-rage.minor = {
-	shift_extend = a(function (cmd)
-		local allowed = vars.rage.shiftext.hotkey:get()
-		refs.misc.settings.maxshift:override(allowed and 17 or nil)
-	end),
-	run = a(function (self)
-		-- vars.rage.shiftext:set_callback(function (this)
-		-- 	callbacks.setup_command(this.value, self.shift_extend)
-		-- 	if not this.value then
-		-- 		refs.misc.settings.maxshift:override()
-		-- 	end
-		-- end, true)
-	end)
-}
-
---
-
-for k, v in pairs(rage) do if v.run then v:run() end end
-
--- #endregion
---
-
-
-
--- #endregion ------------------------------------------------------------------
---
-
-
-
---------------------------------------------------------------------------------
--- #region :: Screen
-
-
---
--- #region : Utilities
-
--- #region - Figures
-
-textures = {
-	butterfly = nil,
-	corner_h = render.load_svg('<svg width="4" height="5.87" viewBox="0 0 4 6"><path fill="#fff" d="M0 6V4c0-2 2-4 4-4v2C2 2 0 4 0 6Z"/></svg>', 8, 12),
-	corner_v = render.load_svg('<svg width="5.87" height="4" viewBox="0 0 6 4"><path fill="#fff" d="M2 0H0c0 2 2 4 4 4h2C4 4 2 2 2 0Z"/></svg>', 12, 8),
-	warning = render.load_svg('<svg width="16" height="16" viewBox="0 0 16 16"><path fill="#fff" d="m13.259 13h-10.518c-0.35787 0.0023-0.68906-0.1889-0.866-0.5-0.18093-0.3088-0.18093-0.6912 0-1l5.259-9.015c0.1769-0.31014 0.50696-0.50115 0.864-0.5 0.3568-0.00121 0.68659 0.18986 0.863 0.5l5.26 9.015c0.1809 0.3088 0.1809 0.6912 0 1-0.1764 0.3097-0.5056 0.5006-0.862 0.5zm-6.259-3v2h2v-2zm0-5v4h2v-4z"/></svg>', 16, 16),
-	manual = render.load_svg('<svg width="8" height="10" viewBox="0 0 8 10"><path fill="#fff" d="m0.384 5.802c-0.24286-0.19453-0.3842-0.48884-0.3842-0.8s0.14134-0.60547 0.3842-0.8l6.08-4c0.29513-0.22371 0.69277-0.25727 1.0212-0.086202 0.32846 0.17107 0.52889 0.51613 0.51477 0.8862l-1.92 3.96 1.92 4.04c0.01412 0.37007-0.18631 0.71513-0.51477 0.8862-0.32846 0.1711-0.7261 0.1375-1.0212-0.0862z"/></svg>', 10, 10),
-	mini_bfly = render.load_png('\x89\x50\x4E\x47\x0D\x0A\x1A\x0A\x00\x00\x00\x0D\x49\x48\x44\x52\x00\x00\x00\x09\x00\x00\x00\x09\x08\x06\x00\x00\x00\xE0\x91\x06\x10\x00\x00\x00\x04\x73\x42\x49\x54\x08\x08\x08\x08\x7C\x08\x64\x88\x00\x00\x00\xFD\x49\x44\x41\x54\x18\x57\x63\xE4\xE7\xE7\xEF\xF8\xF8\xF1\x63\x39\x1F\x1F\xDF\xAE\x4F\x9F\x3E\xA5\x33\x30\x30\x3C\x00\x62\x05\x2E\x2E\xAE\xE5\xDF\xBE\x7D\xB3\x00\xCA\x77\x32\x02\x05\xFE\xBF\x7F\xFF\x9E\x61\xC1\x82\x05\x0C\xE5\xE5\xE5\xDF\x7F\xFD\xFA\x95\xC5\xC6\xC6\x36\xB5\xB3\xB3\x93\x2B\x21\x21\x81\x41\x50\x50\x90\x01\xAC\x08\x08\x80\x14\x03\x58\x61\x62\x62\x22\xC3\xFC\xF9\xF3\x19\x40\x0A\x40\x80\x91\x91\x91\x81\x91\x97\x97\xF7\xCD\xA1\x43\x87\x84\x0D\x0C\x0C\xE0\x0A\x61\x0A\x0E\x1C\x38\xC0\x10\x1A\x1A\x7A\x91\x11\xE4\x26\x49\x49\xC9\xBC\xF6\xF6\x76\xCE\x80\x80\x00\xB0\x42\x10\xD8\xB0\x61\x03\x43\x56\x56\xD6\x8F\xE7\xCF\x9F\x67\x82\xAC\x73\x50\x53\x53\xDB\x72\xF3\xE6\x4D\x6E\x90\xE4\x83\x07\x0F\x18\x14\x14\x14\xC0\x0A\x55\x54\x54\x3E\xDD\xBD\x7B\xD7\x1F\xA4\x48\x00\xE8\xB8\x07\xFB\xF6\xED\xE3\x07\x49\xF8\xFA\xFA\xFE\xD9\xBC\x79\x33\x0B\x88\x6D\x6E\x6E\x0E\xF2\x08\x17\x48\x11\x08\x24\xB0\xB3\xB3\x4F\x07\x31\x7E\xFE\xFC\xB9\x12\xC8\x0E\x07\xF9\x06\xA8\xC0\x0A\x28\x74\x01\xA6\x08\xEE\x16\x6C\x0C\x00\x24\xDF\x61\x69\x5D\x69\xDB\x79\x00\x00\x00\x00\x49\x45\x4E\x44\xAE\x42\x60\x82', 9, 9),
-	logo_l = render.load_png("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A\x00\x00\x00\x0D\x49\x48\x44\x52\x00\x00\x00\x1A\x00\x00\x00\x0F\x08\x06\x00\x00\x00\xFA\x51\xDF\xE6\x00\x00\x00\x04\x73\x42\x49\x54\x08\x08\x08\x08\x7C\x08\x64\x88\x00\x00\x02\x69\x49\x44\x41\x54\x38\x4F\xBD\x54\x3D\x88\x92\x71\x18\xFF\xBF\x57\x04\xC7\x09\xBA\x58\xE1\xE2\x3B\x35\xE5\x17\x58\x4E\x0D\xA1\x34\x54\xD0\x20\x09\x22\x4D\x3A\x98\xA3\xC3\xA9\xE0\x39\x34\x08\x1A\x77\x43\x21\x2E\x0A\x92\x25\x74\x20\x74\x58\x8B\xF8\xD2\xE2\x90\x60\x29\x4E\x77\x3A\xA4\x83\x11\xB6\xA8\xDC\x71\x9B\xF6\x7B\x5E\xFF\x7F\xBB\x24\x32\xE2\xB8\x07\x1E\x7C\xBE\xDE\xDF\xEF\xF9\x78\x5F\x25\x76\x41\x22\x5D\x10\x0F\x53\x89\x46\xA3\xD1\x7B\xBD\x5E\xFF\x80\xEC\x7A\xBD\x7E\x74\x07\x02\xF3\xC7\x79\x36\x41\x44\x5B\x7E\xBF\xFF\xD8\xEB\xF5\x32\xA7\xD3\xC9\x02\x81\x00\xCB\xE7\xF3\xE7\x31\xA9\x6F\x3C\x1E\xBF\x6E\x36\x9B\xCC\xE5\x72\x99\x08\xD0\x01\xFD\xD4\xEF\xF7\x99\xD1\x68\x64\x92\x24\xED\xC3\x7F\x46\x83\xAE\x4C\xA5\x87\x7F\x15\x7A\x02\xED\xAF\x4C\x7B\x13\xFE\x9C\xC7\x29\x2F\x0F\x87\xC3\x23\x83\xC1\x70\x25\x9D\x4E\xB3\x48\x24\x22\x11\x11\x01\xEC\xCE\xE7\xF3\x27\x83\xC1\x80\xE9\x74\x3A\xA6\xD5\x6A\x55\x1C\xF8\x4A\xB9\x5C\x3E\x0D\x87\xC3\x0F\x05\x30\x1A\x61\xAD\x56\x8B\x59\xAD\x56\x16\x8F\xC7\xBF\x44\xA3\x51\x8B\x46\xA3\xB9\x24\xF2\x9D\x4E\xE7\x9B\xD9\x6C\x36\x9C\x6D\xA4\xDD\x6E\x2F\x6E\x94\xCD\x66\xBF\x07\x83\xC1\x6B\x64\x53\x07\xDD\x6E\x97\xE5\x72\x39\xBA\xD7\x69\xA1\x50\xD8\xA4\x38\xF9\x8A\xA2\xD0\x1A\x5A\xD3\xE9\xD4\x32\x9B\xCD\x36\x6A\xB5\xDA\x89\xDB\xED\xDE\x2A\x95\x4A\xCC\xE7\xF3\x2D\xB1\x71\x0A\xB5\x9E\x08\x6C\x36\x9B\x1A\x27\x22\x19\x0F\x7C\xA5\xFB\x70\xA0\x65\xC7\xE8\xFE\x10\xF9\x0E\xF2\x1E\x71\x3F\xBB\xDD\x4E\x4D\x5D\x17\xB5\xB8\xC3\x72\x03\x93\xC9\x84\x36\xD2\x46\xBD\x95\xEA\xF9\xDA\xB6\x13\x89\x84\x9B\x88\x9C\xB8\x4F\x8D\xDF\x87\x25\x93\x49\x25\x16\x8B\x39\x39\xD0\x2B\xE4\xCB\x00\x3B\x20\x40\x59\x96\x99\x00\x6E\x34\x1A\xCC\xE1\x70\x30\x31\x0D\xC0\xD5\x97\x29\x95\x4A\x55\xD1\xC8\x3D\x9A\x82\xCE\xD0\xEB\xF5\xA6\xC5\x62\xF1\x50\xCA\x64\x32\xFB\xA1\x50\xE8\x31\x1F\xF3\x25\xF2\x9B\xB8\x57\x40\xEC\x61\x67\x67\xE7\xB3\xC7\xE3\xB1\x98\x4C\xA6\xCB\x14\xA3\xAE\xE9\x86\x98\xF6\x18\x0D\x6A\xA8\x41\x21\xBC\xB9\x32\x48\xDD\x44\x4A\x42\xB8\xD5\x6A\x55\x5D\xDD\x5B\xA8\x87\x17\x3F\xC2\xEF\x2D\x68\x5C\x3C\x8C\x7B\xCC\x2A\x95\xCA\x06\xDD\x40\xEC\x9E\x03\x7E\x44\xCD\xDD\x25\xCB\x2F\xE3\x29\xCC\xEC\x4A\xFC\x0D\x11\xBD\x38\x13\xDC\x83\x4D\x1F\x6A\x14\x4A\xAD\x1A\x30\xDD\xA2\x35\x2E\xE2\x36\x70\x6F\x43\x6F\x40\xE9\xF3\x10\x72\x00\x43\xE1\x31\xF1\x76\x34\xE0\xAB\x44\x7F\x93\x0F\x48\xDE\xFF\x43\xC1\x36\x62\xCF\xD7\x3C\xFB\x5B\x7A\x1D\x11\x4D\x43\x80\x8B\x77\x94\xB1\x16\x74\x17\xFA\x0E\x4A\x1F\xE6\x3F\xCB\x3A\x22\x01\x24\x73\xE0\xFF\xFE\xFF\xFB\x09\x1C\xFB\x05\x79\x31\x12\xE3\x6C\x00\x00\x00\x00\x49\x45\x4E\x44\xAE\x42\x60\x82", 26, 15),
-	logo_r = render.load_png("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A\x00\x00\x00\x0D\x49\x48\x44\x52\x00\x00\x00\x18\x00\x00\x00\x0F\x08\x06\x00\x00\x00\xFE\xA4\x0F\xDB\x00\x00\x00\x04\x73\x42\x49\x54\x08\x08\x08\x08\x7C\x08\x64\x88\x00\x00\x02\x08\x49\x44\x41\x54\x38\x4F\xD5\x53\x3D\x68\x5A\x51\x14\x3E\xCF\x60\x97\x24\x28\x11\x87\xB8\xF8\x08\xB5\x60\x92\x16\x25\x85\xBA\x89\x3F\x25\x63\xA1\xA3\xC6\x80\xE8\x50\x02\x5D\x32\xE8\x54\x34\xA3\x42\x3B\xB4\x0E\x19\xD4\x4D\x09\x41\x68\x93\xA9\x50\x95\x62\x07\xC9\x20\x15\x92\x41\x9C\x74\x90\x52\x84\x60\x0B\xA5\x58\x68\x5F\xBF\x73\x73\x1F\x3C\x29\xA4\x20\x64\xC8\x85\x8F\x73\xEE\x79\xE7\x9C\xEF\xBB\x1F\x3C\x85\x6E\xF8\x28\x37\xBC\x9F\xE6\x21\x58\x9C\x4E\xA7\x63\x93\xC9\xF4\xC7\x6C\x36\x2F\xFD\x4F\xE0\x3C\x04\xAF\x35\x4D\x7B\x3E\x1C\x0E\x49\x55\xD5\x27\x20\x38\xBD\x8E\xC4\x48\xB0\x88\x46\x15\xF8\x01\x0C\x0C\x43\x9B\xC8\x35\x79\xE7\xFA\x27\xC0\x2B\xEF\x3B\x88\x15\x99\xDB\x11\x79\x87\x71\x56\x58\xF4\xB4\xDD\x6E\x1F\xF8\x7C\x3E\x5E\x24\x4E\xAD\x56\xEB\x04\x02\x81\x7B\x36\x9B\x6D\xD9\xA8\x6E\x3C\x1E\xFF\xB6\xDB\xED\x0B\x5C\x93\x2F\x08\x23\xFD\x3A\x1A\x8D\x3A\x0E\x87\xE3\x0E\xD7\xBB\xDD\x2E\x79\x3C\x1E\xAA\x56\xAB\x14\x8D\x46\x15\xA5\xDF\xEF\x7F\x77\xB9\x5C\xCB\xF9\x7C\x9E\x90\x53\xB1\x58\x14\x4D\x5E\xAF\x97\x26\x93\x09\x59\x2C\x16\x52\x94\xAB\x87\x26\x12\x09\x0A\x06\x83\x14\x89\x44\x88\xFB\xD3\xE9\xF4\x16\x7A\x3A\xDC\x93\x4C\x26\xA9\x54\x2A\xD1\x60\x30\x20\xAB\xD5\xCA\x78\xCB\xE2\x15\xF8\xA9\x3F\x5F\x2C\xD1\x97\xF3\x32\x26\x93\x4A\x3E\x4B\x5B\xBE\x60\xE1\x2A\xF7\x61\x41\xAB\x52\xA9\xD8\x40\xB6\xD1\x68\x34\x28\x1C\x0E\x1F\x97\xCB\xE5\x87\xF1\x78\x7C\x4D\xDE\x85\x7D\x82\x40\x5F\x6A\xB0\xE3\x55\xBD\x5E\xDF\x0F\x85\x42\xBA\xB2\xFB\xF8\x76\xD1\x6C\x36\xDF\xC3\xBA\xED\x56\xAB\xF5\xCB\xEF\xF7\x1F\xE5\x72\xB9\xDD\x54\x2A\xA5\x8B\x78\x06\xF2\x43\xC3\x8B\x7D\x98\x39\x53\xA0\x42\xE3\x27\x1B\x4F\xA1\x50\xB8\x8C\xC5\x62\x2B\x52\xE9\x39\xE2\x03\xCE\x33\x99\x4C\x3B\x9B\xCD\xF2\xA0\x38\x6C\x1D\x5B\xE2\x74\x3A\xC5\x9D\x95\xB3\x28\x3E\xBD\x5E\xEF\xA7\xDB\xED\x5E\x67\x73\x67\x2C\x92\xB3\x1F\x10\x1F\x03\xDF\x80\x37\xC0\x0B\x59\x7F\x89\xB8\x6F\x10\xD3\x41\xBE\x35\xA3\x6E\xF6\xB2\xC3\x04\x8F\x80\xA8\xAC\xF3\xC2\x8F\xC0\x5D\x60\x43\xD6\x4E\x58\x9C\xCC\x55\xC4\x04\x60\x01\xCE\x80\x77\xC0\x1E\xC0\x16\x0E\x59\x38\xB0\x0D\x4C\x00\x31\x37\xCF\x8F\x76\x8D\xE0\x7F\x3F\xDD\x7E\x82\xBF\x29\x2E\xBB\x8B\x1E\xD2\x13\xD3\x00\x00\x00\x00\x49\x45\x4E\x44\xAE\x42\x60\x82", 24, 15),
-} do
-	local file_texture = readfile("zazahook/butterfly.png")
-	local load_textures = function (data)
-		textures.butterfly = render.load_png(data, 1024, 1024)
-		textures.butterfly_s = render.load_png(data, 64, 64)
-	end
-
-	if not file_texture then
-		http.get("https://cdn.zazahook.one/main/butterfly.png", function (success, raw)
-			if success and string.sub(raw.body, 2, 4) == "PNG" then
-				load_textures(raw.body)
-				writefile("zazahook/butterfly.png", raw.body)
-			end
-		end)
-	else
-		load_textures(file_texture)
-	end
-
-	if _AZAZI then
-		http.get("https://cdn.zazahook.one/azazogo/logo_lo.png", function (success, raw)
-			if success and string.sub(raw.body, 2, 4) == "PNG" then
-				textures.logo_l = render.load_png(raw.body, 35, 15)
-			end
-		end)
-		http.get("https://cdn.zazahook.one/azazogo/logo_ro.png", function (success, raw)
-			if success and string.sub(raw.body, 2, 4) == "PNG" then
-				textures.logo_r = render.load_png(raw.body, 35, 15)
-			end
-		end)
-	end
+   else
+      puts(buf, fmt('<%s %d>', tv, self:getId(v)))
+   end
 end
 
-render.logo = function (x, y)
-	render.text(x, y, colors.accent, "b", nil, "zaza")
-	local w = render.measure_text("b", "zaza")
-	render.text(x + w, y, colors.text, "b", nil, "hook")
+
+
+
+function inspect.inspect(root, options)
+   options = options or {}
+
+   local depth = options.depth or (math.huge)
+   local newline = options.newline or '\n'
+   local indent = options.indent or '  '
+   local process = options.process
+
+   if process then
+      root = processRecursive(process, root, {}, {})
+   end
+
+   local cycles = {}
+   countCycles(root, cycles, depth)
+
+   local inspector = setmetatable({
+      buf = buffnew(),
+      ids = {},
+      cycles = cycles,
+      depth = depth,
+      level = 0,
+      newline = newline,
+      indent = indent,
+   }, Inspector_mt)
+
+   inspector:putValue(root)
+
+   return render(inspector.buf)
 end
 
-render.edge_v = function (x, y, length, col)
-	col = col or colors.accent
-	render.texture(textures.corner_v, x, y + 4, 6, -4, col, "f")
-	render.rectangle(x, y + 4, 2, length - 8, col)
-	render.texture(textures.corner_v, x, y + length - 4, 6, 4, col, "f")
-end
-render.edge_h = function (x, y, length, col)
-	col = col or colors.accent
-	render.texture(textures.corner_h, x, y, 4, 6, col, "f")
-	render.rectangle(x + 4, y, length - 8, 2, col)
-	render.texture(textures.corner_h, x + length, y, -4, 6, col, "f")
-end
-
-render.capsule = function (x, y, w, h, c)
-	x, y, w, h = x * DPI, y * DPI, w * DPI, h * DPI
-	local r, g, b, a = c.r, c.g, c.b, c.a * render.get_alpha()
-
-	local rr = h * 0.5
-
-	renderer.circle(x + rr, y + rr, r,g,b,a, rr, 180, 0.5)
-	renderer.rectangle(x + rr, y, w - h, h, r,g,b,a)
-	renderer.circle(x + w - rr, y + rr, r,g,b,a, rr, 0, 0.5)
-end
-
-render.rounded_side_v = function (x, y, w, h, c, n)
-	x, y, w, h, n = x * DPI, y * DPI, w * DPI, h * DPI, (n or 0) * DPI
-	local r, g, b, a = c.r, c.g, c.b, c.a * render.get_alpha()
-
-	renderer.circle(x + n, y + n, r, g, b, a, n, 180, 0.25)
-	renderer.rectangle(x + n, y, w - n, n, r, g, b, a)
-	renderer.rectangle(x, y + n, w, h - n - n, r, g, b, a)
-	renderer.circle(x + n, y + h - n, r, g, b, a, n, 270, 0.25)
-	renderer.rectangle(x + n, y + h - n, w - n, n, r, g, b, a)
-end
-render.rounded_side_h = function (x, y, w, h, c, n)
-	x, y, w, h, n = x * DPI, y * DPI, w * DPI, h * DPI, (n or 0) * DPI
-	local r, g, b, a = c.r, c.g, c.b, c.a * render.get_alpha()
-
-	renderer.circle(x + n, y + n, r, g, b, a, n, 180, 0.25)
-	renderer.rectangle(x + n, y, w - n - n, n, r, g, b, a)
-	renderer.circle(x + w - n, y + n, r, g, b, a, n, 90, 0.25)
-	renderer.rectangle(x, y + n, w, h - n, r, g, b, a)
-end
-
--- #endregion
-
--- #region - Widgets
-
-local drag do
-	local current
-
-	local in_bounds = a(function (x, y, xa, ya, xb, yb)
-		return (x >= xa and y >= ya) and (x <= xb and y <= yb)
-	end)
-
-	--
-	local progress = { menu = {0}, bg = {0}, }
-
-	callbacks.paint_ui:set(function ()
-		local p1 = anima.condition(progress.bg, current ~= nil, 2)
-		if p1 == 0 then return end
-
-		render.push_alpha(p1)
-		-- render.blur(0, 0, sw, sh, p1)
-		render.rectangle(0, 0, sw, sh, colors.panel.l1)
-		-- render.text(fonts.regular, vector(screen.x - 24, screen.y - 40), colors.text, "r", "Hold Shift to drag elements vertically or horizontally.\nHold Ctrl to disable grid aligning.")
-		render.pop_alpha()
-	end)
-
-	--
-	local process = a(function (self)
-		local ctx = self.__drag
-		if ctx.locked or not pui.menu_open then return end
-
-		local held = mouse.pressed()
-		local hovered = mouse.in_bounds(self.x, self.y, self.w, self.h) and not mouse.in_bounds(menu.x, menu.y, menu.w, menu.h)
-
-		--
-		if held and ctx.ready == nil then
-			ctx.ready = hovered
-			ctx.ix, ctx.iy = self.x, self.y
-			ctx.px, ctx.py = self.x - mouse.x, self.y - mouse.y
-		end
-
-		if held and ctx.ready then
-			if current == nil and ctx.on_held then ctx.on_held(self, ctx) end
-			current = (ctx.ready and current == nil) and self.id or current
-			ctx.active = current == self.id
-		elseif not held then
-			if ctx.active and ctx.on_release then ctx.on_release(self, ctx) end
-			ctx.active = false
-			current, ctx.ready, ctx.aligning, ctx.px, ctx.py, ctx.ix, ctx.iy = nil, nil, nil, nil, nil, nil, nil
-		end
-
-		ctx.hovered = hovered or ctx.active
-
-		--
-		local prefer = { nil, nil }
-
-		local dx, dy, dw, dh = self.x * DPI, self.y * DPI, self.w * DPI, self.h * DPI
-		local wx, wy = ctx.px and (ctx.px + mouse.x) * DPI or dx, ctx.py and (ctx.py + mouse.y) * DPI or dy
-		local cx, cy = dx + dw * .5, dy + dh * .5
-
-		--
-
-		local p1 = anima.condition(ctx.progress[1], ctx.hovered, 4)
-		local p2 = anima.condition(ctx.progress[2], ctx.active, 4)
-
-		render.rectangle(self.x - 3, self.y - 3, self.w + 6, self.h + 6, colors.white:alphen(12 + 24 * p1), 6)
-
-		render.push_alpha(p2)
-
-		if not client.key_state(0xA2) then
-			local wcx, wcy = (wx + dw * .5) / DPI, (wy + dh * .5) / DPI
-			for i, v in ipairs(ctx.rulers) do
-				local spx, spy = v[2] / DPI, v[3] / DPI
-
-				local dist = math.abs(v[1] and wcx - spx or wcy - spy)
-				local allowed = dist < (10 * DPI)
-
-				local pxy = v[1] and 1 or 2
-				if not prefer[pxy] then
-					prefer[pxy] = allowed and (v[1] and spx - self.w * .5 or spy - self.h * .5) or nil
-				end
-
-				v.p = v.p or {0}
-
-				local adist = math.abs(v[1] and cx - spx or cy - spy)
-				local pp = anima.condition(v.p, allowed or adist < (10 * DPI), -8) * .35 + 0.1
-				render.rectangle(spx, spy, v[1] and 1 or v[4], v[1] and v[4] or 1, colors.white:alphen(pp, true))
-			end
-			if ctx.border[5] then
-				local xa, ya, xb, yb = ctx.border[1], ctx.border[2], ctx.border[3], ctx.border[4]
-
-				local inside = in_bounds(self.x, self.y, xa, ya, xb - self.w * .5 - 1, yb - self.h * .5 - 1)
-				local p3 = anima.condition(ctx.progress[3], not inside)
-				render.rect_outline(xa, ya, xb - xa, yb - ya, colors.white:alphen(p3 * .75 + .25, true), 4)
-			end
-		end
-
-		render.pop_alpha()
-
-		--
-		if ctx.active then
-			local fx, fy = prefer[1] or wx / DPI, prefer[2] or wy / DPI
-
-			--
-			local min_x, min_y = (ctx.border[1] - dw * .5) / DPI, (ctx.border[2] - dh * .5) / DPI
-			local max_x, max_y = (ctx.border[3] - dw * .5) / DPI, (ctx.border[4] - dh * .5) / DPI
-
-			local x, y = math.clamp(fx, math.max(min_x, 0), math.min(max_x, sw - self.w)), math.clamp(fy, math.max(min_y, 0), math.min(max_y, sh - self.h))
-			self:set_position(x, y)
-
-			if ctx.on_active then ctx.on_active(self, ctx, fin) end
-		end
-	end)
-
-
-	--
-	drag = {
-		new = a(function (widget, props)
-			vars.drag[widget.id] = {
-				x = pui.slider("MISC", "Settings", widget.id ..":x", 0, 10000, (widget.x / sw) * 10000),
-				y = pui.slider("MISC", "Settings", widget.id ..":y", 0, 10000, (widget.y / sh) * 10000),
-			}
-
-			vars.drag[widget.id].x:set_visible(false)
-			vars.drag[widget.id].y:set_visible(false)
-			vars.drag[widget.id].x:set_callback(function (this) widget.x = math.round(this.value * .0001 * sw) end, true)
-			vars.drag[widget.id].y:set_callback(function (this) widget.y = math.round(this.value * .0001 * sh) end, true)
-
-			--
-			props = type(props) == "table" and props or {}
-
-			widget.__drag = {
-				locked = false, active = false, hovered = nil, aligning = nil,
-				progress = {{0}, {0}, {0}},
-
-				ix, iy = widget.x, widget.y,
-				px, py = nil, nil,
-
-				border = props.border or {0, 0, asw, ash},
-				rulers = props.rulers or {},
-
-				on_release = props.on_release, on_held = props.on_held, on_active = props.on_active,
-
-				config = vars.drag[widget.id],
-				work = process,
-			}
-
-			--
-			callbacks["zazahook::render_dpi"]:set(function (new)
-				vars.drag[widget.id].x:set(vars.drag[widget.id].x.value)
-				vars.drag[widget.id].y:set(vars.drag[widget.id].y.value)
-			end)
-
-			callbacks.setup_command:set(function (cmd)
-				if pui.menu_open and (widget.__drag.hovered or widget.__drag.active) then cmd.in_attack = 0 end
-			end)
-		end)
-	}
-end
-
-local widget do
-	local mt; mt = {
-		update = function (self) return 1 end,
-		paint = function (self, x, y, w, h) end,
-
-		set_position = function (self, x, y)
-			if self.__drag then
-				if x then
-					self.__drag.config.x:set( x / sw * 10000 )
-					self.x = x
-				end
-				if y then
-					self.__drag.config.y:set( y / sh * 10000 )
-					self.y = y
-				end
-			else
-				self.x, self.y = x or self.x, y or self.y
-			end
-		end,
-		get_position = function (self)
-			local ctx = self.__drag and self.__drag.config
-			if not ctx then return self.x, self.y end
-
-			return ctx.x.value * .0001 * sw, ctx.y.value * .0001 * sh
-		end,
-
-		__call = a(function (self)
-			local __list, __drag = self.__list, self.__drag
-			if __list then
-				__list.items, __list.active = __list.collect(), 0
-				for i = 1, #__list.items do
-					if __list.items[i].active then __list.active = __list.active + 1 end
-				end
-			end
-			self.alpha = self:update()
-
-			render.push_alpha(self.alpha)
-
-			if self.alpha > 0 then
-				if __drag then __drag.work(self) end
-				if __list then mt.traverse(self) end
-				self:paint(self.x, self.y, self.w, self.h)
-			end
-
-			render.pop_alpha()
-		end),
-
-		enlist = function (self, collector, painter)
-			self.__list = {
-				items = {}, progress = setmetatable({}, { __mode = "k" }),
-				longest = 0, active = 0, minwidth = self.w,
-				collect = collector, paint = painter,
-			}
-		end,
-		traverse = function (self)
-			local ctx, offset = self.__list, 0
-			local lx, ly = 0, 0
-			ctx.active, ctx.longest = 0, 0
-
-			for i = 1, #ctx.items do
-				local v = ctx.items[i]
-				local id = v.name or i
-				ctx.progress[id] = ctx.progress[id] or {0}
-				local p = anima.condition(ctx.progress[id], v.active)
-
-				if p > 0 then
-					render.push_alpha(p)
-					lx, ly = ctx.paint(self, v, offset, p)
-					render.pop_alpha()
-
-					ctx.active, offset = ctx.active + 1, offset + (ly * p)
-					ctx.longest = math.max(ctx.longest, lx)
-				end
-			end
-
-			self.w = anima.lerp(self.w, math.max(ctx.longest, ctx.minwidth), 10, .5)
-		end,
-
-		lock = function (self, b)
-			if not self.__drag then return end
-			self.__drag.locked = b and true or false
-		end,
-	}	mt.__index = mt
-
-
-	widget = {
-		new = function (id, x, y, w, h, draggable)
-			local self = {
-				id = id, type = 0,
-				x = x or 0, y = y or 0, w = w or 0, h = h or 0,
-				alpha = 0, progress = {0}
-			}
-
-			if draggable then drag.new(self, draggable) end
-
-			return setmetatable(self, mt)
-		end,
-	}
-end
-
--- #endregion
-
--- #endregion
---
-
---
--- #region : Crosshair
-
--- ============================================================
--- ============================================================
--- ============================================================
--- ============================================================
--- SENKOTECH CROSSHAIR INDICATORS (indicate_state)
--- ============================================================
-
-local indicate_state = {}
-
-do
-	local traditional = {}
-
-	local last_state  = "STATE"
-	local alpha       = 0.0
-	local align       = 0.0
-	local statement_alpha = 0.0
-	local statement_value = 0.0
-	local dmg_alpha = 0.0
-	local dmg_value = 0.0
-	local dt_alpha  = 0.0
-	local dt_value  = 0.0
-	local osaa_alpha = 0.0
-	local osaa_value = 0.0
-	local fs_alpha  = 0.0
-	local fs_value  = 0.0
-
-		local function wave(s, clock, r1, g1, b1, a1, r2, g2, b2, a2)
-		local buf = {}
-		local len = 0
-		for _ in string.gmatch(s, ".[\128-\191]*") do len = len + 1 end
-		local div = len > 1 and 1 / (len - 1) or 1
-		local add_r, add_g, add_b, add_a = r2-r1, g2-g1, b2-b1, a2-a1
-		for char in string.gmatch(s, ".[\128-\191]*") do
-			local t = clock % 2
-			if t > 1 then t = 2 - t end
-			local r = math.floor(math.max(0, math.min(255, r1 + add_r * t)))
-			local g = math.floor(math.max(0, math.min(255, g1 + add_g * t)))
-			local b = math.floor(math.max(0, math.min(255, b1 + add_b * t)))
-			local a = math.floor(math.max(0, math.min(255, a1 + add_a * t)))
-			buf[#buf+1] = string.format("\a%02x%02x%02x%02x%s", r, g, b, a, char)
-			clock = clock + div
-		end
-		return table.concat(buf)
-	end
-	
-	local function fade(s, pct, r1, g1, b1, a1, r2, g2, b2, a2)
-		if pct <= 0 then
-			return string.format("\a%02x%02x%02x%02x", math.floor(r2), math.floor(g2), math.floor(b2), math.floor(a2)) .. s
-		end
-		if pct >= 1 then
-			return string.format("\a%02x%02x%02x%02x", math.floor(r1), math.floor(g1), math.floor(b1), math.floor(a1)) .. s
-		end
-		local buf = {}
-		local len = 0
-		for _ in string.gmatch(s, ".[\128-\191]*") do len = len + 1 end
-		local div = len > 1 and 1 / (len - 1) or 1
-		local clock = 0
-		local HALF_PI = math.pi / 2
-		for char in string.gmatch(s, ".[\128-\191]*") do
-			local t = math.sin(HALF_PI * (1 - clock * pct) * (1 - pct * pct))
-			local r = math.floor(math.max(0, math.min(255, r1 + (r2-r1) * t)))
-			local g = math.floor(math.max(0, math.min(255, g1 + (g2-g1) * t)))
-			local b = math.floor(math.max(0, math.min(255, b1 + (b2-b1) * t)))
-			local a = math.floor(math.max(0, math.min(255, a1 + (a2-a1) * t)))
-			buf[#buf+1] = string.format("\a%02x%02x%02x%02x%s", r, g, b, a, char)
-			clock = clock + div
-		end
-		return table.concat(buf)
-	end
-
-	local function get_state()
-		if not my.valid then return "STAND" end
-		local me    = my.entity
-		local flags = entity.get_prop(me, "m_fFlags") or 0
-		local duck  = entity.get_prop(me, "m_flDuckAmount") or 0
-		local vx    = entity.get_prop(me, "m_vecVelocity[0]") or 0
-		local vy    = entity.get_prop(me, "m_vecVelocity[1]") or 0
-		local speed = math.sqrt(vx*vx + vy*vy)
-		local onground = bit.band(flags, 1) ~= 0
-		if not onground then return "AIRBORNE" end
-		if duck > 0.5  then return "CROUCH"   end
-		if speed > 10  then return "MOVING"   end
-		return "STAND"
-	end
-
-	local function update_global_animations()
-		if not my.valid then
-			alpha = anima.lerp(alpha, 0.0, 20)
-			align = anima.lerp(align, 1.0, 20)
-			return
-		end
-		local me     = my.entity
-		local scoped = entity.get_prop(me, "m_bIsScoped") == 1
-		alpha = anima.lerp(alpha, scoped and 0.75 or 1.0, 20)
-		align = anima.lerp(align, scoped and 1.0 or 0.0, 20)
-	end
-
-	local function update_feature_animations()
-		if alpha == 0.0 then return end
-		local state = get_state()
-		local is_dt  = refs.rage.aimbot.double_tap[1].value and refs.rage.aimbot.double_tap[1].hotkey:get()
-		local is_dmg = refs.rage.aimbot.damage_ovr[1].value and refs.rage.aimbot.damage_ovr[1].hotkey:get()
-		local is_os  = refs.aa.other.onshot.value            and refs.aa.other.onshot.hotkey:get()
-		local is_fs  = refs.aa.angles.freestand.value        and refs.aa.angles.freestand.hotkey:get()
-		-- Exact senkotech: shift = (servertick + latency_ticks) > m_nTickBase
-		local shift = false
-		if my.valid then
-			local tickbase     = entity.get_prop(my.entity, "m_nTickBase") or 0
-			local tickinterval = globals.tickinterval()
-			local latency_ticks = math.floor((client.latency() * 0.5 * 0.67) / tickinterval)
-			shift = (globals.tickcount() + latency_ticks) > tickbase
-		end
-		statement_alpha = anima.lerp(statement_alpha, 1.0, 20)
-		statement_value = anima.lerp(statement_value, (state == last_state) and 1 or 0, 15)
-		dmg_alpha = anima.lerp(dmg_alpha, is_dmg and 1 or 0, 20)
-		dmg_value = anima.lerp(dmg_value, 1.0, 20)
-		dt_alpha  = anima.lerp(dt_alpha,  is_dt  and 1 or 0, 20)
-		dt_value  = anima.lerp(dt_value,  shift  and 1 or 0, 20)
-		osaa_alpha = anima.lerp(osaa_alpha, is_os and 1 or 0, 20)
-		osaa_value = anima.lerp(osaa_value, (shift or dt_alpha > 0.0) and 1 or 0, 20)
-		fs_alpha  = anima.lerp(fs_alpha, is_fs and 1 or 0, 20)
-		fs_value  = anima.lerp(fs_value, is_fs and 1 or 0, 20)
-		if statement_value < 0.1 then last_state = state end
-	end
-
-	function traditional.think()
-		update_global_animations()
-		update_feature_animations()
-	end
-
-	function traditional.draw()
-		if alpha == 0.0 then return end
-		local clock = globals.realtime() * 1.25
-		local px = math.floor(sc.x + math.floor(10 * align))
-		local py = math.floor(sc.y + 18)
-		local r0, g0, b0, a0 = 71, 71, 71, 255
-		local r1 = colors.accent.r
-		local g1 = colors.accent.g
-		local b1 = colors.accent.b
-		local a1 = math.max(colors.accent.a, 55)
-		a0 = a1
-
-		do
-			local text_alpha = alpha
-			local tw, th = render.measure_text("db", "zazahook")
-			local ox = math.floor((tw * 0.5) * (1 - align))
-			local text = wave("zazahook", clock, r1, g1, b1, a1 * text_alpha, r0, g0, b0, a0 * text_alpha)
-			render.text(px - ox, py, color.rgb(r1, g1, b1, math.floor(a1 * alpha)), "db", nil, text)
-			py = py + th
-		end
-
-		if statement_alpha > 0.0 then
-			local text_alpha = alpha * statement_alpha
-			local tw, th = render.measure_text("-d", last_state)
-			local ox = math.floor((tw * 0.5) * (1 - align))
-			local text = fade(last_state, statement_value, r1, g1, b1, a1 * text_alpha, r0, g0, b0, a0 * text_alpha)
-			render.text(px - ox - 1, py, color.rgb(r1, g1, b1, math.floor(a1 * text_alpha)), "-d", nil, text)
-			py = py + math.floor(th * statement_alpha)
-		end
-
-		if dmg_alpha > 0.0 then
-			local text_alpha = alpha * dmg_alpha
-			local tw, th = render.measure_text("-d", "DMG")
-			local ox = math.floor((tw * 0.5) * (1 - align))
-			local text = fade("DMG", dmg_value, r1, g1, b1, a1 * text_alpha, r0, g0, b0, a0 * text_alpha)
-			render.text(px - ox - 1, py, color.rgb(r1, g1, b1, math.floor(a1 * text_alpha)), "-d", nil, text)
-			py = py + math.floor(th * dmg_alpha)
-		end
-
-		if dt_alpha > 0.0 then
-			local text_alpha = alpha * dt_alpha
-			local tw, th    = render.measure_text("-d", "DT")
-			local radius    = math.max(3, math.floor(th * 0.33))
-			local thickness = math.max(1, math.floor(radius * 0.25))
-			local gap       = 4
-			local margin    = radius + gap
-			local ox        = math.floor(((tw + margin) * 0.5) * (1 - align))
-			local text_x    = px - ox - 1
-			local text = fade("DT", dt_value, r1, g1, b1, a1 * text_alpha, r0, g0, b0, a0 * text_alpha)
-			render.text(text_x, py, color.rgb(r1, g1, b1, math.floor(a1 * text_alpha)), "-d", nil, text)
-			-- Use renderer.circle_outline DIRECTLY (same as senkotech) not render.circle_outline wrapper
-			-- Multiply coords by DPI since sc.x/sc.y are logical pixels
-			renderer.circle_outline(
-				(text_x + tw + margin) * DPI,
-				(py + math.floor(th * 0.5)) * DPI,
-				r1, g1, b1,
-				math.floor(a1 * text_alpha),
-				radius * DPI,
-				180,
-				dt_value,
-				thickness * DPI
-			)
-			py = py + math.floor(th * dt_alpha)
-		end
-
-		if osaa_alpha > 0.0 then
-			local text_alpha = alpha * osaa_alpha
-			local tw, th = render.measure_text("-d", "OSAA")
-			local ox = math.floor((tw * 0.5) * (1 - align))
-			local text = fade("OSAA", osaa_value, r1, g1, b1, a1 * text_alpha, r0, g0, b0, a0 * text_alpha)
-			render.text(px - ox - 1, py, color.rgb(r1, g1, b1, math.floor(a1 * text_alpha)), "-d", nil, text)
-			py = py + math.floor(th * osaa_alpha)
-		end
-
-		if fs_alpha > 0.0 then
-			local text_alpha = alpha * fs_alpha
-			local tw, th = render.measure_text("-d", "FS")
-			local ox = math.floor((tw * 0.5) * (1 - align))
-			local text = fade("FS", fs_value, r1, g1, b1, a1 * text_alpha, r0, g0, b0, a0 * text_alpha)
-			render.text(px - ox - 1, py, color.rgb(r1, g1, b1, math.floor(a1 * text_alpha)), "-d", nil, text)
-			py = py + math.floor(th * fs_alpha)
-		end
-	end
-
-	function indicate_state.frame()
-		if not my.in_game then return end
-		traditional.think()
-		traditional.draw()
-	end
-end
--- #region : HUD
-
-local hud = {}
-
--- #region - Watermark
-
-hud.watermark = widget.new("watermark", sw - 24, 24, 160, 24, {
-	rulers = {
-		{ true, asc.x, 0, ash },
-		{ false, 0, ash - 32, asw },
-		{ false, 0, 32, asw },
-	},
-	on_release = function (self, ctx)
-		local partition = sw / 3
-		local pos = self.x + self.w * .5
-
-		local align = math.floor(pos / partition)
-		if align == self.align then return end
-		self.align = align
-
-		if self.align == 1 then
-			self:set_position(pos)
-			self.x = self.x - self.w * .5
-		elseif self.align == 2 then
-			self:set_position(self.x + self.w)
-			self.x = self.x - self.w
-		end
-
-		ctx.config.a:set(align)
-	end,
-	on_held = function (self, ctx)
-		self.align = 0
-		ctx.config.a:set(0)
-	end,
+setmetatable(inspect, {
+   __call = function(_, root, options)
+      return inspect.inspect(root, options)
+   end,
 })
 
-hud.watermark.align, hud.watermark.logop, hud.watermark.logo = 2, {0}, 0
-hud.watermark.__drag.config.a = pui.slider("MISC", "Settings", "watermark:align", 0, 2, hud.watermark.align)
-hud.watermark.__drag.config.a:set_visible(false)
-hud.watermark.__drag.config.a:set_callback(function (this)
-	hud.watermark.align = this.value
-end, true)
+return inspect
+end,
+    ["neverlose/easing"] = function(require)
+        local tween = {
+  _VERSION     = 'tween 2.1.1',
+  _DESCRIPTION = 'tweening for lua',
+  _URL         = 'https://github.com/kikito/tween.lua',
+  _LICENSE     = [[
+    MIT LICENSE
 
-hud.watermark.items = {
-	{
-		0, function (self, x, y)
-			local cname = vars.visuals.water.name:get()
-			local t = string.format(zazahook.build == "stable" and "%s" or "%s %s%02x— %s",
-				cname ~= "" and cname or zazahook.user.name, colors.hexs, render.get_alpha() * self[1] * 255, zazahook.build)
-			local tw, th = render.measure_text("", t)
+    Copyright (c) 2014 Enrique García Cota, Yuichi Tateno, Emmanuel Oga
 
-			if self[1] > 0 then
-				render.blur(x, y + 1, tw + 16, 22, 1, 8)
-				render.rectangle(x, y + 1, tw + 16, 22, colors.panel.l1, 4)
-				render.text(x + 8, y + 6, colors.text, nil, nil, t)
-			end
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
 
-			return true, tw + 16
-		end, {}
-	},
-	{
-		0, function (self, x, y)
-			local hours, minutes = client.system_time()
-			local text = string.format("%02d:%02d", hours, minutes)
-			local tw, th = render.measure_text("", text)
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
 
-			if self[1] > 0 then
-				render.blur(x, y + 1, tw + 16, 22, 1, 8)
-				render.rectangle(x, y + 1, tw + 16, 22, colors.panel.l1, 4)
-				render.text(x + 8, y + 6, colors.text, nil, nil, text)
-			end
-
-			return true, tw + 16
-		end, {}
-	},
-	{
-		0, function (self, x, y)
-			local ping = client.latency() * 1000
-			local text = string.format("%dms", ping)
-			local tw, th = render.measure_text("", text)
-
-			if self[1] > 0 then
-				render.blur(x, y + 1, tw + 16, 22, 1, 8)
-				render.rectangle(x, y + 1, tw + 16, 22, colors.panel.l1, 4)
-				render.text(x + 8, y + 6, colors.text, nil, nil, text)
-			end
-
-			return ping > 5, tw + 16
-		end, {}
-	},
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ]]
 }
 
-hud.watermark.enumerate = function (self)
-	local total = self.logo * ((_AZAZI and 86 or 64) + 4)
-	for i, v in ipairs(self.items) do
-		render.push_alpha(v[1])
-		local state, length = v[2](v, self.x + total, self.y)
-		render.pop_alpha()
+-- easing
 
-		v[1] = anima.condition(v[3], state)
+-- Adapted from https://github.com/EmmanuelOga/easing. See LICENSE.txt for credits.
+-- For all easing functions:
+-- t = time == how much time has to pass for the tweening to complete
+-- b = begin == starting property value
+-- c = change == ending - beginning
+-- d = duration == running time. How much time has passed *right now*
 
-		total = total + (length + 2) * v[1]
-	end
-	self.w = anima.lerp(self.w, total, nil, .5)
+local pow, sin, cos, pi, sqrt, abs, asin = math.pow, math.sin, math.cos, math.pi, math.sqrt, math.abs, math.asin
+
+-- linear
+local function linear(t, b, c, d) return c * t / d + b end
+
+-- quad
+local function inQuad(t, b, c, d) return c * pow(t / d, 2) + b end
+local function outQuad(t, b, c, d)
+  t = t / d
+  return -c * t * (t - 2) + b
+end
+local function inOutQuad(t, b, c, d)
+  t = t / d * 2
+  if t < 1 then return c / 2 * pow(t, 2) + b end
+  return -c / 2 * ((t - 1) * (t - 3) - 1) + b
+end
+local function outInQuad(t, b, c, d)
+  if t < d / 2 then return outQuad(t * 2, b, c / 2, d) end
+  return inQuad((t * 2) - d, b + c / 2, c / 2, d)
 end
 
-hud.watermark.update = function (self)
-	local cx, cy = self:get_position()
-
-	if self.align == 2 then
-		self.x = cx - self.w * self.alpha
-	elseif self.align == 1 then
-		self.x = cx - self.w * .5
-	end
-
-	return anima.condition(self.progress, vars.visuals.water.on.value, 3)
+-- cubic
+local function inCubic (t, b, c, d) return c * pow(t / d, 3) + b end
+local function outCubic(t, b, c, d) return c * (pow(t / d - 1, 3) + 1) + b end
+local function inOutCubic(t, b, c, d)
+  t = t / d * 2
+  if t < 1 then return c / 2 * t * t * t + b end
+  t = t - 2
+  return c / 2 * (t * t * t + 2) + b
+end
+local function outInCubic(t, b, c, d)
+  if t < d / 2 then return outCubic(t * 2, b, c / 2, d) end
+  return inCubic((t * 2) - d, b + c / 2, c / 2, d)
 end
 
-hud.watermark.paint = function (self, x, y, w, h)
-	self.logo = anima.condition(self.logop, not vars.visuals.water.hide.value)
-
-	if self.logo > 0 then
-		local wl = _AZAZI and 86 or 64
-		render.push_alpha(self.logo)
-		render.blur(x, y, wl, h, 1, 8)
-		render.rounded_side_v(x, y, wl, h, colors.panel.g1, 4)
-		render.rectangle(x + wl, y, 2, h, colors.panel.g1)
-		render.logo(x + 8, y + 5)
-		render.edge_v(x + wl, y, 24)
-		render.pop_alpha()
-	end
-
-	self:enumerate()
+-- quart
+local function inQuart(t, b, c, d) return c * pow(t / d, 4) + b end
+local function outQuart(t, b, c, d) return -c * (pow(t / d - 1, 4) - 1) + b end
+local function inOutQuart(t, b, c, d)
+  t = t / d * 2
+  if t < 1 then return c / 2 * pow(t, 4) + b end
+  return -c / 2 * (pow(t - 2, 4) - 2) + b
+end
+local function outInQuart(t, b, c, d)
+  if t < d / 2 then return outQuart(t * 2, b, c / 2, d) end
+  return inQuart((t * 2) - d, b + c / 2, c / 2, d)
 end
 
--- #endregion
-
--- #region - Damage indicator
-
-hud.damage = widget.new("damage", sc.x + 4, sc.y + 4, 6, 4, {
-	border = { asc.x - 40, asc.y - 40, asc.x + 40, asc.y + 40, true }
-})
-hud.damage.dmg = refs.rage.aimbot.damage.value
-hud.damage.ovr_alpha = 0
-
-hud.damage.update = function (self)
-	if not vars.visuals.damage.value then
-		return anima.condition(self.progress, false, -4)
-	end
-
-	local overridden = (refs.rage.aimbot.damage_ovr[1].value and refs.rage.aimbot.damage_ovr[1]:get_hotkey())
-	local minimum_damage = overridden and refs.rage.aimbot.damage_ovr[2].value or refs.rage.aimbot.damage.value
-
-	self.dmg = anima.lerp(self.dmg, minimum_damage, 16)
-	self.ovr_alpha = anima.condition("hud::damage.ovr_alpha", overridden, -8)
-
-	local weapon_t = my.weapon and weapondata(my.weapon)
-	local weapon_valid = weapon_t and weapon_t.weapon_type_int ~= 9 and weapon_t.weapon_type_int ~= 0
-
-	return anima.condition(self.progress, my.valid and (weapon_valid or pui.menu_open) and not my.in_score and globals.mapname(), -8)
+-- quint
+local function inQuint(t, b, c, d) return c * pow(t / d, 5) + b end
+local function outQuint(t, b, c, d) return c * (pow(t / d - 1, 5) + 1) + b end
+local function inOutQuint(t, b, c, d)
+  t = t / d * 2
+  if t < 1 then return c / 2 * pow(t, 5) + b end
+  return c / 2 * (pow(t - 2, 5) + 2) + b
+end
+local function outInQuint(t, b, c, d)
+  if t < d / 2 then return outQuint(t * 2, b, c / 2, d) end
+  return inQuint((t * 2) - d, b + c / 2, c / 2, d)
 end
 
-hud.damage.paint = function (self, x, y, w, h)
-	local dmg = math.round(self.dmg)
-	dmg = dmg == 0 and "A" or dmg > 100 and ("+" .. (dmg - 100)) or tostring(dmg)
-
-	self.w, self.h = render.measure_text("-", dmg)
-	self.h, self.w = self.h - 3, self.w + 1
-
-	render.text(x - 1, y - 2, colors.text:alphen( math.lerp(96, 255, self.ovr_alpha) ), "-", nil, dmg)
+-- sine
+local function inSine(t, b, c, d) return -c * cos(t / d * (pi / 2)) + c + b end
+local function outSine(t, b, c, d) return c * sin(t / d * (pi / 2)) + b end
+local function inOutSine(t, b, c, d) return -c / 2 * (cos(pi * t / d) - 1) + b end
+local function outInSine(t, b, c, d)
+  if t < d / 2 then return outSine(t * 2, b, c / 2, d) end
+  return inSine((t * 2) -d, b + c / 2, c / 2, d)
 end
 
--- #endregion
-
--- #region - Anti-aim arrows
-
-hud.arrows = widget.new("arrows", sc.x - 32, sc.y - 5, 10, 10, {
-	border = { asc.x - 120, asc.y + 1, asc.x - 10, asc.y + 1 },
-	rulers = {
-		{ false, asc.x - 120, asc.y, 110 }
-	}
-})
-
-hud.arrows.update = function (self)
-	return anima.condition(self.progress, vars.visuals.arrows.value and my.in_game and my.valid)
+-- expo
+local function inExpo(t, b, c, d)
+  if t == 0 then return b end
+  return c * pow(2, 10 * (t / d - 1)) + b - c * 0.001
+end
+local function outExpo(t, b, c, d)
+  if t == d then return b + c end
+  return c * 1.001 * (-pow(2, -10 * t / d) + 1) + b
+end
+local function inOutExpo(t, b, c, d)
+  if t == 0 then return b end
+  if t == d then return b + c end
+  t = t / d * 2
+  if t < 1 then return c / 2 * pow(2, 10 * (t - 1)) + b - c * 0.0005 end
+  return c / 2 * 1.0005 * (-pow(2, -10 * (t - 1)) + 2) + b
+end
+local function outInExpo(t, b, c, d)
+  if t < d / 2 then return outExpo(t * 2, b, c / 2, d) end
+  return inExpo((t * 2) - d, b + c / 2, c / 2, d)
 end
 
-hud.arrows.paint = function (self, x, y, w, h)
-	local neutral = pui.menu_open and colors.white:alphen(128) or colors.null
-
-	local left = anima.condition("hud::arrows.left", antiaim.data.manual == -90, 6)
-	render.texture(textures.manual, x, y, 10, 10, neutral:lerp(colors.accent, left), "f")
-
-	local right = anima.condition("hud::arrows.right", antiaim.data.manual == 90, 6)
-	render.texture(textures.manual, sw - x + 1, y, -10, 10, neutral:lerp(colors.accent, right), "f")
+-- circ
+local function inCirc(t, b, c, d) return(-c * (sqrt(1 - pow(t / d, 2)) - 1) + b) end
+local function outCirc(t, b, c, d)  return(c * sqrt(1 - pow(t / d - 1, 2)) + b) end
+local function inOutCirc(t, b, c, d)
+  t = t / d * 2
+  if t < 1 then return -c / 2 * (sqrt(1 - t * t) - 1) + b end
+  t = t - 2
+  return c / 2 * (sqrt(1 - t * t) + 1) + b
+end
+local function outInCirc(t, b, c, d)
+  if t < d / 2 then return outCirc(t * 2, b, c / 2, d) end
+  return inCirc((t * 2) - d, b + c / 2, c / 2, d)
 end
 
--- #endregion
-
--- #region - Slowdown
-
-hud.slowdown = widget.new("slowdown", sc.x - 120 * 0.5, sc.y - 160, 120, 32, {
-	rulers = {
-		{ true, asc.x, 0, ash },
-	}
-})
-hud.slowdown.speed = 0.5
-
-hud.slowdown.update = function (self)
-	if not vars.visuals.slowdown.value or not my.valid then
-		return anima.condition(self.progress, false, -4)
-	end
-
-	self.speed = entity.get_prop(my.entity, "m_flVelocityModifier")
-
-	return anima.condition(self.progress, pui.menu_open or (my.valid and self.speed < 1), -8)
+-- elastic
+local function calculatePAS(p,a,c,d)
+  p, a = p or d * 0.3, a or 0
+  if a < abs(c) then return p, c, p / 4 end -- p, a, s
+  return p, a, p / (2 * pi) * asin(c/a) -- p,a,s
+end
+local function inElastic(t, b, c, d, a, p)
+  local s
+  if t == 0 then return b end
+  t = t / d
+  if t == 1  then return b + c end
+  p,a,s = calculatePAS(p,a,c,d)
+  t = t - 1
+  return -(a * pow(2, 10 * t) * sin((t * d - s) * (2 * pi) / p)) + b
+end
+local function outElastic(t, b, c, d, a, p)
+  local s
+  if t == 0 then return b end
+  t = t / d
+  if t == 1 then return b + c end
+  p,a,s = calculatePAS(p,a,c,d)
+  return a * pow(2, -10 * t) * sin((t * d - s) * (2 * pi) / p) + c + b
+end
+local function inOutElastic(t, b, c, d, a, p)
+  local s
+  if t == 0 then return b end
+  t = t / d * 2
+  if t == 2 then return b + c end
+  p,a,s = calculatePAS(p,a,c,d)
+  t = t - 1
+  if t < 0 then return -0.5 * (a * pow(2, 10 * t) * sin((t * d - s) * (2 * pi) / p)) + b end
+  return a * pow(2, -10 * t) * sin((t * d - s) * (2 * pi) / p ) * 0.5 + c + b
+end
+local function outInElastic(t, b, c, d, a, p)
+  if t < d / 2 then return outElastic(t * 2, b, c / 2, d, a, p) end
+  return inElastic((t * 2) - d, b + c / 2, c / 2, d, a, p)
 end
 
-hud.slowdown.paint = function (self, x, y, w, h)
-	local warnclr = color.rgb(240, 60, 60):lerp(colors.text, self.speed)
-
-	render.blur(x + 36, y + 1, w - 36, h - 2)
-	render.rectangle(x + 36, y + 1, w - 36, h - 2, colors.panel.l1, 4)
-
-	render.blur(x, y, 32, h, 1, 8)
-	render.rounded_side_v(x, y, 32, h, colors.panel.g1, 4)
-	render.rectangle(x + 32, y, 2, h, colors.panel.g1)
-	render.texture(textures.warning, x + 8, y + 8, 16, 16, warnclr)
-
-	render.edge_v(x + 32, y, h)
-
-	render.text(x + 44, y + 6, colors.text:alphen((1 - self.speed) * 196 + 64), nil, nil, "slowed")
-	render.text(x + w - 8, y + 6, warnclr, "r", nil, string.format("%d%%", self.speed * 100))
-
-	render.rectangle(x + 44, y + 21, 67, 2, colors.white:alphen(32))
-	render.rectangle(x + 44, y + 21, self.speed * 67, 2, colors.accent:alphen(self.speed * 196 + 58))
+-- back
+local function inBack(t, b, c, d, s)
+  s = s or 1.70158
+  t = t / d
+  return c * t * t * ((s + 1) * t - s) + b
+end
+local function outBack(t, b, c, d, s)
+  s = s or 1.70158
+  t = t / d - 1
+  return c * (t * t * ((s + 1) * t + s) + 1) + b
+end
+local function inOutBack(t, b, c, d, s)
+  s = (s or 1.70158) * 1.525
+  t = t / d * 2
+  if t < 1 then return c / 2 * (t * t * ((s + 1) * t - s)) + b end
+  t = t - 2
+  return c / 2 * (t * t * ((s + 1) * t + s) + 2) + b
+end
+local function outInBack(t, b, c, d, s)
+  if t < d / 2 then return outBack(t * 2, b, c / 2, d, s) end
+  return inBack((t * 2) - d, b + c / 2, c / 2, d, s)
 end
 
--- #endregion
+-- bounce
+local function outBounce(t, b, c, d)
+  t = t / d
+  if t < 1 / 2.75 then return c * (7.5625 * t * t) + b end
+  if t < 2 / 2.75 then
+    t = t - (1.5 / 2.75)
+    return c * (7.5625 * t * t + 0.75) + b
+  elseif t < 2.5 / 2.75 then
+    t = t - (2.25 / 2.75)
+    return c * (7.5625 * t * t + 0.9375) + b
+  end
+  t = t - (2.625 / 2.75)
+  return c * (7.5625 * t * t + 0.984375) + b
+end
+local function inBounce(t, b, c, d) return c - outBounce(d - t, 0, c, d) + b end
+local function inOutBounce(t, b, c, d)
+  if t < d / 2 then return inBounce(t * 2, 0, c, d) * 0.5 + b end
+  return outBounce(t * 2 - d, 0, c, d) * 0.5 + c * .5 + b
+end
+local function outInBounce(t, b, c, d)
+  if t < d / 2 then return outBounce(t * 2, b, c / 2, d) end
+  return inBounce((t * 2) - d, b + c / 2, c / 2, d)
+end
 
--- #region - Logs
-
-hud.logs = widget.new("logs", sc.x - 150, sc.y + 160, 300, 32, {
-	rulers = {
-		{ true, asc.x, 0, ash },
-	}
-})
-
-hud.logs.preview, hud.logs.dummy = false, {
-	{
-		event = "hit",
-		text = "\aA3D350\x01•\aE6E6E6\x02 Killed\aE6E6E6\x02 \aE6E6E6\x02\aE6E6E6\x01maj0r\aE6E6E6\x02 in \aE6E6E6\x02\aE6E6E6\x01head\aE6E6E6\x02\aE6E6E6\x02",
-		time = math.huge,
-		progress = {0},
-	},
-	{
-		event = "miss",
-		text = "\aA67CCF\x01•\aE6E6E6\x02 Missed\aE6E6E6\x02 \aE6E6E6\x01gz\aE6E6E6\x02's\aE6E6E6\x01 head\aE6E6E6\x02 due to \aE6E6E6\x01unpredicted occasion",
-		time = math.huge,
-		progress = {0},
-	},
-	{
-		event = "harm",
-		text = "\ad35050\x01•\aE6E6E6\x02 Harmed by\aE6E6E6\x02 \aE6E6E6\x01gz\aE6E6E6\x02 in \aE6E6E6\x01head\aE6E6E6\x02 for \aE6E6E6\x0172",
-		time = math.huge,
-		progress = {0},
-	},
+tween.easing = {
+  linear    = linear,
+  inQuad    = inQuad,    outQuad    = outQuad,    inOutQuad    = inOutQuad,    outInQuad    = outInQuad,
+  inCubic   = inCubic,   outCubic   = outCubic,   inOutCubic   = inOutCubic,   outInCubic   = outInCubic,
+  inQuart   = inQuart,   outQuart   = outQuart,   inOutQuart   = inOutQuart,   outInQuart   = outInQuart,
+  inQuint   = inQuint,   outQuint   = outQuint,   inOutQuint   = inOutQuint,   outInQuint   = outInQuint,
+  inSine    = inSine,    outSine    = outSine,    inOutSine    = inOutSine,    outInSine    = outInSine,
+  inExpo    = inExpo,    outExpo    = outExpo,    inOutExpo    = inOutExpo,    outInExpo    = outInExpo,
+  inCirc    = inCirc,    outCirc    = outCirc,    inOutCirc    = inOutCirc,    outInCirc    = outInCirc,
+  inElastic = inElastic, outElastic = outElastic, inOutElastic = inOutElastic, outInElastic = outInElastic,
+  inBack    = inBack,    outBack    = outBack,    inOutBack    = inOutBack,    outInBack    = outInBack,
+  inBounce  = inBounce,  outBounce  = outBounce,  inOutBounce  = inOutBounce,  outInBounce  = outInBounce
 }
 
-hud.logs.update = function (self)
-	return anima.condition(self.progress, vars.misc.logs.on.value and vars.misc.logs.output:get("Screen") and my.in_game)
+
+
+-- private stuff
+
+local function copyTables(destination, keysTable, valuesTable)
+  valuesTable = valuesTable or keysTable
+  local mt = getmetatable(keysTable)
+  if mt and getmetatable(destination) == nil then
+    setmetatable(destination, mt)
+  end
+  for k,v in pairs(keysTable) do
+    if type(v) == 'table' then
+      destination[k] = copyTables({}, v, valuesTable[k])
+    else
+      destination[k] = valuesTable[k]
+    end
+  end
+  return destination
 end
 
-hud.logs.part = function (self, log, offset, progress, condition, i)
-	local text = string.gsub(log.text, "[\x01\x02]", {
-		["\x01"] = string.format("%02x", progress * render.get_alpha() * 255),
-		["\x02"] = string.format("%02x", progress * render.get_alpha() * 128),
-	})
-
-	local tw, th = render.measure_text("", text)
-
-	local x, y = math.lerp(self.x + self.w * 0.5 - tw * 0.5 - 18, self.x, self.align), offset
-	if not condition then
-		x = x + (1 - progress) * (tw * 0.5) * (i % 2 == 0 and -1 or 1)
-	end
-
-	render.blur(x, y, 24, 24)
-	render.rounded_side_v(x, y, 24, 24, colors.panel.g1, 4)
-	render.rectangle(x + 24, y, 2, 24, colors.panel.g1)
-	render.edge_v(x + 24, y, 24)
-
-	render.blur(x + 28, y + 1, tw + 14, 22)
-	render.rectangle(x + 28, y + 1, tw + 14, 22, colors.panel.l1, 4)
-
-	render.texture(textures.mini_bfly, x + 8, y + 8, 9, 9, colors.accent)
-	render.text(x + 35, y + 5, colors.text:alphen(128), nil, nil, text)
+local function checkSubjectAndTargetRecursively(subject, target, path)
+  path = path or {}
+  local targetType, newPath
+  for k,targetValue in pairs(target) do
+    targetType, newPath = type(targetValue), copyTables({}, path)
+    table.insert(newPath, tostring(k))
+    if targetType == 'number' then
+      assert(type(subject[k]) == 'number', "Parameter '" .. table.concat(newPath,'/') .. "' is missing from subject or isn't a number")
+    elseif targetType == 'table' then
+      checkSubjectAndTargetRecursively(subject[k], targetValue, newPath)
+    else
+      assert(targetType == 'number', "Parameter '" .. table.concat(newPath,'/') .. "' must be a number or table of numbers")
+    end
+  end
 end
 
-hud.logs.paint = function (self, x, y, w, h)
-	if not vars.misc.logs.on.value then return end
-	local continue
-	self.align = anima.condition("hud::logs.align", self.x < sw / 3)
-	self.preview = anima.condition("hud::logs.preview", pui.menu_open and vars.misc.logs.output:get("Screen") and #logger.list == 0)
-	y = y + 4
+local function checkNewParams(duration, subject, target, easing)
+  assert(type(duration) == 'number' and duration > 0, "duration must be a positive number. Was " .. tostring(duration))
+  local tsubject = type(subject)
+  assert(tsubject == 'table' or tsubject == 'userdata', "subject must be a table or userdata. Was " .. tostring(subject))
+  assert(type(target)== 'table', "target must be a table. Was " .. tostring(target))
+  assert(type(easing)=='function', "easing must be a function. Was " .. tostring(easing))
+  checkSubjectAndTargetRecursively(subject, target)
+end
 
-	local ctx = self.preview > 0 and self.dummy or logger.list
-	for i = 1, #ctx do
-		local v = ctx[i]
-		local ascend = (globals.realtime() - v.time) < 4 and i < 10
+local function getEasingFunction(easing)
+  easing = easing or "linear"
+  if type(easing) == 'string' then
+    local name = easing
+    easing = tween.easing[name]
+    if type(easing) ~= 'function' then
+      error("The easing function name '" .. name .. "' is invalid")
+    end
+  end
+  return easing
+end
 
-		local progress = anima.condition(v.progress, ternary(self.preview > 0, self.preview == 1, ascend))
-		if progress == 0 then continue = i end
+local function performEasingOnSubject(subject, target, initial, clock, duration, easing)
+  local t,b,c,d
+  for k,v in pairs(target) do
+    if type(v) == 'table' then
+      performEasingOnSubject(subject[k], v, initial[k], clock, duration, easing)
+    else
+      t,b,c,d = clock, initial[k], v - initial[k], duration
+      subject[k] = easing(t,b,c,d)
+    end
+  end
+end
 
-		render.push_alpha(progress)
-		self:part(v, y, progress, ascend, i)
-		render.pop_alpha()
+-- Tween methods
 
-		y = y + 28 * (ascend and progress or 1)
-	end
+local Tween = {}
+local Tween_mt = {__index = Tween}
 
-	if continue then
-		table.remove(logger.list, continue)
-	end
+function Tween:set(clock)
+  assert(type(clock) == 'number', "clock must be a positive number or 0")
+
+  self.initial = self.initial or copyTables({}, self.target, self.subject)
+  self.clock = clock
+
+  if self.clock <= 0 then
+
+    self.clock = 0
+    copyTables(self.subject, self.initial)
+
+  elseif self.clock >= self.duration then -- the tween has expired
+
+    self.clock = self.duration
+    copyTables(self.subject, self.target)
+
+  else
+
+    performEasingOnSubject(self.subject, self.target, self.initial, self.clock, self.duration, self.easing)
+
+  end
+
+  return self.clock >= self.duration
+end
+
+function Tween:reset()
+  return self:set(0)
+end
+
+function Tween:update(dt)
+  assert(type(dt) == 'number', "dt must be a number")
+  return self:set(self.clock + dt)
 end
 
 
--- #endregion
+-- Public interface
 
-do
-	local fn = a(function ()
-		if vars.visuals.water.on.value or hud.watermark.alpha > 0 then
-			hud.watermark()
-		end
-		if vars.visuals.damage.value or hud.damage.alpha > 0 then
-			hud.damage()
-		end
-		if vars.visuals.arrows.value or hud.arrows.alpha > 0 then
-			hud.arrows()
-		end
-		if vars.visuals.slowdown.value or hud.slowdown.alpha > 0 then
-			hud.slowdown()
-		end
-		if (vars.misc.logs.on.value and vars.misc.logs.output:get("Screen")) or hud.logs.alpha > 0 then
-			hud.logs()
-		end
-		if vars.visuals.crosshair.on.value then
-			indicate_state.frame()
-		end
-	end)
-
-	callbacks.paint_ui:set(fn)
+function tween.new(duration, subject, target, easing)
+  easing = getEasingFunction(easing)
+  checkNewParams(duration, subject, target, easing)
+  return setmetatable({
+    duration  = duration,
+    subject   = subject,
+    target    = target,
+    easing    = easing,
+    clock     = 0
+  }, Tween_mt)
 end
 
--- #region - Butterfly
+return tween
+end;
+}
 
-if not _DEBUG then
-	local welcome = {
-		state = true,
-		completing = false,
-		progress = { {0}, {0}, {0} }
-	}
+local loaded = {}
+local loading = {}
+local custom_require
 
-	welcome.render = function ()
-		local P1 = anima.condition(welcome.progress[1], welcome.state, 2)
-		local P2 = anima.condition(welcome.progress[2], P1 == 1, 2)
-
-		render.rectangle(0, 0, sw, sh, colors.back:alphen(P1 * 180))
-
-		local size = 400
-		render.texture(textures.butterfly, sc.x - size * 0.5, sc.y - size * 0.5, size, size, colors.accent:alphen(P2 * 255))
-
-		if not welcome.completing then
-			client.delay_call(3, function () if welcome then welcome.state = false end end)
-			welcome.completing = true
-		end
-	end
-
-	client.delay_call(1, function () callbacks.paint_ui:set(welcome.render) end)
-	client.delay_call(6, function ()
-		callbacks.paint_ui:unset(welcome.render)
-		welcome = nil
-	end)
+local function make_env(modname)
+    return setmetatable({ require = custom_require, _MODULE = modname }, { __index = _G })
 end
 
--- #endregion
+local function load_embedded_module(lib, def)
+    if loaded[lib] ~= nil then return loaded[lib] end
+    if loading[lib] then error("circular require detected for module: " .. lib, 2) end
+    loading[lib] = true
 
--- #endregion
---
+    local ret
+    local t = type(def)
+    if t == "function" then
+        local ok, result = pcall(def, custom_require, lib)
+        loading[lib] = nil
+        if not ok then error(("failed to load module '%s': %s"):format(lib, tostring(result)), 2) end
+        ret = result
+    elseif t == "table" then
+        loading[lib] = nil
+        ret = def
+    elseif t == "string" then
+        if not compiler then
+            loading[lib] = nil
+            error(("module '%s' is stored as source string, but load/loadstring is unavailable"):format(lib), 2)
+        end
+        local chunk, err = compiler(def, "@" .. lib)
+        if not chunk then
+            loading[lib] = nil
+            error(("failed to compile module '%s': %s"):format(lib, tostring(err)), 2)
+        end
+        if setfenv then setfenv(chunk, make_env(lib)) end
+        local ok, result = pcall(chunk, lib)
+        loading[lib] = nil
+        if not ok then error(("failed to load module '%s': %s"):format(lib, tostring(result)), 2) end
+        ret = result
+    else
+        loading[lib] = nil
+        error(("unsupported embedded module type for '%s': %s"):format(lib, t), 2)
+    end
+    if ret == nil then ret = true end
+    loaded[lib] = ret
+    return ret
+end
+
+custom_require = function(lib)
+    if lib == "ffi" then
+        return ffi
+    end
+    local def = modules[lib]
+    if def ~= nil then
+        return load_embedded_module(lib, def)
+    end
+    return error("require: " .. lib)
+end
+
+require = custom_require
+
+--original code below
+
+local pui = require("neverlose/pui");
+local base64 = require("neverlose/base64");
+local clipboard = require("neverlose/clipboard");
+local inspect = require("neverlose/inspect");
+local smoothy = require("neverlose/smoothy");
+local easing = require("neverlose/easing")
+
+local last_update = 1747063995;
+--print(common.get_unixtime())
+local reference do
+    reference = { }
+
+    reference.rage = {
+        main = {
+            dormant_aimbot = ui.find("Aimbot", "Ragebot", "Main", "Enabled", "Dormant Aimbot"),
+
+            hide_shots = ui.find("Aimbot", "Ragebot", "Main", "Hide Shots"),
+            hide_shots_options = ui.find("Aimbot", "Ragebot", "Main", "Hide Shots", "Options"),
+
+            double_tap = ui.find("Aimbot", "Ragebot", "Main", "Double Tap"),
+            double_tap_lag_options = ui.find("Aimbot", "Ragebot", "Main", "Double Tap", "Lag Options"),
+
+            peek_assist = {
+                ui.find("Aimbot", "Ragebot", "Main", "Peek Assist"),
+                ui.find("Aimbot", "Ragebot", "Main", "Peek Assist", "Style"),
+                ui.find("Aimbot", "Ragebot", "Main", "Peek Assist", "Auto Stop"),
+                ui.find("Aimbot", "Ragebot", "Main", "Peek Assist", "Retreat Mode")
+            }
+        },
+
+        selection = {
+            hit_chance = ui.find("Aimbot", "Ragebot", "Selection", "Hit Chance"),
+            minimum_damage = ui.find("Aimbot", "Ragebot", "Selection", "Min. Damage"),
+            safe_points = ui.find("Aimbot", "Ragebot", "Safety", "Safe Points"),
+            body_aim = ui.find("Aimbot", "Ragebot", "Safety", "Body Aim")
+        }
+    }
+
+    reference.antiaim = {
+        angles = {
+            enabled = ui.find("Aimbot", "Anti Aim", "Angles", "Enabled"),
+            pitch = ui.find("Aimbot", "Anti Aim", "Angles", "Pitch"),
+
+            yaw = ui.find("Aimbot", "Anti Aim", "Angles", "Yaw"),
+            yaw_base = ui.find("Aimbot", "Anti Aim", "Angles", "Yaw", "Base"),
+            yaw_add = ui.find("Aimbot", "Anti Aim", "Angles", "Yaw", "Offset"),
+            avoid_backstab = ui.find("Aimbot", "Anti Aim", "Angles", "Yaw", "Avoid Backstab"),
+            hidden = ui.find("Aimbot", "Anti Aim", "Angles", "Yaw", "Hidden"),
+
+            yaw_modifier = ui.find("Aimbot", "Anti Aim", "Angles", "Yaw Modifier"),
+            modifier_offset = ui.find("Aimbot", "Anti Aim", "Angles", "Yaw Modifier", "Offset"),
+
+            body_yaw = ui.find("Aimbot", "Anti Aim", "Angles", "Body Yaw"),
+            inverter = ui.find("Aimbot", "Anti Aim", "Angles", "Body Yaw", "Inverter"),
+            left_limit = ui.find("Aimbot", "Anti Aim", "Angles", "Body Yaw", "Left Limit"),
+            right_limit = ui.find("Aimbot", "Anti Aim", "Angles", "Body Yaw", "Right Limit"),
+            options = ui.find("Aimbot", "Anti Aim", "Angles", "Body Yaw", "Options"),
+            freestanding_body_yaw = ui.find("Aimbot", "Anti Aim", "Angles", "Body Yaw", "Freestanding"),
+
+            freestanding = ui.find("Aimbot", "Anti Aim", "Angles", "Freestanding"),
+            freestand_peek = ui.find("Aimbot", "Anti Aim", "Angles", "Body Yaw", "Freestanding"),
+            disable_yaw_modifiers = ui.find("Aimbot", "Anti Aim", "Angles", "Freestanding", "Disable Yaw Modifiers"),
+            body_freestanding = ui.find("Aimbot", "Anti Aim", "Angles", "Freestanding", "Body Freestanding"),
+
+            extended_angles = ui.find("Aimbot", "Anti Aim", "Angles", "Extended Angles"),
+            extended_pitch = ui.find("Aimbot", "Anti Aim", "Angles", "Extended Angles", "Extended Pitch"),
+            extended_roll = ui.find("Aimbot", "Anti Aim", "Angles", "Extended Angles", "Extended Roll")
+        },
+
+        fake_lag = {
+            enabled = ui.find("Aimbot", "Anti Aim", "Fake Lag", "Enabled"),
+            limit = ui.find("Aimbot", "Anti Aim", "Fake Lag", "Limit")
+        },
+
+        misc = {
+            fake_duck = ui.find("Aimbot", "Anti Aim", "Misc", "Fake Duck"),
+            slow_walk = ui.find("Aimbot", "Anti Aim", "Misc", "Slow Walk"),
+            leg_movement = ui.find("Aimbot", "Anti Aim", "Misc", "Leg Movement")
+        }
+    }
+
+    reference.ping_spike = ui.find("Miscellaneous", "Main", "Other", "Fake Latency")
+end
+
+local e_num = {
+    states = {
+        "Standing", "Running", "Slowing", "Crouching", "Sneaking", "Air", "Air Crouching", "Legit AA", "Freestanding"
+    },
+
+    teams = {
+        "T", "CT"
+    }
+}
+
+local log = {}; do
+    function log:message(msg)
+        print_raw(
+            string.format('[\a%sgazolina\aDEFAULT] %s', ui.get_style()["Link Active"]:to_hex(), msg)
+        )
+
+    end
+
+    function log:error(msg)
+        print_raw(
+            string.format('[\a%sgazolina\aDEFAULT] \aFF3E3EFF%s', ui.get_style()["Link Active"]:to_hex(), msg)
+        )
+    end
+
+end
+
+local screen = render.screen_size();
+
+local windows = {}; do
+    function windows:new(name, initial_pos)
+        local initial_pos = initial_pos or vector();
+        local group = ui.create("DRAGGING$$$)$)$)$");
+        local mt = {};
+        local mt_data = {
+            dragging = false,
+            mouse_pos = vector(0, 0),
+            mouse_pos_diff = vector(0, 0),
+            intersected = nil,
+
+            size = vector(0, 0),
+            position = vector(0, 0),
+
+            reference = (function()
+                local dragging_vector = {
+                    group:slider(('%s:dragging_x'):format(name), -16384, 16384, initial_pos.x),
+                    group:slider(('%s:dragging_y'):format(name), -16384, 16384, initial_pos.y)
+                }
+
+                dragging_vector[1]:visibility(false)
+                dragging_vector[2]:visibility(false)
+
+                return dragging_vector
+            end)()
+        }
+
+        function mt.intersects(self, mouse, pos, size)
+            return
+                mouse.x >= pos.x and mouse.x <= pos.x+size.x and
+                mouse.y >= pos.y and mouse.y <= pos.y+size.y
+        end
+
+        function mt.set_position(self, vec)
+            self.reference[1]:set(vec.x);
+            self.reference[2]:set(vec.y);
+        end
+
+        function mt.is_dragging(self)
+            return self.dragging
+        end
+
+        function mt.update(self, size)
+            local new_mouse_pos = ui.get_mouse_position()
+            local menu_pos = ui.get_position()
+            local menu_size = ui.get_size()
+
+            local holding_key, intersection_check =
+                ui.get_alpha() > 0 and common.is_button_down(1),
+                self:intersects(new_mouse_pos, self.position, size) and not
+                self:intersects(new_mouse_pos, menu_pos, menu_size)
+
+            self.mouse_pos_diff = -(self.mouse_pos-new_mouse_pos)
+
+            if holding_key and self.intersected == nil then
+                self.intersected = intersection_check
+            end
+
+            if holding_key and self.intersected then
+                self.dragging = true
+            elseif not holding_key then
+                self.dragging = false
+                self.intersected = nil
+            end
+
+            if self.dragging then
+                local limit, new_pos = size * .5, vector(
+                    self.reference[1]:get() + self.mouse_pos_diff.x,
+                    self.reference[2]:get() + self.mouse_pos_diff.y
+                )
+
+                self.reference[1]:set(math.max(-limit.x, math.min(screen.x-limit.x, new_pos.x)))
+                self.reference[2]:set(math.max(-limit.y, math.min(screen.y-limit.y, new_pos.y)))
+            end
+
+            local pos = vector(
+                self.reference[1]:get(),
+                self.reference[2]:get()
+            )
+
+            self.mouse_pos = new_mouse_pos
+            self.size = size;
+            self.position = pos;
+        end
+
+        return setmetatable(mt, { __index = mt_data })
+    end
+end
+
+local cvars = {}; do
+    function cvars:get_original(convar)
+        return tonumber(convar:string())
+    end
+end
+
+local text_effects = {}; do
+    function text_effects:animate(speed, from, to, text)
+        if not text or text:gsub(" ", "") == "" then 
+            return text
+        end
+    
+        local output = ""
+        local time = globals.realtime * speed
+        local i = 1
+        local len = #text
+    
+        while i <= len do
+            local byte1 = text:byte(i)
+            local is_cyrillic = (byte1 == 0xD0 or byte1 == 0xD1) and text:byte(i + 1)
+    
+            if is_cyrillic then
+                local char = text:sub(i, i + 1)
+                local index = (math.sin(time + i / 3) + 1) / 2
+                local accent = from:lerp(to, math.clamp(index, 0, 1)):to_hex()
+                output = output .. "\a" .. accent .. char -- фикс русских символов братик
+                i = i + 2
+            else
+                local index = (math.sin(time + i / 3) + 1) / 2
+                local accent = from:lerp(to, math.clamp(index, 0, 1)):to_hex()
+                output = output .. "\a" .. accent .. text:sub(i, i)
+                i = i + 1
+            end
+        end
+    
+        return output
+    end
+
+    function text_effects:format(icon, text, pre_spaces, post_spaces, post_post_spaces, icon_color)
+        pre_spaces = pre_spaces or 0
+        post_spaces = post_spaces or 0 
+        post_post_spaces = post_post_spaces or 0
+        text = text or "ERROR"
+
+        local space = "\xE2\x80\x8A"
+
+        local get = ui.get_icon(icon);
+        local clean = string.gsub(get, " ", "")
+
+        if clean == "" then
+            get = icon;
+        end
+
+        if icon_color then
+            get = "\a" .. icon_color .. get .. "\r"
+        else
+            get = "\v" .. get .. "\r"
+        end
+
+        return string.rep(space, pre_spaces)  .. get .. string.rep(space, post_spaces) .. text .. string.rep(space, post_post_spaces)
+    end
+
+    function text_effects:colored(...)
+        local output = "";
+        
+        for key, value in pairs({...}) do
+            local accent = value[2];
+            local text = value[1];
+
+            output = output .. "\a" .. accent:to_hex() .. text;
+        end
+
+        return output;
+    end
+end
+
+local keybinds = {}; do
+    function keybinds:get_state(name)
+        local value, active = 0, false
+        local binds = ui.get_binds()
+        
+        for i = 1, #binds do
+            local bind = binds[i]
+            if bind.name == name then
+                value = bind.value
+                active = bind.active
+                break
+            end
+        end
+
+        return {value, active}
+    end
+end
+
+local menu = {}; do
+    local interpoint = "•";
+
+    local info = {}; do
+        
+        local groups = {
+            pui.create(text_effects:format("house", "", 0, 0, 0), " ", 1),
+            pui.create(text_effects:format("house", "", 0, 0, 0), "", 1),
+            pui.create(text_effects:format("house", "", 0, 0, 0), "  ", 1)
+        }
+
+        groups[1]:list("", {text_effects:format("user", "About", 1, 8)})
+        groups[2]:label(text_effects:format("triangle-exclamation", "This script was fixed by 2k00 and adapted to neverlose free crack , your welcome dx17 ;)", 1, 3, 0, "aeae61ff"))
+        groups[2]:label(text_effects:format("bug", "Report Bugs", 1, 3, 0, "DEFAULT"))
+        groups[2]:button(text_effects:format("discord", "Discord Server", 1, 2), function() panorama.SteamOverlayAPI.OpenExternalBrowserURL("https://discord.gg/QwJx52dPSe") end, true)
+        groups[2]:button(text_effects:format("", "🦫 Sata Config", 0, 2), function() panorama.SteamOverlayAPI.OpenExternalBrowserURL("https://ru.neverlose.cc/market/item?id=ojYbuQ") end, true)
+        groups[2]:button(text_effects:format("youtube", "Sata's YouTube", 0, 2), function() panorama.SteamOverlayAPI.OpenExternalBrowserURL("https://www.youtube.com/channel/UCN5jetnEx5fkG7Cdr0iYh4g") end, true)
+
+        groups[3]:label(text_effects:format("user", "Welcome back, \v" .. common.get_username(), 0, 8));
+        groups[3]:label(text_effects:format("code-branch", "Last update: " .. "\v" .. common.get_date("%m/%d %H:%M", last_update) ..  "\r", 0, 8));
 
 
--- #endregion ------------------------------------------------------------------
---
+        local group = pui.create(text_effects:format("house", "", 0, 0, 0), "Settings", 1)
 
-	
-configs.system = pui.setup(vars)
+        local sidebar = {}; do
+            sidebar.label = group:label(text_effects:format(interpoint, "Sidebar", 2, 2, 2))
+            local gear = sidebar.label:create();
 
-end)()
+            sidebar.text = gear:input("Text", _G.SCRIPT_NAME)
+            sidebar.color = gear:color_picker(text_effects:format(interpoint, "Color", 5, 5, 5), {
+                ["Inner"] = { color(175, 255, 55, 255) },
+                ["Outter"] = { color(35, 128, 255, 255) }
+            })
+            sidebar.speed = gear:slider(text_effects:format(interpoint, "Speed", 5, 5, 5), 1, 32, 4)
+            info.sidebar = sidebar;
+        end
+
+        local watermark = {}; do
+            watermark.label = group:label(text_effects:format(interpoint, "Watermark", 2, 2, 2))
+            local gear = watermark.label:create();
+
+            watermark.mode = gear:listable("Options", {
+                "Customizable Text",
+                "Customizable Color",
+                "Customizable Font"
+            })
+
+            watermark.text = gear:input("Text", _G.SCRIPT_NAME):depend({watermark.mode, 1})
+            watermark.gradient = gear:switch(text_effects:format(interpoint, "Gradient", 2, 2, 2)):depend({watermark.mode, 2})
+            watermark.color = gear:color_picker(text_effects:format(interpoint, "Color", 5, 5, 5), {
+                ["Inner"] = { color(175, 255, 55, 255) },
+                ["Outter"] = { color(35, 128, 255, 255) }
+            }):depend({watermark.mode, 2}, {watermark.gradient, true})
+            watermark.speed = gear:slider(text_effects:format(interpoint, "Speed", 5, 5, 5), 1, 32, 4):depend({watermark.mode, 2}, {watermark.gradient, true})
+            watermark.non_gradient = gear:color_picker(text_effects:format(interpoint, "Color", 2, 2, 2)):depend({watermark.mode, 2}, {watermark.gradient, false})
+            watermark.font = gear:combo(text_effects:format(interpoint, "Font", 2, 2, 2), {"Default", "Small", "Console", "Bold"}):depend({watermark.mode, 3})
+
+            info.watermark = watermark;
+        end
+        
+        local notify = {}; do
+            notify.label = group:label(text_effects:format(interpoint, "Notifications", 2, 2, 2))
+            local gear = notify.label:create();
+
+            notify.style = gear:combo(text_effects:format(interpoint, "Mode", 15, 2, 2), {"Cat"})
+
+            notify.text_color = gear:color_picker(text_effects:format(interpoint, "Text Color", 15, 2, 2), color())
+            notify.border_color = gear:color_picker(text_effects:format(interpoint, "Border Color", 15, 2, 2), color())
+
+            notify.spam = gear:switch(text_effects:format(" ", "Test Notification", 25, 15, 35))
+
+            info.notify = notify;
+        end
+
+        local presets = {}; do
+            local delete_state = {
+                false, false
+            }
+            
+            local group = pui.create(text_effects:format("house", "", 0, 0, 0), "Presets", 2);
+
+            presets.list = group:list(text_effects:format("list", "List of available configs", 1, 2, 1), {});
+            
+            presets.name = group:input(text_effects:format("pen", "Name", 1, 2, 1), "")
+            presets.create = group:button(text_effects:format("paste", "", 0, 0, 0, "00BCD4ff"), nil, true);
+            presets.create:tooltip("Create preset.")
+
+            presets.load = group:button(text_effects:format("upload", "", 0, 0, 0, "3F51B5ff"), nil, true);
+            presets.load:tooltip("Load selected preset.")
+
+            presets.save = group:button(text_effects:format("floppy-disk", "", 0, 0, 0, "388E3Cff"), nil, true);
+            presets.save:tooltip("Save selected preset.")
+
+            presets.import = group:button(text_effects:format("file-import", "", 0, 0, 0, "4CAF50ff"), nil, true);
+            presets.import:tooltip("Import new preset.")
+
+            presets.export = group:button(text_effects:format("file-export", "", 0, 0, 0, "2196F3ff"), nil, true);
+            presets.export:tooltip("Export selected preset.")
+            
+            local hidden_switch = group:switch(" ", false)
+            hidden_switch:visibility(false);
+
+
+            presets.delete = group:button(text_effects:format("trash", "", 0, 0, 0, "ff0000ff"), function() 
+                hidden_switch:set(true);
+            end):depend({hidden_switch, false})
+
+            presets.delete_confirm = group:button(text_effects:format("trash-check", "", 0, 0, 0, "45ec4aff"), function()
+                hidden_switch:set(false)
+            end):depend({hidden_switch, true})
+
+            presets.delete_cancel = group:button(text_effects:format("trash-xmark", "", 0, 0, 0, "ff0000ff"), function() 
+                hidden_switch:set(false)
+            end):depend({hidden_switch, true})
+            
+            local information = {}; do
+                local group = pui.create(text_effects:format("house", "", 0, 0, 0), "Presets", 2);
+                
+                information.creator = group:label("Author: \v...")
+                presets.information = information
+            end
+            
+            info.presets = presets;
+        end
+
+        menu.info = info
+    end
+
+    local antiaim = {}; do
+
+        local main = {}; do
+
+            local configure = {}; do
+                local group = pui.create(text_effects:format("list-tree", "", 0, 0, 0), "Selection", 1);
+
+                configure.team = group:list(text_effects:format("", "", 0, 0, 0), {
+                    "\aFF0000FF" .. interpoint .. "\r  T", "\a8698fdff" .. interpoint .. "\r  CT"
+                });
+
+                
+
+
+                configure.state = group:list(text_effects:format("users", "Select the state you want to change.", 2, 2, 2), e_num.states)
+
+                main.configure = configure
+            end
+
+            local additional = {}; do
+                local group = pui.create(text_effects:format("list-tree", "", 0, 0, 0), "Tweaks", 1);
+
+                local legit_aa = {}; do
+                    legit_aa.enabled = group:switch(text_effects:format("face-zany", "Legit AA", 2, 2, 2));
+
+                    local gear = legit_aa.enabled:create();
+                    legit_aa.mode = gear:combo(text_effects:format(interpoint, "Yaw Base", 2, 2, 2), {"Local View", "At Target"}):depend({legit_aa.enabled, true});
+                
+                    additional.legit_aa = legit_aa;
+                end
+
+                local manual_yaw = {}; do
+                    manual_yaw.select = group:combo(text_effects:format("rotate", "Manual Yaw", 2, 2, 2), {"Disabled", "Left", "Right", "Forward"});
+
+                    local gear = manual_yaw.select:create();
+                    manual_yaw.static = gear:switch(text_effects:format(interpoint, "Static", 2, 2, 2));
+                    manual_yaw.inverter = gear:switch(text_effects:format(interpoint, "Inverter", 2, 2, 2)):depend({manual_yaw.static, true})
+                
+                    additional.manual_yaw = manual_yaw;
+                end
+
+                local backstab = {}; do
+                    backstab.switch = group:switch(text_effects:format("sword", "Avoid Backstab", 2, 2, 2));
+
+                    additional.backstab = backstab
+                end
+
+                local warmup_aa = {}; do
+                    warmup_aa.select = group:combo(text_effects:format("gear", "State", 2, 2, 2), {"Disabled", "Warmup", "No Enemies", "Force"});
+                    local gear = warmup_aa.select:create();
+
+                    warmup_aa.pitch = gear:combo(text_effects:format(interpoint, "Pitch", 2, 2, 2), "Disabled", "Down"):depend({warmup_aa.select, "Disabled", true})
+                    warmup_aa.yaw = gear:combo(text_effects:format(interpoint, "Yaw", 2, 2, 2), "Spin", "Distortion", "L&R"):depend({warmup_aa.select, "Disabled", true})
+
+                    warmup_aa.range = gear:slider(text_effects:format("arrows-left-right", "Range", 2, 2, 2), 1, 360, 360):depend({warmup_aa.yaw, "L&R", true}, {warmup_aa.select, "Disabled", true})
+                    warmup_aa.speed = gear:slider(text_effects:format("gauge", "Speed", 2, 2, 2), 1, 128, 32, 1, "t"):depend({warmup_aa.yaw, "L&R", true}, {warmup_aa.select, "Disabled", true})
+
+                    warmup_aa.left_yaw = gear:slider(text_effects:format("arrow-left", "Left Offset", 2, 2, 2), -180, 180, 0):depend({warmup_aa.yaw, "L&R"}, {warmup_aa.select, "Disabled", true})
+                    warmup_aa.right_yaw = gear:slider(text_effects:format("arrow-right", "Right Offset", 2, 2, 2), -180, 180, 0):depend({warmup_aa.yaw, "L&R"}, {warmup_aa.select, "Disabled", true})
+                    
+                    additional.warmup_aa = warmup_aa;
+                end
+
+                local safe_head = {}; do
+                    safe_head.switch = group:switch(text_effects:format("head-side", "Safe Head", 2, 2, 2));
+
+                    local gear = safe_head.switch:create();
+                    safe_head.states = gear:selectable(text_effects:format("list-check", "Conditions", 2, 2, 2), {
+                        "Air Crouch",
+                        "Zeus",
+                        "Knife",
+                        "Height Advantage"
+                    }):depend({safe_head.switch, true});
+                    safe_head.height = gear:slider(text_effects:format("ruler-vertical", "Height", 2, 2, 2), 0, 200, 25, 1, "u."):depend({safe_head.switch, true}, {safe_head.states, "Height Advantage"});
+                    safe_head.height:tooltip(text_effects:format("info-circle", "If value equals zero then safe head works only on the same height as your enemy.", 1, 2, 1))
+
+                    additional.safe_head = safe_head;
+                end
+            
+                main.additional = additional
+            end
+
+            antiaim.main = main;
+        end
+
+        local angles = {}; do
+            
+            local group = pui.create(text_effects:format("list-tree", "", 0, 0, 0), "Builder", 2);
+
+            local break_lc = {}; do
+                break_lc.group = pui.create(text_effects:format("list-tree", "", 0, 0, 0), "Snap builder"); 
+                break_lc.select = break_lc.group:selectable(text_effects:format(interpoint, "Break LC", 2, 5, 2, "9ca7e1ff"), e_num.states);
+
+                local gear = break_lc.select:create();
+                break_lc.disable_on_grenade = gear:switch(text_effects:format("", "Disable on Grenade", 0, 0, 0));
+                break_lc.hide_shots = gear:combo(text_effects:format("", "Hide Shots", 0, 0, 0), {"Favor Fire Rate", "Favor Fake Lag", "Break LC"})
+                
+                angles.break_lc = break_lc;
+            end
+
+            local ctx = {}; do
+                for idx, state in pairs(e_num.states) do
+                    ctx[state] = {};
+
+                    for team, i in pairs(e_num.teams) do
+                        ctx[state][i] = {};
+
+                        local b = ctx[state][i];
+                        local m_team = main.configure.team;
+                        local m_state = main.configure.state;
+
+
+                        b.allow_state = group:switch(text_effects:format("shield-check", ("Allow \v%s\r state"):format(state), 2, 2, 2), true):depend({m_team, team}, {m_state, idx})
+                        b.yaw = group:combo(text_effects:format(interpoint, "Yaw", 2, 2, 2), {"Disabled", "Backward"}, "Backward"):depend({m_team, team}, {m_state, idx}) do
+                            local gear = b.yaw:create();
+
+                            b.yaw_mode = gear:combo(text_effects:format("", "Mode", 0, 0, 0), {"Solo", "L/R"}):depend({b.yaw, "Backward"});
+                            b.offset = gear:slider(text_effects:format("turn-down-right", "Offset", 10, 2, 2), -180, 180, 0):depend({b.yaw, "Backward"}, {b.yaw_mode, "Solo"});
+
+                            b.yaw_left = gear:slider(text_effects:format("turn-down-right", "Left", 10, 2, 2), -180, 180, 0):depend({b.yaw, "Backward"}, {b.yaw_mode, "L/R"});
+                            b.yaw_right = gear:slider(text_effects:format("turn-down-right", "Right", 10, 2, 2), -180, 180, 0):depend({b.yaw, "Backward"}, {b.yaw_mode, "L/R"});
+
+                            b.delay = gear:switch(text_effects:format(interpoint, "Delay", 2, 2, 2, "FFA500FF")):depend({b.yaw, "Backward"}, {b.yaw_mode, "L/R"});
+                            b.delay_method = gear:combo(text_effects:format("", "Method", 10, 2, 2), {"Default", "Random", "Custom"}):depend({b.yaw, "Backward"}, {b.yaw_mode, "L/R"}, {b.delay, true});
+
+                            b.delay_default = gear:slider(text_effects:format("turn-down-right", "\aFFA500FFTiming\r", 15, 2, 2), 2, 22, 0):depend({b.yaw, "Backward"}, {b.yaw_mode, "L/R"}, {b.delay_method, "Default"}, {b.delay, true});
+
+                            b.delay_random_min = gear:slider(text_effects:format("turn-down-right", "\aFFA500FFMin. Timing\r", 18, 2, 2), 2, 22, 0):depend({b.yaw, "Backward"}, {b.yaw_mode, "L/R"}, {b.delay_method, "Random"}, {b.delay, true});
+                            b.delay_random_max = gear:slider(text_effects:format("turn-down-right", "\aFFA500FFMax. Timing\r", 18, 2, 2), 2, 22, 0):depend({b.yaw, "Backward"}, {b.yaw_mode, "L/R"}, {b.delay_method, "Random"}, {b.delay, true});
+
+                            b.delay_custom_sliders = gear:slider(text_effects:format(interpoint, "Sliders", 17, 2, 2), 2, 6, 2):depend({b.yaw, "Backward"}, {b.yaw_mode, "L/R"}, {b.delay_method, "Custom"}, {b.delay, true});
+
+                            for i = 1, 6 do
+                                b["delay_" .. i] = gear:slider(text_effects:format("turn-down-right", ("%s"):format(i), 14 + 5 * i, 2, 2), 2, 22, 0):depend({b.yaw, "Backward"}, {b.yaw_mode, "L/R"}, {b.delay_method, "Custom"}, {b.delay, true}, {b.delay_custom_sliders, function()
+                                    if i <= 2 then
+                                        return true;
+                                    end
+
+                                    return b.delay_custom_sliders.value >= i
+                                end});
+                            end
+                        end;
+
+                        b.modifier = group:combo(text_effects:format("turn-down-right", "Modifier", 10, 2, 2), {"Disabled", "Center", "Offset", "Random", "Spin", "3-Way", "Bobro", "5-Way"}):depend({m_team, team}, {m_state, idx}, {b.yaw, "Backward"}) do
+                            local gear = b.modifier:create();
+
+                            b.randomize = gear:switch(text_effects:format("", "Randomize", 0, 0, 0)):depend({m_team, team}, {m_state, idx}, {b.yaw, "Backward"}, {b.modifier, "Disabled", true});
+                            
+                            b.modifier_mode = gear:combo(text_effects:format("", "Mode", 0, 0, 0), "Default", "Custom"):depend({m_team, team}, {m_state, idx}, {b.yaw, "Backward"}, {b.modifier, "Disabled", true}, {b.randomize, true});
+                            
+                            
+                            b.min = gear:slider(text_effects:format("turn-down-right", "Minimum", 10, 2, 2), -180, 180, 0):depend({m_team, team}, {m_state, idx}, {b.yaw, "Backward"}, {b.modifier, "Disabled", true}, {b.randomize, true}, {b.modifier_mode, "Default"})
+                            b.max = gear:slider(text_effects:format("turn-down-right", "Maximum", 10, 2, 2), -180, 180, 0):depend({m_team, team}, {m_state, idx}, {b.yaw, "Backward"}, {b.modifier, "Disabled", true}, {b.randomize, true}, {b.modifier_mode, "Default"})
+
+                            b.modifier_custom_sliders = gear:slider(text_effects:format(interpoint, "Sliders", 7, 5, 2), 2, 6, 2):depend({m_team, team}, {m_state, idx}, {b.yaw, "Backward"}, {b.modifier, "Disabled", true}, {b.randomize, true}, {b.modifier_mode, "Custom"});
+
+                            for i = 1, 6 do
+                                b["modifier_sliders_" .. i] = gear:slider(text_effects:format("turn-down-right", ("%s"):format(i), 10 + 5 * i, 2, 2), -180, 180, 0):depend({m_team, team}, {m_state, idx}, {b.yaw, "Backward"}, {b.modifier, "Disabled", true}, {b.randomize, true}, {b.modifier_mode, "Custom"}, {b.modifier_custom_sliders, function()
+                                    if i <= 2 then
+                                        return true;
+                                    end
+
+                                    return b.modifier_custom_sliders.value >= i
+                                end});
+                            end
+
+                            b.modifier_offset = gear:slider(text_effects:format(interpoint, "Offset", 2, 2, 2), -180, 180, 0):depend({m_team, team}, {m_state, idx}, {b.yaw, "Backward"}, {b.modifier, "Disabled", true}, {b.randomize, false})
+                        end
+
+                        b.body_yaw = group:switch(text_effects:format(interpoint, "Body Yaw", 2, 2, 2)):depend({m_team, team}, {m_state, idx}) do
+                            local gear = b.body_yaw:create();
+
+                            b.body_freestanding = gear:combo("Freestanding", {"Off", "Peek Fake", "Peek Real"}):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true});
+
+                            b.mode = gear:combo(text_effects:format("", "Mode", 0, 0, 0), {"Static", "Ticks", "Random"}):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true});
+                            b.mode_ticks = gear:slider(text_effects:format("turn-down-right", "Ticks", 10, 2, 2), 4, 16, 4, 1, "t"):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true}, {b.mode, "Ticks"});
+                            b.mode_random = gear:slider(text_effects:format("turn-down-right", "Random Ticks", 10, 2, 2), 4, 16, 4, 1, "x"):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true}, {b.mode, "Random"});
+                        
+                        
+                            b.limit_mode = gear:combo(text_effects:format("", "Limit Mode", 0, 0, 0), {"Static", "Random", "From/To", "Speed-based Switch"}):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true});
+
+                            b.left_limit = gear:slider(text_effects:format("turn-down-right", "Left Limit", 10, 2, 2), 0, 60, 60):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true}, {b.limit_mode, "Static"});
+                            b.right_limit = gear:slider(text_effects:format("turn-down-right", "Right Limit", 10, 2, 2), 0, 60, 60):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true}, {b.limit_mode, "Static"});
+
+                            b.minimum_limit = gear:slider(text_effects:format("turn-down-right", "Minimum", 10, 2, 2), 0, 60, 60):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true}, {b.limit_mode, "Random"});
+                            b.maximum_limit = gear:slider(text_effects:format("turn-down-right", "Maximum", 10, 2, 2), 0, 60, 60):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true}, {b.limit_mode, "Random"});
+
+                            b.from_limit = gear:slider(text_effects:format("turn-down-right", "From", 10, 2, 2), 0, 60, 60):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true}, {b.limit_mode, function()
+                                return b.limit_mode:get() == "From/To" or b.limit_mode:get() == "Speed-based Switch"
+                            end});
+
+                            b.to_limit = gear:slider(text_effects:format("turn-down-right", "To", 10, 2, 2), 0, 60, 60):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true}, {b.limit_mode, function()
+                                return b.limit_mode:get() == "From/To" or b.limit_mode:get() == "Speed-based Switch"
+                            end});
+
+                            b.sb_speed = gear:slider(text_effects:format("turn-down-right", "\aFFA500FFTiming\r", 15, 2, 2), 1, 22, 0):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true}, {b.limit_mode, "Speed-based Switch"});
+
+                        end
+                        b.body_yaw_options = group:selectable(text_effects:format("turn-down-right", "Options", 10, 2, 2), {"Avoid Overlap", "Jitter", "Randomize Jitter", "Anti Bruteforce"}):depend({m_team, team}, {m_state, idx}, {b.body_yaw, true})
+
+                        b.send_to_opposite = group:button(text_effects:format("share-from-square", "Send to the opposite side", 17, 2, 20), function ()
+                            local opposite_team = m_team:get() == "T" and "CT" or "T";
+                            local current_state = m_state:list()[m_state:get()];
+
+                            local original = ctx[current_state][m_team:get()]
+                            local opposite = ctx[current_state][opposite_team]
+                            for key, value in pairs(original) do
+
+                                for k, v in pairs(opposite) do
+
+                                    if k == key then
+                                        v:set(value:get())
+                                    end
+                                end
+                            end
+
+                            cvar.playvol:call("ui/beepclear.wav", 1.0)
+                        end, true):depend({m_team, team}, {m_state, idx})
+
+                        b.choke = break_lc.group:combo(text_effects:format(interpoint, "Tickbase", 2, 5, 2, "ff0000ff"), {"Default", "Custom"}):depend({m_team, team}, {m_state, idx}, {break_lc.select, function()
+                            return break_lc.select:get(idx)
+                        end}); do
+                            local gear = b.choke:create();
+
+                            b.random_choke = gear:switch(text_effects:format("", "Random Choke", 0, 0, 0)):depend({m_team, team}, {m_state, idx}, {b.choke, "Custom"})
+                            b.choke_slider = gear:slider(text_effects:format("turn-down-right", "Choke", 10, 2, 2), 2, 22, 16, 1, "t"):depend({m_team, team}, {m_state, idx}, {b.choke, "Custom"}, {b.random_choke, false})
+
+                            b.choke_method = gear:combo(text_effects:format(interpoint, "Method", 2, 2, 2), {"Default", "Custom"}):depend({m_team, team}, {m_state, idx}, {b.choke, "Custom"}, {b.random_choke, true})
+                            b.choke_from = gear:slider(text_effects:format("turn-down-right", "Choke from", 10, 2, 2), 1, 22, 16):depend({m_team, team}, {m_state, idx}, {b.choke, "Custom"}, {b.random_choke, true}, {b.choke_method, "Default"})
+                            b.choke_to = gear:slider(text_effects:format("turn-down-right", "Choke to", 10, 2, 2), 1, 22, 16):depend({m_team, team}, {m_state, idx}, {b.choke, "Custom"}, {b.random_choke, true}, {b.choke_method, "Default"})
+
+
+                            b.choke_sliders = gear:slider(text_effects:format("", "Sliders", 15, 0, 0), 2, 6, 2):depend({m_team, team}, {m_state, idx}, {b.choke, "Custom"}, {b.random_choke, true}, {b.choke_method, "Custom"})
+                            for i = 1, 6 do
+                                b["choke1_" .. i] = gear:slider(text_effects:format("turn-down-right", ("%s"):format(i), 14 + 5 * i, 2, 2), 2, 22, 0, 1, "t"):depend({m_team, team}, {m_state, idx}, {b.choke, "Custom"}, {b.random_choke, true}, {b.choke_method, "Custom"}, {b.choke_sliders, function()
+                                    if i <= 2 then
+                                        return true;
+                                    end
+
+                                    return b.choke_sliders.value >= i
+                                end});
+                            end
+                        end
+
+                        ctx[state][i] = b;
+                        angles.builder = ctx;
+                    end
+                end
+            end
+
+
+            local freestanding = {}; do
+                freestanding.switch = group:switch(text_effects:format("arrows-rotate", "Freestanding", 2, 2, 2));
+
+                local gear = freestanding.switch:create();
+                freestanding.prefer_manual = gear:switch(text_effects:format(interpoint, "Prefer Manual", 2, 2, 2));
+
+                local dsbl_tbl = e_num.states;
+                table.remove(dsbl_tbl, 9)
+
+                freestanding.disablers = gear:selectable(text_effects:format(interpoint, "Disablers", 2, 2, 2), dsbl_tbl);
+                freestanding.body_fs = gear:switch(text_effects:format(interpoint, "Body Freestanding", 2, 2, 2))
+                freestanding.yaw_mod = gear:switch(text_effects:format(interpoint, "Disable Yaw Modifiers", 2, 2, 2))
+
+                angles.freestanding = freestanding;
+            end
+
+            local anti_bruteforce = {}; do
+                anti_bruteforce.switch = group:switch(text_effects:format("reply-clock", "Anti-Bruteforce", 2, 2, 2));
+
+                local gear =  anti_bruteforce.switch:create();
+                anti_bruteforce.states = gear:selectable(text_effects:format(interpoint, "States", 2, 2, 2), e_num.states):depend({anti_bruteforce.switch, true})
+                anti_bruteforce.mode = gear:combo(text_effects:format(interpoint, "Mode", 2, 2, 2), {"Increasing", "Decreasing", "Meta"}):depend({anti_bruteforce.switch, true}, {anti_bruteforce.states, true})
+                anti_bruteforce.switch:tooltip(text_effects:format("info-circle", "Anti-bruteforce with automatic preset to avoid hs ^_^.", 1, 2, 1))
+                
+                angles.anti_bruteforce = anti_bruteforce;
+            end
+
+            antiaim.angles = angles;
+        end
+
+
+        menu.antiaim = antiaim;
+    end
+
+    local misc = {}; do
+
+        local player_animations = {}; do
+            local group = pui.create(text_effects:format("bottle-droplet", "", 0, 0, 0), "Animations", 1);
+
+            local jitter_legs = {}; do
+                jitter_legs.switch = group:switch(text_effects:format("user-ninja", "Jitter Legs", 2, 2, 2));
+
+                local gear = jitter_legs.switch:create();
+                jitter_legs.from = gear:slider(text_effects:format("", "Start", 2, 2, 2), 0, 100, 0, 0.01, "x"):depend({jitter_legs.switch, true});
+                jitter_legs.to = gear:slider(text_effects:format("", "End", 2, 2, 2), 0, 100, 0, 0.01, "x"):depend({jitter_legs.switch, true});
+                
+                player_animations.jitter_legs = jitter_legs;
+            end
+
+            local leaning = {}; do
+                leaning.value = group:slider(text_effects:format("lines-leaning", "Leaning", 2, 3, 2), 0, 100, 50, 1, "%");
+
+                player_animations.leaning = leaning;
+            end
+
+            local falling = {}; do
+                falling.value = group:slider(text_effects:format("person-falling", "Falling", 2, 2, 2), 0, 100, 50, 1, "%");
+
+                player_animations.falling = falling;
+            end
+
+            misc.player_animations = player_animations;
+        end
+
+        local aimbot = {}; do
+            local group = pui.create(text_effects:format("bottle-droplet", "", 0, 0, 0), "Aimbot", 1);
+
+            local latency = {}; do
+                latency.switch = group:switch(text_effects:format("wifi", "Unlock Fake Latency", 2, 2, 2), false);
+                latency.switch:set_callback(function(e)local value = e:get();cvar.sv_maxunlag:float(value and 2 or 0.1)end)
+                latency.switch:tooltip(text_effects:format("info-circle", "Allows you to use maximum Fake Latency (200-300)", 1, 2, 1))
+
+                aimbot.latency = latency;
+            end
+
+            local fakeduck = {}; do
+                fakeduck.unlock = group:switch(text_effects:format("rabbit-running", "Unlock FD Speed", 2, 2, 2));
+                fakeduck.unlock:tooltip(text_effects:format("info-circle", "Allows you to move a bit faster on Fake duck", 1, 2, 1))
+
+                fakeduck.freeze_period = group:switch(text_effects:format("duck", "Fakeduck on Freezetime", 2, 4, 2));
+                fakeduck.freeze_period:tooltip(text_effects:format("info-circle", "Allows you to Fake duck on freezetime period.\n\n Helps on de_bank a lot.", 1, 2, 1))
+
+                aimbot.fakeduck = fakeduck;
+            end
+            
+            local logging = {}; do
+                logging.switch = group:switch(text_effects:format("timeline-arrow", "Log Events", 2, 2, 2));
+
+                local gear = logging.switch:create();
+
+                local mode = {}; do
+                    mode.select = gear:selectable(text_effects:format(interpoint, "Events", 2, 2, 2), {"Aimbot", "Connection problems", "Low FPS"}):depend({logging.switch, true});
+                    
+                    mode.is_notification = gear:switch(text_effects:format("", "Notification", 10, 2, 2)):depend({logging.switch, true}, {mode.select, "Aimbot"});
+
+                    logging.mode = mode;
+                end
+
+                local colors = {}; do
+                
+                    colors.prefix = gear:color_picker(text_effects:format("", "Prefix Color", 10, 2, 2)):depend({logging.switch, true}, {mode.select, "Aimbot"});
+                    colors.main = gear:color_picker(text_effects:format("", "Main Color", 10, 2, 2)):depend({logging.switch, true}, {mode.select, "Aimbot"});
+
+                    logging.colors = colors
+                end
+
+                aimbot.logging = logging;
+            end
+
+            misc.aimbot = aimbot;
+        end
+        
+        local movement = {}; do
+            local group = pui.create(text_effects:format("bottle-droplet", "", 0, 0, 0), "Movement", 1);
+
+            movement.fall_damage = group:switch(text_effects:format("person-falling", "Avoid Fall Damage", 2, 4, 2));
+            movement.fall_damage:tooltip("Attempts to perform a jumpbug\nwhen possible.\n\nThis is a 1:1 replica from \a7a9809ffgamesense\r")
+
+            movement.fast_ladder = group:switch(text_effects:format("water-ladder", "Fast Ladder", 2, 2, 2));
+            movement.fast_ladder:tooltip("- Abuses the ladder movement\nmechanic and makes you move a\nlittle faster")
+
+            movement.air_duck_collision = group:switch(text_effects:format("person-walking-dashed-line-arrow-right", "Collision Air Duck", 2, 1, 2));
+            movement.air_duck_collision:tooltip("Automatically ducks if there's a possibility of avoiding collision by making the player fully-ducked. \n\nDoesn't work on ground.")
+
+            movement.edge_quick_stop = group:switch(text_effects:format("person-circle-exclamation", "Edge Quick Stop", 2, 2, 2));
+            movement.edge_quick_stop:tooltip("Prevents you from walking or jumping off edges, similar to the Minecraft sneaking mechanic. \n\nWorks best with Peek Assist.")
+
+            misc.movement = movement
+        end
+
+        menu.misc = misc;
+    end
+
+    local visuals = {}; do
+        local group = pui.create(text_effects:format("bottle-droplet", "", 0, 0, 0), "Visuals", 2);
+
+        local scope_overlay = {}; do
+            scope_overlay.switch = group:switch(text_effects:format("crosshairs", "Better Scope Overlay", 2, 2, 2));
+
+            local gear = scope_overlay.switch:create();
+            scope_overlay.options = gear:selectable(text_effects:format(interpoint, "Options", 2, 2, 2), {"Rotation", "Inverted"}):depend({scope_overlay.switch, true})
+            scope_overlay.animation = gear:switch("Animate"):depend({scope_overlay.switch, true}):depend({scope_overlay.options, "Rotation"});
+
+
+            scope_overlay.length = gear:slider("Length", 10, 300, 185):depend({scope_overlay.switch, true})
+            scope_overlay.gap = gear:slider("Gap", 1, 300, 5):depend({scope_overlay.switch, true})
+
+            local colors = {}; do
+                colors.main = gear:color_picker("Main Accent", color(255)):depend({scope_overlay.switch, true})
+                colors.edge = gear:color_picker("Edge Accent", color(0)):depend({scope_overlay.switch, true})
+
+                scope_overlay.colors = colors;
+            end
+
+            visuals.scope_overlay = scope_overlay
+        end
+
+
+        local manual_arrows = {}; do
+            manual_arrows.switch = group:switch(text_effects:format("arrows-turn-to-dots", "Manual Arrows", 2, 2, 2));
+            
+            local gear = manual_arrows.switch:create();
+            manual_arrows.font = gear:combo(text_effects:format(interpoint, "Font", 2, 2, 2), {"Default", "Small", "Console", "Bold"}):depend({manual_arrows.switch, true});
+            manual_arrows.color = gear:color_picker(text_effects:format(interpoint, "Color", 2, 2, 2), color()):depend({manual_arrows.switch, true});
+            manual_arrows.offset = gear:slider(text_effects:format(interpoint, "Offset", 2, 2, 2), 0, 200, 35):depend({manual_arrows.switch, true});
+
+            local symbols = {}; do
+                symbols.left = gear:input("Left Symbol", "力量"):depend({manual_arrows.switch, true})
+                symbols.right = gear:input("Right Symbol", "力量"):depend({manual_arrows.switch, true})
+                symbols.forward = gear:input("Forward Symbol", "力量"):depend({manual_arrows.switch, true})
+
+                manual_arrows.symbols = symbols;
+            end
+            visuals.manual_arrows = manual_arrows;
+        end
+
+        local aspect_ratio = {}; do
+            aspect_ratio.switch = group:switch(text_effects:format("glasses", "Aspect Ratio", 2, 2, 2));
+
+            local gear = aspect_ratio.switch:create();
+            aspect_ratio.value = gear:slider(text_effects:format(interpoint, "Value", 2, 2, 2), 1, 200, 133, 0.01):depend({aspect_ratio.switch, true});
+
+            local r_aspectratio = cvar.r_aspectratio;
+
+            local function shutdown()
+                r_aspectratio:float(cvars:get_original(r_aspectratio))
+            end
+
+            local function on_change()
+                if not aspect_ratio.switch:get() then
+                    shutdown()
+                    return;
+                end
+
+                local value = aspect_ratio.value:get() * .01
+
+                r_aspectratio:float(value, true);
+            end
+
+            aspect_ratio.switch:set_callback(on_change, true);
+            aspect_ratio.value:set_callback(on_change);
+            events.shutdown(shutdown)
+
+            visuals.aspect_ratio = aspect_ratio;
+        end
+
+        local viewmodel_changer = {}; do
+            viewmodel_changer.switch = group:switch(text_effects:format("hand", "Viewmodel Changer", 2, 3, 2));
+            
+            local gear = viewmodel_changer.switch:create();
+
+            viewmodel_changer.fov = gear:slider(text_effects:format(interpoint, "Field of View", 2, 2, 2), 0, 1000, 680, 0.1):depend({viewmodel_changer.switch, true});
+            viewmodel_changer.x = gear:slider(text_effects:format(interpoint, "Offset X", 2, 2, 2), -100, 100, 0, 0.1):depend({viewmodel_changer.switch, true});
+            viewmodel_changer.y = gear:slider(text_effects:format(interpoint, "Offset Y", 2, 2, 2), -100, 100, 0, 0.1):depend({viewmodel_changer.switch, true});
+            viewmodel_changer.z = gear:slider(text_effects:format(interpoint, "Offset Z", 2, 2, 2), -100, 100, 0, 0.1):depend({viewmodel_changer.switch, true});
+
+            local viewmodel_fov = cvar.viewmodel_fov;
+
+            local viewmodel_offset_x = cvar.viewmodel_offset_x;
+            local viewmodel_offset_y = cvar.viewmodel_offset_y;
+            local viewmodel_offset_z = cvar.viewmodel_offset_z;
+
+            local function shutdown()
+                viewmodel_fov:float(cvars:get_original(viewmodel_fov), false)
+
+                viewmodel_offset_x:float(cvars:get_original(viewmodel_offset_x), false)
+                viewmodel_offset_y:float(cvars:get_original(viewmodel_offset_y), false)
+                viewmodel_offset_z:float(cvars:get_original(viewmodel_offset_z), false)
+            end
+
+            local function on_change()
+                local x, y, z, fov = viewmodel_changer.x:get(), viewmodel_changer.y:get(), viewmodel_changer.z:get(), viewmodel_changer.fov:get()
+
+                if viewmodel_changer.switch:get() then
+                    viewmodel_fov:float(fov * 0.1, true)
+                    viewmodel_offset_x:float(x * 0.1, true)
+                    viewmodel_offset_y:float(y * 0.1, true)
+                    viewmodel_offset_z:float(z * 0.1, true)
+                else
+                    shutdown()
+                end
+            end
+
+            events.shutdown(shutdown)
+            viewmodel_changer.switch:set_callback(on_change, true)
+            viewmodel_changer.x:set_callback(on_change)
+            viewmodel_changer.y:set_callback(on_change)
+            viewmodel_changer.z:set_callback(on_change)
+            viewmodel_changer.fov:set_callback(on_change)
+
+            
+            visuals.viewmodel_changer = viewmodel_changer;
+        end
+
+        local skeet_indicators = {}; do
+            skeet_indicators.switch = group:switch(text_effects:format("paintbrush", "Game\a95b806ffSense\r Indicators", 2, 2, 2));
+
+            local gear = skeet_indicators.switch:create();
+            skeet_indicators.bomb = gear:switch("Bomb"):depend({skeet_indicators.switch, true})
+            skeet_indicators.features = gear:selectable(text_effects:format(interpoint, "Feature ind.", 2, 2, 2), {
+                "Force safe point",
+                "Force body aim",
+                "Ping spike",
+                "Double tap",
+                "Duck peek assist",
+                "Freestanding",
+                "On shot anti-aim",
+                "Minimum damage override"
+            }):depend({skeet_indicators.switch, true})
+
+            skeet_indicators.additional = gear:selectable(text_effects:format(interpoint, "Additional ind.", 2, 2, 2), {
+                "Hitchance override",
+                "Dormant aimbot"
+            }):depend({skeet_indicators.switch, true})
+
+            visuals.skeet_indicators = skeet_indicators;
+        end
+
+
+        local velocity_warning = {}; do
+            velocity_warning.switch = group:switch(text_effects:format("rabbit-running", "Velocity Warning", 2, 2, 2));
+
+            local gear = velocity_warning.switch:create();
+            velocity_warning.color = gear:color_picker(text_effects:format(interpoint, "Color", 2, 2, 2)):depend({velocity_warning.switch, true})
+            
+            visuals.velocity_warning = velocity_warning;
+        end
+            
+        local hitmarker = {}; do
+            hitmarker.select = group:selectable(text_effects:format("bullseye-arrow", "Hit Marker", 2, 4, 2), {"2D", "3D"});
+
+            local gear = hitmarker.select:create();
+            hitmarker.color = gear:color_picker(text_effects:format(interpoint, "Color", 2, 2, 2), {
+                ["2D"] = { color(175, 255, 55, 255) },
+                ["3D"] = { color(35, 128, 255, 255) }
+            }):depend({hitmarker.select, true});
+            hitmarker.time = gear:slider(text_effects:format(interpoint, "Duration", 2, 2, 2), 0, 100, 1, 0.1, "s"):depend({hitmarker.select, true});
+
+            visuals.hitmarker = hitmarker;
+        end
+
+        local player_transparency = {}; do
+            player_transparency.switch = group:switch(text_effects:format("face-dotted", "Keep Model Transparency", 2, 4, 2));
+            player_transparency.switch:tooltip("- Keeps the local player model transparent after shooting with bolt-action sniper rifles and adds extra fade-in/out animation \n\n- This is a 1:1 replica from \a95b806ffgamesense")
+            
+            visuals.player_transparency = player_transparency;
+        end
+
+        local damage_indicator = {}; do
+            damage_indicator.switch = group:switch(text_effects:format("claw-marks", "Damage Indicator", 2, 3, 2));
+
+            visuals.damage_indicator = damage_indicator;
+        end
+
+        local legacy_desync = {}; do
+            legacy_desync.switch = group:switch(text_effects:format("calendar-range", "Legacy Desync", 2, 5, 2));
+            legacy_desync.switch:tooltip("Brings back old desync like back then in 2020. Pre-riptide animations")
+
+            visuals.legacy_desync = legacy_desync;
+        end
+
+        local remove_sleeves = {}; do
+            remove_sleeves.switch = group:switch(text_effects:format("shirt-long-sleeve", "Remove Sleeves", 2, 2.5, 2));
+
+            visuals.remove_sleeves = remove_sleeves;
+        end
+
+        local increased_fl = {}; do
+            local ref = ui.find("Aimbot", "Anti Aim", "Fake Lag", "Limit");
+            
+            increased_fl.switch = group:switch(text_effects:format("lock", "Clock Correction", 2, 5, 2));
+            increased_fl.ticks = increased_fl.switch:create():slider("Client-issued ticks", 1, 22, 15, 1, function(e)
+                if e == 15 then return "NL" end
+                if e == 16 then return "GS" end
+                if e == 17 then return "Default" end
+                return e;
+            end):depend(increased_fl.switch)
+
+            local sv_maxusrcmdprocessticks = cvar.sv_maxusrcmdprocessticks;
+            local function shutdown()
+                sv_maxusrcmdprocessticks:int(cvars:get_original(sv_maxusrcmdprocessticks), false);
+                ref:set(cvars:get_original(sv_maxusrcmdprocessticks) - 2)
+            end
+
+            local function on_change()
+                local ticks = increased_fl.ticks:get()
+                local list = {
+                    ["nopoint"] = true,
+                    ["ramzan777888"] = true
+                }
+
+                if list[common.get_username()] then
+                    increased_fl.switch:disabled(false)
+                    increased_fl.ticks:disabled(false)
+                    if increased_fl.switch:get() then
+                        sv_maxusrcmdprocessticks:int(ticks, true)
+                        ref:set(ticks - 2);
+                    else
+                        shutdown()
+                    end
+                else
+                    increased_fl.switch:disabled(true)
+                    increased_fl.ticks:disabled(true)
+                    shutdown()
+                end
+            end
+
+            events.shutdown(shutdown)
+            events.render(on_change)
+
+            visuals.increased_fl = increased_fl;
+        end
+
+        menu.visuals = visuals;
+    end
+end
+
+local notify = {}; do
+    local data = {}
+
+    function notify.new(text, color, icon)
+        local style = menu.info.notify.style:get()
+        local time = 3
+        
+        table.insert(data, {
+            text = text,
+
+            duration = globals.realtime + 3,
+            alpha = smoothy.new(0),
+            color = color or ui.get_style()["Link Active"],
+            icon = icon or "bolt"
+        })
+    end
+
+    local function outline_container(icon, text, pos, clr, alpha, add_y)
+        clr = clr or color(255);
+
+        local text_size = render.measure_text(1, "d", text) + vector(33, 10)
+
+        pos = pos - vector(text_size.x/2, 0);
+        
+
+        render.rect_outline(pos, pos + text_size, color(0):alpha_modulate(alpha * 255), 1, 5);
+        render.rect(pos + vector(1, 1), pos - vector(1, 1) + text_size, color(0, 0, 0, 120 * alpha), 5);
+
+        render.rect(pos + vector(25, 4), pos + vector(25, text_size.y - 4), color(160, 160, 160, 255 * alpha), 0);
+
+        render.text(1, pos + vector(10, 4), clr:alpha_modulate(255 * alpha), "d", ui.get_icon(icon))
+        render.text(1, pos + vector(30, 4), color():alpha_modulate(255 * alpha), "d", text)
+    end
+
+    local function cat_container(ctx, center, add_y)
+        local text = ctx.text;
+
+        local accent = ctx.color or color(255);
+        ctx.alpha(.1, globals.realtime < ctx.duration);
+        local alpha_value = ctx.alpha.value;
+
+        outline_container(ctx.icon, text_effects:colored(
+            (function()
+                local parts = {}
+                for i, txt in pairs(text) do
+                    table.insert(parts, {
+                        txt,
+                        (i % 2 == 0 and accent or color(255)):alpha_modulate(255 * alpha_value)
+                    })
+                end
+                return unpack(parts)
+            end)()  
+        ), center + vector(0, add_y), accent, alpha_value, add_y)
+
+
+        add_y = add_y * alpha_value;
+
+        return alpha_value < 0.01 and (ctx.duration + 3 < globals.realtime) or #data > 6, alpha_value;
+    end
+
+    local function on_paint()
+        local center = screen / vector(2, 1.4)
+        local add_y = 0
+
+        for i = #data, 1, -1 do
+            local ctx = data[i]
+            local style = menu.info.notify.style:get()
+            
+            if style == "Cat" then
+                local should_clear, alpha = cat_container(ctx, center, add_y);
+
+                if should_clear then
+                    table.remove(data, i)
+                end
+
+                add_y = add_y + 27 * alpha
+            end
+        end
+    end
+
+    local function test_notify()
+        if not menu.info.notify.spam:get() then
+            return
+        end
+        notify.new({
+            "Hello",
+            " world! ",
+            "boys and ",
+            "ladies","","","","",""
+        }, color(255, 0, 0, 255))
+
+        notify.new({
+            "Hello",
+            " world! ",
+            "boys and ",
+            "ladies","","","","",""
+        }, color(255, 255, 255, 255))
+
+        utils.execute_after(5, test_notify)
+    end 
+
+    menu.info.notify.spam:set_callback(test_notify)
+    test_notify();
+    events.render(on_paint)
+end
+
+local presets = {}; do
+    local _NAME = "mo4ablyadskaya";
+    local database = db[_NAME] or {};
+    local xor_key = "3e b1 59 f2 8d 04 c7 aa 6f d0 23 9c 45 e8";
+
+    local sep = "♡⋆⋆························⋆⋆♡";
+    
+    local pinned = {"\a{Link Active}•   Brandon", "\a{Link Active}•   mapsat ♡", "\a{Link Active}•   MetaHOI", sep}
+
+
+    if not database[pinned[1]] then
+        database[pinned[1]] = "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"
+    end
+    
+    if not database[pinned[2]] then
+        database[pinned[2]] = "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"
+    end
+
+    if not database[pinned[3]] then
+        database[pinned[3]] = "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"
+    end
+
+
+    local function save_database()
+        db[_NAME] = database;
+    end 
+
+    local function xorstr(str)
+        local key = xor_key
+        local strlen, keylen = #str, #key
+
+        local strbuf = ffi.new('char[?]', strlen+1)
+        local keybuf = ffi.new('char[?]', keylen+1)
+
+        ffi.copy(strbuf, str)
+        ffi.copy(keybuf, key)
+
+        for i=0, strlen-1 do
+            strbuf[i] = bit.bxor(strbuf[i], keybuf[i % keylen])
+        end
+
+        return ffi.string(strbuf, strlen)
+    end
+
+    local function encrypt_preset(str)
+        return base64.encode(
+            xorstr(json.stringify(str))
+        )
+    end
+
+    local function normalize_blob(str)
+        if type(str) ~= "string" then
+            return
+        end
+
+        str = str:gsub("%s+", "")
+
+        if str == "" then
+            return
+        end
+
+        return str
+    end
+
+    local function decrypt_preset(str, silent)
+        str = normalize_blob(str)
+
+        if str == nil then
+            if not silent then
+                log:error("Unable to decrypt preset")
+            end
+
+            return
+        end
+
+        local success, preset = pcall(function()
+            return json.parse(xorstr(base64.decode(str)))
+        end)
+
+        if success == false then
+            if not silent then
+                log:error("Unable to decrypt preset")
+            end
+
+            return
+        end
+
+        return preset;
+    end
+
+    local function get_selected_name()
+        local list = menu.info.presets.list
+        local items = list:list()
+        local index = list:get()
+        local name = items ~= nil and index ~= nil and items[index] or nil
+
+        if name ~= nil and name ~= sep then
+            return name
+        end
+
+        local fallback_name = menu.info.presets.name:get()
+
+        if fallback_name == nil or fallback_name == sep or database[fallback_name] == nil then
+            return
+        end
+
+        return fallback_name
+    end
+
+    local function is_pinned_name(name)
+        for i = 1, #pinned do
+            if pinned[i] == name then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    local function parse_preset_blob(str)
+        str = normalize_blob(str)
+
+        if str == nil then
+            return
+        end
+
+        local preset = decrypt_preset(str, true)
+
+        if type(preset) == "table" and type(preset.config) == "string" and type(preset.author) == "string" then
+            local config = decrypt_preset(preset.config, true)
+
+            if type(config) == "table" then
+                if type(preset.time) ~= "number" then
+                    preset.time = common.get_unixtime()
+                end
+
+                return str, preset, config
+            end
+        end
+
+        if type(msgpack) ~= "table" then
+            return
+        end
+
+        local legacy_success, legacy_preset = pcall(function()
+            return msgpack.unpack(base64.decode(str))
+        end)
+
+        if not legacy_success or type(legacy_preset) ~= "table" or type(legacy_preset.config) ~= "string" then
+            return
+        end
+
+        local legacy_config_success, legacy_config = pcall(function()
+            return msgpack.unpack(base64.decode(normalize_blob(legacy_preset.config) or ""))
+        end)
+
+        if not legacy_config_success or type(legacy_config) ~= "table" then
+            return
+        end
+
+        local upgraded_preset = {
+            author = type(legacy_preset.author) == "string" and legacy_preset.author or "Unknown",
+            time = common.get_unixtime(),
+            config = encrypt_preset(legacy_config)
+        }
+
+        return encrypt_preset(upgraded_preset), upgraded_preset, legacy_config
+    end
+
+    local function get_preset_entry(name)
+        local str = database[name]
+
+        if str == nil then
+            return
+        end
+
+        local storage, preset, config = parse_preset_blob(str)
+
+        if storage == nil then
+            return
+        end
+
+        if storage ~= str then
+            database[name] = storage
+            save_database()
+        end
+
+        return storage, preset, config
+    end
+
+    local function update_information()
+        local selected = get_selected_name()
+
+        if selected == nil then
+            return
+        end
+
+        local _, preset = get_preset_entry(selected)
+
+        if preset == nil then
+            return
+        end
+
+        local preset_time = type(preset.time) == "number" and preset.time or common.get_unixtime()
+        local format = common.get_date("%m/%d %H:%M", preset_time)
+
+        menu.info.presets.information.creator:name(string.format("\v%s\r    |    \v%s\r", preset.author, format))
+    end
+
+    local function update_list()
+        local m = {};
+
+        for _, name in ipairs(pinned) do
+            m[#m + 1] = name
+        end
+
+        for name, _ in pairs(database) do
+            local already_added = false
+            for _, added_name in ipairs(m) do
+                if added_name == name then
+                    already_added = true
+                    break
+                end
+            end
+            if not already_added then
+                m[#m + 1] = name
+            end
+        end
+
+
+
+        menu.info.presets.list:update(m);
+
+        local list = menu.info.presets.list
+        local name = list:list()[list:get()];
+
+        if name == nil then
+            return
+        end
+
+        if name ~= sep then
+            menu.info.presets.name:set(name)
+            update_information();
+        end
+
+        local selected_pinned = is_pinned_name(name)
+
+        menu.info.presets.save:disabled(selected_pinned);
+        menu.info.presets.export:disabled(selected_pinned);
+        menu.info.presets.delete:disabled(selected_pinned);
+        menu.info.presets.delete_confirm:disabled(selected_pinned);
+        menu.info.presets.delete_cancel:disabled(selected_pinned);
+    end
+
+    local function update_preset(name, data)
+        database[name] = data;
+
+        save_database();
+        update_list();
+    end
+
+    local function on_create()
+        local name = menu.info.presets.name:get();
+
+        if name == nil or name:gsub(" ", "") == "" then
+            log:error("Unable to create preset with empty name")
+            notify.new({"Unable to create preset with empty name"})
+            return
+        end
+
+        if name == sep then
+            return
+        end
+
+        if database[name] ~= nil then
+            log:error("Preset already exists")
+            notify.new({"Preset already exists"})
+            return
+        end
+
+        local settings = {
+            config = encrypt_preset(pui.save()),
+            author = common.get_username(),
+            time = common.get_unixtime()
+        }
+
+        notify.new({"Created preset with name - ", name})
+
+        update_preset(name, encrypt_preset(settings)); 
+    end
+
+    local function on_load()
+        local name = get_selected_name()
+
+        if name == nil then
+            log:error("Unable to find selected preset")
+            notify.new({"Unable to find selected preset"})
+            return
+        end
+
+        local _, preset, config = get_preset_entry(name)
+
+        if preset == nil or config == nil then
+            log:error("Unable to load preset")
+            notify.new({"Unable to load preset"})
+            return
+        end
+
+        local success = pcall(function()
+            return pui.load(config)
+        end)
+
+        if success then
+            log:message(string.format("Loaded %s's config (%s)", preset.author, name))
+            notify.new({"Loaded ", preset.author, "'s config - ", name})
+        else
+            log:error("Unable to load preset")
+            notify.new({"Unable to load preset"})
+        end
+    end
+
+    local function on_save()
+        local list = menu.info.presets.list;
+        local name = menu.info.presets.name:get();
+        if name == nil or name:gsub(" ", "") == "" then
+            log:error("Unable to create preset with empty name")
+            notify.new({"Unable to create preset with empty name"})
+            return
+        end
+
+        if name == sep then
+            return
+        end
+
+        local _, preset = get_preset_entry(name)
+
+        if preset == nil then
+            log:error("Unable to find preset")
+            notify.new({"Unable to find preset"})
+            return
+        end
+
+        preset.config = encrypt_preset(pui.save());
+        preset.time = common.get_unixtime()
+
+        update_preset(name, encrypt_preset(preset))
+        log:message(string.format("Overwrited %s's config (%s)", preset.author, name))
+        notify.new({"Overwrited ", preset.author, "'s config - ", name})
+    end
+
+    local function on_import()
+        local cbdata = clipboard.get()
+
+        if cbdata == nil or cbdata:gsub(" ", "") == "" then
+            log:error("Unable to find clipboard data")
+            notify.new({"Unable to find clipboard data"})
+            return
+        end
+
+        local name = menu.info.presets.name:get();
+
+        if name == nil or name:gsub(" ", "") == "" then
+            log:error("Unable to import preset with empty name")
+            notify.new({"Unable to import preset with empty name"})
+            return
+        end
+
+        if name == sep then
+            return
+        end
+
+        if is_pinned_name(name) then
+            log:error("Unable to overwrite pinned preset")
+            notify.new({"Unable to overwrite pinned preset"})
+            return
+        end
+
+        local already_exists = database[name] ~= nil
+        local storage, preset, config = parse_preset_blob(cbdata)
+
+        if storage == nil or preset == nil or config == nil then
+            log:error("Unable to import preset")
+            notify.new({"Unable to import preset"})
+            return
+        end
+
+        update_preset(name, storage)
+
+        local load_success = pcall(function()
+            return pui.load(config)
+        end)
+
+        if load_success then
+            if already_exists then
+                log:message(string.format("Imported %s's config and overwrote (%s)", preset.author, name))
+                notify.new({"Imported ", preset.author, "'s config and overwrote - ", name})
+            else
+                log:message(string.format("Imported %s's config (%s)", preset.author, name))
+                notify.new({"Imported ", preset.author, "'s config - ", name})
+            end
+        else
+            log:error("Imported preset, but failed to load it")
+            notify.new({"Imported preset, but failed to load it"})
+        end
+    end
+
+    local function on_export()
+        local name = get_selected_name()
+
+        if name == nil then
+            log:error("Unable to find selected preset")
+            notify.new({"Unable to find selected preset"})
+            return
+        end
+
+        local str, preset = get_preset_entry(name)
+
+        if preset == nil then
+            log:error("Unable to export preset")
+            notify.new({"Unable to export preset"})
+            return
+        end
+
+        local success = pcall(function()
+            return clipboard.set(str);
+        end)
+
+        if success then
+            log:message(string.format("Copied %s's config (%s)", preset.author, name))
+            notify.new({"Copied ", preset.author, "'s config - ", name})
+        else
+            log:error("Unable to export preset")
+            notify.new({"Unable to export preset"})
+        end
+    end
+
+    local function on_delete()
+        local list = menu.info.presets.list;
+        local name = menu.info.presets.name:get();
+
+        if name == nil or name:gsub(" ", "") == "" then
+            log:error("Unable to find preset.")
+            notify.new({"Unable to find preset."})
+            return
+        end
+
+        if name == sep then
+            return
+        end
+
+        local _, preset = get_preset_entry(name)
+
+        if preset == nil then
+            log:error("Unable to find preset")
+            notify.new({"Unable to find preset."})
+            return
+        end
+        
+        log:message(string.format("Deleted %s's config (%s)", preset.author, name))
+        notify.new({"Deleted ", preset.author, "'s config - ", name})
+
+        update_preset(name, nil)
+    end
+
+    menu.info.presets.create:set_callback(on_create);
+    menu.info.presets.load:set_callback(on_load);
+    menu.info.presets.save:set_callback(on_save);
+    menu.info.presets.export:set_callback(on_export);
+    menu.info.presets.import:set_callback(on_import);
+    menu.info.presets.delete_confirm:set_callback(on_delete);
+    menu.info.presets.list:set_callback(update_list, true);
+
+    events.shutdown(save_database)
+    save_database();
+end
+ 
+local conditions = {};  do
+
+    function conditions.get(is_legit_aa)
+        local player = entity.get_local_player()
+
+        if player == nil or not player:is_alive() then
+            return;
+        end
+
+        local animstate = player:get_anim_state();
+
+        if animstate == nil then
+            return
+        end
+
+        local duck_amount = player.m_flDuckAmount;
+        local speed = player.m_vecVelocity:length2d();
+
+        local on_ground = animstate.on_ground and not animstate.landed_on_ground_this_frame
+
+        local team = player.m_iTeamNum == 2 and "T" or "CT";
+
+        local legit_data = menu.antiaim.angles.builder["Legit AA"][team];
+        local freestand_data = menu.antiaim.angles.builder["Freestanding"][team];
+
+        if is_legit_aa and legit_data.allow_state:get() then
+            return "Legit AA";
+        end
+
+        if (reference.antiaim.angles.freestanding:get() or reference.antiaim.angles.freestanding:get_override()) and freestand_data.allow_state:get() then
+            return "Freestanding";
+        end
+
+        if on_ground then
+            if reference.antiaim.misc.slow_walk:get() then
+                return "Slowing"
+            end
+
+            if speed < 5 then
+                if duck_amount > 0 then
+                    return "Crouching"
+                end
+
+                return "Standing"
+            end
+
+            if duck_amount > 0 then
+                return "Sneaking"
+            end
+
+            return "Running"
+        end
+
+        return duck_amount > 0 and "Air Crouching" or "Air"
+    end
+end
+
+local manual_aa = {}; do
+    local list = {
+        ["Forward"] = 180,
+        ["Left"] = -90,
+        ["Right"] = 90
+    }
+
+    function manual_aa.think()
+        local value = menu.antiaim.main.additional.manual_yaw.select:get()
+
+        if value == "Disabled" then
+            return false, 0
+        end
+
+        local offset = list[value]
+
+        if not offset then
+            return false, 0
+        end
+
+        return true, offset;
+    end
+
+    function manual_aa.update(e, ctx, data)
+        local is_manual_aa, offset = manual_aa.think();
+        local is_static = menu.antiaim.main.additional.manual_yaw.static:get();
+        local inverter = menu.antiaim.main.additional.manual_yaw.inverter:get();
+
+        if is_manual_aa then
+            ctx.yaw_offset = offset;
+            ctx.yaw_base = "Local View"
+
+            if is_static then
+                ctx.yaw_modifier = "Disabled";
+                rage.antiaim:inverter(inverter)
+            end
+        end
+    end
+end
+
+local safe_head = {}; do
+
+    function safe_head.think(e)
+        local me = entity.get_local_player()
+
+        if me == nil or not me:is_alive() then
+            return false;
+        end
+
+        local weapon = me:get_player_weapon()
+
+        if weapon == nil then
+            return false;
+        end
+
+        if not menu.antiaim.main.additional.safe_head.switch:get() then
+            return false;
+        end
+
+        local threat = entity.get_threat();
+
+        if threat == nil or not threat:is_alive() then
+            return false;
+        end
+        
+        local class = weapon:get_classname();
+
+        local is_knife = class == "CKnife";
+        local is_zeus = class == "CWeaponTaser";
+
+        local origin = me:get_origin();
+        local delta = origin - threat:get_origin();
+
+        local height = menu.antiaim.main.additional.safe_head.height:get();
+
+        return {
+            ["Air Crouch"] = conditions.get() == "Air Crouching",
+            ["Zeus"] = is_zeus,
+            ["Knife"] = is_knife,
+            ["Height Advantage"] = delta.z >= height
+        }
+    end
+
+    function safe_head.update(e, ctx, data)
+        local is_safe_head_table = safe_head.think(e)
+
+        if type(is_safe_head_table) == "boolean" and not is_safe_head_table then
+            return
+        end
+
+        for name, value in pairs(is_safe_head_table) do
+            if menu.antiaim.main.additional.safe_head.states:get(name) then
+                if value then
+                    ctx.body_yaw = true;
+                    ctx.yaw_offset = 0;
+                    ctx.left_limit = 1;
+                    ctx.right_limit = 1;
+                    ctx.body_yaw_options = {};
+                    ctx.yaw_modifier = "Disabled";
+                    return true;
+                end
+            end
+        end
+    end
+end
+
+local warmup_aa = {}; do
+    local distortion = 0;
+
+    function warmup_aa.think()
+        local me = entity.get_local_player();
+    
+        if me == nil or not me:is_alive() then
+            return false;
+        end
+
+        local game_rules = entity.get_game_rules();
+
+        if game_rules == nil then
+            return false;
+        end
+
+        local mode = menu.antiaim.main.additional.warmup_aa.select:get()
+
+        if mode == "Disabled" then
+            return false;
+        end
+
+        local are_all_enemies_dead = true
+
+        for i=1, globals.max_players do
+            local player = entity.get(i)
+            
+            if player ~= nil then
+                local player_resource = player:get_resource();
+
+                if player_resource.m_bConnected and player_resource.m_bConnected == true then
+                    if player:is_enemy() and player:is_alive() then
+                        are_all_enemies_dead = false;
+                        break;
+                    end
+                end
+            end
+        end
+
+
+        local check_for_idiots = game_rules.m_bWarmupPeriod;
+        
+        if not check_for_idiots then
+            check_for_idiots = are_all_enemies_dead;
+
+            if not check_for_idiots then
+                check_for_idiots = game_rules.m_bWarmupPeriod
+            end
+        end
+
+        return {
+            ["Warmup"] = game_rules.m_bWarmupPeriod,
+            ["No Enemies"] = are_all_enemies_dead,
+            ["Force"] = check_for_idiots     
+        }
+    end
+
+    function warmup_aa.update(e, ctx, data)
+        local is_warmup_aa_table = warmup_aa.think();
+
+        if type(is_warmup_aa_table) ~= "boolean" and not is_warmup_aa_table then
+            return
+        end
+
+        local mode = menu.antiaim.main.additional.warmup_aa.select:get()
+
+        if mode == "Disabled" then
+            return;
+        end
+
+        local yaw = menu.antiaim.main.additional.warmup_aa.yaw:get();
+        
+        local range = menu.antiaim.main.additional.warmup_aa.range:get();
+        local speed = menu.antiaim.main.additional.warmup_aa.speed:get();
+
+        local left_yaw = menu.antiaim.main.additional.warmup_aa.left_yaw:get();
+        local right_yaw = menu.antiaim.main.additional.warmup_aa.right_yaw:get();
+
+        if is_warmup_aa_table[ mode ] and mode ~= "Disabled" then
+            ctx.pitch = menu.antiaim.main.additional.warmup_aa.pitch:get();
+            ctx.yaw = "Backward";
+            ctx.yaw_modifier = "Disabled";
+            
+            if yaw == "L&R" then
+                ctx.body_yaw = true;
+                ctx.body_yaw_options = {"Jitter"}
+                ctx.yaw_offset = rage.antiaim:inverter() and left_yaw or right_yaw
+            else
+                if yaw == "Distortion" then
+                    if globals.tickcount % speed == 0 then
+                        distortion = utils.random_int(-range, range)
+                    end
+
+                    ctx.yaw_offset = distortion
+                end
+
+                if yaw == "Spin" then
+                    ctx.yaw_offset = (globals.framecount * (speed * .1)) % range
+                end
+
+                ctx.body_yaw = false; 
+            end
+        end
+    end
+end
+
+local legit_aa = {}; do
+    legit_aa.is_working = false;
+
+    local function is_pickup_available(player)
+        local eye_position = player:get_eye_position();
+        local camera_angles = render.camera_angles();
+        local forward = vector():angles(camera_angles)
+        local eye_angle = eye_position + forward * 128
+
+        local trace = utils.trace_line(eye_position, eye_angle, 0xFFFFFFFF)
+        if trace.entity == nil then
+            return false
+        end
+
+        local classname = trace.entity:get_classname()
+
+        if classname:find("Weapon") or classname:find("Door") then
+            return true
+        end
+
+        return false
+    end
+
+    local function is_bomb_defuse(player)
+        if player.m_iTeamNum ~= 3 then
+            return false;
+        end
+
+        local origin_ = player:get_origin()
+
+        local CPlantedC4 = entity.get_entities("CPlantedC4");
+
+        for i = 1, #CPlantedC4 do
+            local c4 = CPlantedC4[i];
+
+            if c4 == nil then
+                return false;
+            end
+            
+            local origin = c4:get_origin()
+
+            if origin == nil then
+                return false;
+            end
+            
+            if c4.m_bBombTicking and origin_:dist(origin) < 87.5 then
+                return true;
+            end
+        end
+    end
+
+    local function is_hostage_pickup(player)
+        local eye_position = player:get_eye_position();
+        local camera_angles = render.camera_angles();
+        local forward = vector():angles(camera_angles)
+        local eye_angle = eye_position + forward * 128
+
+        local mins = vector(-1, -1, -1)
+        local maxs = vector(1, 1, 1)
+
+        local mask = bit.bor(0x1, 0x2, 0x8, 0x4000, 0x2000000)
+
+        local trace = utils.trace_hull(eye_position, eye_angle, mins, maxs, player, mask)
+
+        if trace.entity == nil then
+            return false;
+        end
+
+        local origin = player:get_origin();
+        if origin:dist(trace.entity:get_origin()) < 125 and trace.entity:get_classid() == 97 then
+            return true;
+        end
+    
+        return false;
+    end
+
+    local function is_use_needed(e, player, weapon)
+        if weapon then
+            local wpn_classname = weapon:get_classname();
+
+            if wpn_classname == 'CC4' then
+                return true
+            end
+        end
+
+        if is_pickup_available(player) then
+            return true;
+        end
+
+        if is_bomb_defuse(player) then
+            return true;
+        end
+
+        if is_hostage_pickup(player) then
+            return true;
+        end
+
+        return false;
+    end
+
+    function legit_aa.think(e)
+        local me = entity.get_local_player()
+
+        if me == nil or not me:is_alive() then
+            return false;
+        end
+
+        local weapon = me:get_player_weapon()
+
+        if weapon == nil then
+            return false;
+        end
+
+        if not menu.antiaim.main.additional.legit_aa.enabled:get() then
+            return false;
+        end
+
+        if not e.in_use then
+            return false;
+        end
+
+        if is_use_needed(e, me, weapon) then
+            return false;
+        end
+
+
+        return true;
+    end
+
+    function legit_aa.update(e, ctx, data)
+        legit_aa.is_working = legit_aa.think(e);
+        if not legit_aa.is_working then
+            return
+        end
+
+        e.in_use = false;
+
+        ctx.pitch = "Disabled";
+        ctx.yaw_base = menu.antiaim.main.additional.legit_aa.mode:get();
+    end
+end
+
+local break_lc = {}; do
+    local current_slider = 1;
+    local switch_delay = 0;
+
+    function break_lc.think(e)
+        local me = entity.get_local_player();
+
+        if me == nil or not me:is_alive() then
+            return false;
+        end
+
+        local weapon = me:get_player_weapon()
+
+        if weapon == nil then
+            return false;
+        end
+
+        local state = conditions.get();
+
+        if not menu.antiaim.angles.break_lc.select:get(state) then
+            return false;
+        end
+
+        if menu.antiaim.angles.break_lc.disable_on_grenade:get() and weapon:get_weapon_info().weapon_type == 9 then
+            return false;
+        end
+        
+        return true;
+    end
+
+    function break_lc.update(e, ctx, data)
+        local is_break_lc = break_lc.think(e);
+
+        if not is_break_lc then
+            return
+        end
+
+        local choke_mode = data.choke:get();
+        local choke_random = data.random_choke:get();
+        local choke_slider = data.choke_slider:get();
+        local choke_method = data.choke_method:get();
+        local choke_from = data.choke_from:get();
+        local choke_to = data.choke_to:get();
+        local choke_sliders = data.choke_sliders:get();
+
+        if e.choked_commands == 0 then
+            switch_delay = switch_delay + 1;
+            local current_slider_value = data["choke1_" .. current_slider]:get() or 1;
+            current_slider_value = math.max(current_slider_value, 1)
+            
+            if choke_sliders >= current_slider_value then
+                switch_delay = 0;
+                current_slider = current_slider + 1
+                if current_slider > choke_sliders then
+                    current_slider = 1
+                end
+            end
+        end
+
+        if choke_mode == "Custom" then
+            if not choke_random then
+                if globals.tickcount % choke_slider == 0 then
+                    ctx.lag_options = "Always On";
+                end
+            else
+                if choke_method == "Default" then
+                    local slider = 1;
+
+                    if globals.tickcount % choke_from == 0 then
+                        slider = slider + 1;
+
+                        if slider >= 3 then
+                            slider = 1
+                        end
+                    end
+
+                    local ui_slider = slider == 1 and choke_from or choke_to
+                    if globals.tickcount % ui_slider == 0 then
+                        ctx.lag_options = "Always On";
+                    end
+                else
+                    local choke_value = data["choke1_" .. current_slider]:get() or 1;
+                    if globals.tickcount % choke_value == 0 then
+                        ctx.lag_options = "Always On"
+                    end
+                end
+            end
+        else
+            ctx.lag_options = "Always On";
+        end
+
+        ctx.hs_options = menu.antiaim.angles.break_lc.hide_shots:get();
+    end
+end
+
+local freestanding = {}; do
+
+    local function condition_for_freestand()
+        -- fuck it
+        local player = entity.get_local_player()
+
+        if player == nil or not player:is_alive() then
+            return;
+        end
+
+        local animstate = player:get_anim_state();
+
+        if animstate == nil then
+            return
+        end
+
+        local duck_amount = player.m_flDuckAmount;
+        local speed = player.m_vecVelocity:length2d();
+
+        local on_ground = animstate.on_ground and not animstate.landed_on_ground_this_frame
+
+        local team = player.m_iTeamNum == 2 and "T" or "CT";
+
+        local legit_data = menu.antiaim.angles.builder["Legit AA"][team];
+
+        if is_legit_aa and legit_data.allow_state:get() then
+            return "Legit AA";
+        end
+
+        if on_ground then
+            if reference.antiaim.misc.slow_walk:get() then
+                return "Slowing"
+            end
+
+            if speed < 5 then
+                if duck_amount > 0 then
+                    return "Crouching"
+                end
+
+                return "Standing"
+            end
+
+            if duck_amount > 0 then
+                return "Sneaking"
+            end
+
+            return "Running"
+        end
+
+        return duck_amount > 0 and "Air Crouching" or "Air"
+    end
+    function freestanding.think(e)
+        local fs_condition = condition_for_freestand(legit_aa.is_working);
+        if menu.antiaim.angles.freestanding.disablers:get(fs_condition) then
+            return false;
+        end
+
+        if not menu.antiaim.angles.freestanding.switch:get() then
+            return false;
+        end
+
+        return true
+    end
+
+    function freestanding.update(e, ctx, data)
+        local is_freestanding = freestanding.think(e)
+
+        ctx.freestanding = is_freestanding;
+        ctx.body_freestanding = menu.antiaim.angles.freestanding.body_fs:get()
+        ctx.disable_yaw_modifiers = menu.antiaim.angles.freestanding.yaw_mod:get()
+    end
+end
+
+local anti_bruteforce = {}; do
+
+    local last_tick_triggered = 0;
+    local reset_time = 0;
+    local is_working = false;
+
+    local offset = 0;
+
+    function anti_bruteforce.reset()
+        is_working = false;
+        last_tick_triggered = 0;
+        reset_time = 0;
+        offset = 0;
+    end
+    
+
+    function anti_bruteforce.think(e)
+        if not menu.antiaim.angles.anti_bruteforce.switch:get() then
+            return false;
+        end
+
+        if not menu.antiaim.angles.anti_bruteforce.states:get(conditions.get(legit_aa.is_working)) then
+            return false
+        end
+
+        return true;
+    end
+
+    function anti_bruteforce.bullet_impact(e)
+        local player = entity.get_local_player()
+
+        if player == nil or not player:is_alive() then
+            return
+        end
+
+        local userid = entity.get(e.userid, true)
+    
+        if userid == nil or not userid:is_alive() or userid:is_dormant() or not userid:is_enemy() then
+            return
+        end
+
+        if last_tick_triggered == globals.tickcount then 
+            return 
+        end
+
+        local impact = vector(e.x, e.y, e.z)
+        local userid_pos = userid:get_eye_position()
+        local player_pos = player:get_hitbox_position(0);
+        local distance = player_pos:closest_ray_point(userid_pos, impact):dist(player_pos)
+    
+        if distance > 40 then 
+            return
+        end
+
+        notify.new({
+            "Anti-Bruteforce updated by ",
+            userid:get_name(),
+            "'s shot ",
+            "", 
+            "[", 
+            offset, 
+            "°;", 
+            math.floor(tostring(distance)), 
+            "]"
+        }, ui.get_style()["Link Active"], "sparkles")
+    
+        last_tick_triggered = globals.tickcount
+        reset_time = globals.realtime + 3
+    
+        local mode = menu.antiaim.angles.anti_bruteforce.mode:get();
+
+        if mode == "Increasing" then
+            offset = math.random(-5, 10)
+        elseif mode == "Decreasing" then
+            offset = 5
+        else
+            offset = math.random(-15, 15)
+        end
+    end
+
+    function anti_bruteforce.update(e, ctx)
+        if not anti_bruteforce.think(e) then
+            return
+        end
+
+        if reset_time <= globals.realtime then
+            anti_bruteforce.reset()
+        else
+            is_working = true
+        end
+
+        if not is_working then
+            return
+        end
+
+        ctx.yaw_offset = ctx.yaw_offset + (rage.antiaim:inverter() and offset or -offset)
+    end
+
+    events.bullet_impact(anti_bruteforce.bullet_impact)
+end
+
+local instance = {}; do
+
+    local antiaim = {}; do
+        function antiaim:reset()
+            for key, value in pairs(reference.antiaim.angles) do
+                value:override();
+            end
+        end
+
+        function antiaim:define()
+            self.pitch = nil;
+            self.yaw = nil;
+            self.yaw_offset = nil;
+            self.yaw_base = nil;
+            self.yaw_modifier = nil;
+            self.modifier_offset = nil;
+            self.left_limit = nil;
+            self.right_limit = nil;
+
+            self.body_yaw = nil;
+            self.body_yaw_options = nil;
+
+            self.disable_yaw_modifiers = nil;
+            self.body_freestanding = nil;
+
+            self.freestanding = nil;
+            self.freestand_peek = nil;
+
+            self.lag_options = nil;
+            self.hs_options = nil;
+
+            self.avoid_backstab = nil;
+
+            self.ignore_inverter = false;
+        end
+
+        function antiaim:run()
+            local pitch = self.pitch or "Disabled";
+            reference.antiaim.angles.pitch:override(pitch);
+
+            local yaw = self.yaw or "Disabled";
+            reference.antiaim.angles.yaw:override(yaw);
+
+            local yaw_offset = self.yaw_offset or 0;
+            reference.antiaim.angles.yaw_add:override(yaw_offset);
+
+            local yaw_base = self.yaw_base or "Local View";
+            reference.antiaim.angles.yaw_base:override(yaw_base);
+
+            local yaw_modifier = self.yaw_modifier or "Disabled";
+            reference.antiaim.angles.yaw_modifier:override(yaw_modifier);
+
+            local modifier_offset = self.modifier_offset or 0;
+            reference.antiaim.angles.modifier_offset:override(modifier_offset);
+
+            local left_limit, right_limit = self.left_limit or 0, self.right_limit or 0;
+            reference.antiaim.angles.left_limit:override(left_limit);
+            reference.antiaim.angles.right_limit:override(right_limit);
+
+            local body_yaw = self.body_yaw or false;
+            reference.antiaim.angles.body_yaw:override(body_yaw);
+
+            local body_yaw_options = self.body_yaw_options or {};
+            reference.antiaim.angles.options:override(body_yaw_options);
+
+            local disable_yaw_modifiers = self.disable_yaw_modifiers or false;
+            reference.antiaim.angles.disable_yaw_modifiers:override(disable_yaw_modifiers);
+
+            local body_freestanding = self.body_freestanding or false;
+            reference.antiaim.angles.body_freestanding:override(body_freestanding);
+
+            local freestanding = self.freestanding or false;
+            reference.antiaim.angles.freestanding:override(freestanding);
+
+            local freestand_peek = self.freestand_peek or "Off";
+            reference.antiaim.angles.freestand_peek:override(freestand_peek);
+
+            local lag_options = self.lag_options or "On Peek";
+            reference.rage.main.double_tap_lag_options:override(lag_options)
+
+            local hs_options = self.hs_options or "Favor Fire Rate";
+            reference.rage.main.hide_shots_options:override(hs_options)
+
+            local avoid_backstab = self.avoid_backstab or false;
+            reference.antiaim.angles.avoid_backstab:override(avoid_backstab);
+        end
+
+        antiaim:reset()
+    end
+
+    instance.create_antiaim = function()
+        return setmetatable({}, {__index = antiaim})
+    end
+end
+
+local builder = {}; do
+    local data = instance.create_antiaim();
+
+    local current_slider = 1;
+    local current_modifier_slider = 1;
+
+    local switch_delay = 0;
+    local switch_modifier = 0;
+
+    local side = false;
+    local switch = false;
+
+    local ticks = 0;
+    local bobro = 1;
+
+    local from_to_ticks = 0;
+    local from_to_swap = false;
+
+    function builder.get_exploit_values(offset, index)
+        return ({
+            [1] = -offset,
+            [2] = -offset/2,
+            [3] = -offset/3,
+            [4] = offset/3,
+            [5] = offset/2,
+            [6] = offset
+        })[index or 1]
+    end
+
+    function builder.get_preset(state, team)
+        local items = menu.antiaim.angles.builder[state]
+
+        if items == nil then
+            return nil
+        end
+
+        return items[team]
+    end
+
+    function builder.update_yaw(e, ctx, data)
+        ctx.pitch = "Down";
+        ctx.yaw = data.yaw:get();
+        ctx.yaw_base = "At Target";
+
+        local yaw_type = data.yaw_mode:get();
+        local is_delay = data.delay:get();
+
+        local left_yaw = data.yaw_left:get();
+        local right_yaw = data.yaw_right:get();
+
+        local delay_mode = data.delay_method:get();
+        local delay_ticks = data.delay_default:get();
+        
+        local min_delay = data.delay_random_min:get();
+        local max_delay = data.delay_random_max:get();
+
+        local delay_sliders = data.delay_custom_sliders:get();
+        local current_slider_value = data["delay_" .. current_slider]:get() or 1;
+        current_slider_value = math.max(current_slider_value, 1);
+
+        local div = 1.95
+
+        if yaw_type == "Solo" then
+            ctx.yaw_offset = data.offset:get();
+        elseif yaw_type == "L/R" then
+
+            if is_delay then
+                if e.choked_commands == 0 then
+                    switch_delay = switch_delay + 1
+
+                    if delay_mode == "Default" then
+                        if switch_delay >= delay_ticks/div then
+                            switch_delay = 0;
+                            side = not side;
+                        end
+                    elseif delay_mode == "Random" then
+                        if switch_delay >= utils.random_int(min_delay, max_delay)/div then
+                            switch_delay = 0;
+                            side = not side;
+                        end
+                    else
+                        if switch_delay >= current_slider_value/div then
+                            switch_delay = 0;
+                            side = not side;
+
+                            current_slider = current_slider + 1
+
+                            if current_slider > delay_sliders then
+                                current_slider = 1;
+                            end
+                        end
+                    end
+                end
+                
+                rage.antiaim:inverter(side);
+                ctx.yaw_offset = side and left_yaw or right_yaw;
+            else
+                ctx.yaw_offset = rage.antiaim:inverter() and left_yaw or right_yaw;
+            end
+        end
+    end
+
+    function builder.update_body_yaw(e, ctx, data)
+        local body_yaw = data.body_yaw:get();
+        local body_yaw_options = data.body_yaw_options:get();
+        local body_yaw_mode = data.mode:get()
+        local body_yaw_ticks = data.mode_ticks:get();
+        local body_yaw_ticks_random = data.mode_random:get();
+
+        if body_yaw_mode == "Static" then
+            ctx.body_yaw = body_yaw;
+        elseif body_yaw_mode == "Ticks" and not reference.antiaim.misc.fake_duck:get() then
+            local amount = body_yaw_ticks;
+
+            if globals.tickcount % amount == 0 then
+                switch = not switch
+                ticks = 0
+            end
+
+            if not switch then
+                ticks = ticks + 1
+            end
+
+            if ticks >= utils.random_int(2, 6) then
+                switch = true
+                ticks = 0
+            end
+
+            local trigger = utils.random_int(3, 6)
+
+
+            if trigger == 1 or trigger == 2 then
+                trigger = 9
+            else
+                trigger = trigger + 1
+            end
+
+            ctx.body_yaw = switch
+        elseif body_yaw_mode == "Random" and not reference.antiaim.misc.fake_duck:get() then
+            ctx.body_yaw = globals.tickcount % body_yaw_ticks_random == 0;
+        end
+
+        local body_yaw_limit_mode = data.limit_mode:get();
+        local body_yaw_limit_minimum = data.minimum_limit:get();
+        local body_yaw_limit_maximum = data.maximum_limit:get();
+
+        local body_yaw_limit_from = data.from_limit:get();
+        local body_yaw_limit_to = data.to_limit:get();
+
+        local inverter = rage.antiaim:inverter();
+        
+        if body_yaw_limit_mode == "Speed-based Switch" then
+            if e.choked_commands == 0 then
+                from_to_ticks = from_to_ticks + 1
+            end
+
+            if from_to_ticks >= data.sb_speed:get() then
+                from_to_ticks = 0;
+                from_to_swap = not from_to_swap;
+            end
+
+            inverter = from_to_swap;
+        end
+
+        local left, right = 0, 0; do
+            if body_yaw_limit_mode == "Static" then
+                left = data.left_limit:get();
+                right = data.right_limit:get();
+            elseif body_yaw_limit_mode == "Random" then
+                left = math.random(body_yaw_limit_minimum, body_yaw_limit_maximum);
+                right = math.random(body_yaw_limit_minimum, body_yaw_limit_maximum)
+            else
+                left = inverter and body_yaw_limit_from or body_yaw_limit_to;
+                right = inverter and body_yaw_limit_from or body_yaw_limit_to;
+            end
+
+            ctx.left_limit = left;
+            ctx.right_limit = right;
+        end
+
+        ctx.freestand_peek = data.body_freestanding:get()
+        ctx.body_yaw_options = body_yaw_options;
+    end
+    
+    function builder.update_modifier(e, ctx, data)
+        local yaw_modifier = data.modifier:get();
+        local yaw_modifier_mode = data.modifier_mode:get();
+        local yaw_modifier_randomize = data.randomize:get();
+        local yaw_modifier_minimum = data.min:get();
+        local yaw_modifier_maximum = data.max:get();
+        local yaw_modifier_sliders = data.modifier_custom_sliders:get();
+        local yaw_modifier_offset = data.modifier_offset:get();
+
+        local current_slider_value = data["modifier_sliders_" .. current_modifier_slider]:get() or 1;
+        current_slider_value = math.max(current_slider_value, 1);
+
+        if e.choked_commands == 0 then  
+            bobro = bobro + 1;
+            if bobro >= 7 then
+                bobro = 1;
+            end
+        end
+
+
+        if yaw_modifier_randomize then
+            if yaw_modifier_mode == "Default" then
+                local value = math.random(yaw_modifier_minimum, yaw_modifier_maximum);
+                ctx.modifier_offset = yaw_modifier == "Bobro" and builder.get_exploit_values(value, bobro) or value; 
+            elseif yaw_modifier_mode == "Custom" then
+                if e.choked_commands == 0 then
+                    switch_modifier = switch_modifier + 1;
+                    if switch_modifier >= current_slider_value then
+                        switch_modifier = 0;
+                        current_modifier_slider = current_modifier_slider + 1;
+
+                        if current_modifier_slider > yaw_modifier_sliders then
+                            current_modifier_slider = 1;
+                        end
+                    end
+                end
+
+                local default_value = data["modifier_sliders_" .. current_modifier_slider]:get();
+                local bober_value = builder.get_exploit_values(default_value, bobro);
+                ctx.modifier_offset = yaw_modifier == "Bobro" and bober_value or default_value;
+            end
+        else
+            local bober_value = builder.get_exploit_values(yaw_modifier_offset, bobro);
+            ctx.modifier_offset = yaw_modifier == "Bobro" and bober_value or yaw_modifier_offset;
+        end
+
+        ctx.yaw_modifier = yaw_modifier == "Bobro" and "3-Way" or yaw_modifier;
+    end 
+
+    function builder.update(e, condition, player)
+        data:define();
+
+        local team = player.m_iTeamNum == 2 and "T" or "CT";
+        local items = builder.get_preset(condition, team)
+
+        if items == nil then
+            return
+        end
+
+        if not items.allow_state:get() then goto continue end
+
+        data.avoid_backstab = menu.antiaim.main.additional.backstab.switch:get();
+        
+        builder.update_yaw(e, data, items)
+        builder.update_body_yaw(e, data, items)
+        builder.update_modifier(e, data, items)
+
+        anti_bruteforce.update(e, data)
+
+        break_lc.update(e, data, items)
+        warmup_aa.update(e, data, items)
+
+        local is_legit_aa = legit_aa.think(e);
+        if is_legit_aa then
+            legit_aa.update(e, data, items)
+            data:run()
+            return
+        end;
+
+        safe_head.update(e, data, items)
+        
+        local is_manual_aa = manual_aa.think()
+        local is_freestand = freestanding.think()
+        
+
+        if menu.antiaim.angles.freestanding.prefer_manual:get() and is_manual_aa then
+            manual_aa.update(e, data, items)
+        elseif is_freestand then
+            freestanding.update(e, data, items)
+        else
+            manual_aa.update(e, data, items)
+        end
+
+
+        data:run()
+
+        ::continue::
+    end
+
+    local function callback(e)
+        local me = entity.get_local_player()
+        local is_legit_aa = legit_aa.think(e)
+        local condition = conditions.get(is_legit_aa);
+
+        builder.update(e, condition, me)
+    end
+
+    events.createmove(callback)
+end
+
+local player_animations = {}; do
+    local animlayer_t = ffi.typeof [[
+        struct { 
+            bool client_blend; 
+            float blend_in; 
+            void *studio_hdr; 
+            int dispatch_sequence; 
+            int second_dispatch_sequence; 
+            uint32_t order; 
+            uint32_t sequence; 
+            float prev_cycle; 
+            float weight; 
+            float weight_delta_rate; 
+            float playback_rate; 
+            float cycle; 
+            void *entity; 
+            char pad_0x0038[0x4]; 
+        } **
+    ]];
+
+    function player_animations.get_anim_overlay(player, idx)
+        return ffi.cast(animlayer_t, ffi.cast("char*", player[0]) + 0x2990)[0][idx]
+    end
+    
+    local in_use = false;
+
+    local function createmove(e)
+        in_use = e.in_use;
+        
+        if menu.misc.player_animations.jitter_legs.switch:get() then
+            reference.antiaim.misc.leg_movement:override(e.command_number % 3 == 0 and "Walking" or "Sliding")
+        else
+            reference.antiaim.misc.leg_movement:override()
+        end
+    end
+    local function apply(player)
+        if not menu.misc.player_animations.jitter_legs.switch:get() then
+            return
+        end
+
+        local me = entity.get_local_player()
+
+        if me == nil or not me:is_alive() then
+            return
+        end
+
+        local weapon = me:get_player_weapon()
+
+        if weapon == nil then
+            return
+        end
+
+        if me ~= player then
+            return
+        end
+
+        local overlay = player_animations.get_anim_overlay(player, 12)
+        if overlay and me.m_vecVelocity:length2d() > 5 then
+            overlay.weight = menu.misc.player_animations.leaning.value:get() / 100;
+        end
+
+        if weapon:get_index() == 668 then
+            if in_use then
+                local bomb_overlay = player_animations.get_anim_overlay(player, 10);
+
+                if bomb_overlay then
+                    bomb_overlay.weight = 1
+                    bomb_overlay.sequence = 200;
+                    bomb_overlay.cycle = 0.1 
+                end
+            end
+        end
+
+        local from = menu.misc.player_animations.jitter_legs.from:get() / 100;
+        local to = menu.misc.player_animations.jitter_legs.to:get() / 100;
+
+
+        if menu.misc.player_animations.jitter_legs.switch:get() then
+            player.m_flPoseParameter[0] = (globals.clock_offset + globals.client_tick) % 3 == 0 and from or to
+        end
+
+        me.m_flPoseParameter[6] = menu.misc.player_animations.falling.value:get() / 100;
+    end
+
+    events.post_update_clientside_animation(apply)
+    events.createmove(createmove);
+end
+
+local unlock_fakeduck_speed do
+    local function apply(e)
+        if not menu.misc.aimbot.fakeduck.unlock:get() then
+            return
+        end
+
+        if not reference.antiaim.misc.fake_duck:get() then
+            return
+        end
+
+        local threshold = 5.0
+        local forwardmove = e.forwardmove
+        local sidemove = e.sidemove
+        
+        if math.abs(forwardmove) > threshold or math.abs(sidemove) > threshold then
+            local speed = (forwardmove * forwardmove + sidemove * sidemove) ^ 0.5
+            local factor = 450 / speed
+            e.forwardmove = forwardmove * factor
+            e.sidemove = sidemove * factor
+        end
+    end
+
+    events.createmove_run(apply)
+end
+
+local unlock_freeze_period do
+
+    local function createmove(e)
+        if not menu.misc.aimbot.fakeduck.freeze_period:get() then
+            return
+        end
+
+        if not reference.antiaim.misc.fake_duck:get() then
+            return
+        end
+
+        local rules = entity.get_game_rules()
+        if not rules then 
+            return 
+        end
+
+        if not rules.m_bFreezePeriod then
+            return
+        end
+
+        e.in_bullrush = true
+    
+        if e.choked_commands < 7 then
+            e.in_duck = false
+        else
+            e.in_duck = true
+        end
+        
+        e.send_packet = not e.choked_commands == 14
+    end
+
+    local function on_override_view(ctx)
+        local me = entity.get_local_player()
+        
+        if me == nil or not me:is_alive() then
+            return
+        end
+
+        local rules = entity.get_game_rules()
+        if not rules then 
+            return 
+        end
+
+        if not rules.m_bFreezePeriod then
+            return
+        end
+        
+        local offset = ctx.camera;
+        if menu.misc.aimbot.fakeduck.freeze_period:get() and reference.antiaim.misc.fake_duck:get() then
+            ctx.camera = vector(
+                offset.x,
+                offset.y,
+                offset.z - me.m_vecViewOffset.z + 64
+            )
+        end
+    end
+
+    events.createmove(createmove)
+    events.override_view(on_override_view)
+end
+
+
+local events_logging do
+    local jmp_ecx = utils.opcode_scan('engine.dll', 'FF E1')
+    local fnGetModuleHandle = ffi.cast('uint32_t(__fastcall*)(unsigned int, unsigned int, const char*)', jmp_ecx)
+    local fnGetProcAddress = ffi.cast('uint32_t(__fastcall*)(unsigned int, unsigned int, uint32_t, const char*)', jmp_ecx)
+    local pGetProcAddress = ffi.cast('uint32_t**', ffi.cast('uint32_t', utils.opcode_scan('engine.dll', 'FF 15 ? ? ? ? A3 ? ? ? ? EB 05')) + 2)[0][0]
+    local pGetModuleHandle = ffi.cast('uint32_t**', ffi.cast('uint32_t', utils.opcode_scan('engine.dll', 'FF 15 ? ? ? ? 85 C0 74 0B')) + 2)[0][0]
+    
+    local function proc_bind(sModuleName, sFunctionName, sTypeOf)
+        local ctype = ffi.typeof(sTypeOf)
+        return function(...)
+            return ffi.cast(ctype, jmp_ecx)(fnGetProcAddress(pGetProcAddress, 0, fnGetModuleHandle(pGetModuleHandle, 0, sModuleName), sFunctionName), 0, ...)
+        end
+    end
+    
+    local fnEnumDisplaySettingsA = proc_bind('user32.dll', 'EnumDisplaySettingsA', 'int(__fastcall*)(unsigned int, unsigned int, unsigned int, unsigned long, void*)');
+    local pLpDevMode = ffi.new('struct { char pad_0[120]; unsigned long dmDisplayFrequency; char pad_2[32]; }[1]')
+    
+    fnEnumDisplaySettingsA(0, 4294967295, pLpDevMode[0])
+
+    local function fps_problem()
+        local fps = 1 / globals.absoluteframetime;
+        local frequency = tonumber(pLpDevMode[0].dmDisplayFrequency)
+        local is_fps = fps < frequency or fps <= 30;
+
+        if is_fps and menu.misc.aimbot.logging.mode.select:get(3) then
+            notify.new({
+                "Alert! ",
+                "FPS ",
+                "is too ",
+                "low ", "[", math.floor(fps),":",frequency,"]",""
+            }, ui.get_style()["Link Active"])
+    
+        end
+
+        utils.execute_after(5, fps_problem)
+    end
+
+    local function connection_error()
+        local me = entity.get_local_player();
+
+        if me == nil or not me:is_alive() then
+            return;
+        end
+
+        local resource = me:get_resource();
+
+        if resource == nil then
+            return
+        end
+
+        local net_channel = utils.net_channel();
+
+        if net_channel == nil then
+            return
+        end
+
+        local loss = (net_channel.loss[0] + net_channel.loss[1]) * 100;
+
+        if (loss >= 8 or resource.m_iPing >= 120) and menu.misc.aimbot.logging.mode.select:get(2) then
+            notify.new({
+                "Alert! ",
+                "Connection ",
+                "issue detected ",
+                "", "[", math.floor(loss),":",resource.m_iPing,"]",""
+            }, ui.get_style()["Link Active"])
+    
+        end
+
+        utils.execute_after(5, connection_error)
+    end
+
+    connection_error();
+    fps_problem();
+end
+
+local aimbot_logs do
+    local hitgroup_str = {
+        [0] = 'generic',
+        'head', 'chest', 'stomach',
+        'left arm', 'right arm',
+        'left leg', 'right leg',
+        'neck', 'generic', 'gear'
+    }
+
+    local function fmt(str, color) 
+        return "\a" .. color .. str .. "\aDEFAULT" 
+    end
+
+    local function aim_ack(e)
+        if not menu.misc.aimbot.logging.switch:get() then
+            return;
+        end
+
+        if not menu.misc.aimbot.logging.mode.select:get(1) then
+            return;
+        end
+
+        local me = entity.get_local_player();
+
+        if me == nil or not me:is_alive() then
+            return;
+        end
+
+        local target = e.target;
+
+        if target == nil then
+            return;
+        end
+
+        local prefix = menu.misc.aimbot.logging.colors.prefix:get():to_hex();
+        local accent = menu.misc.aimbot.logging.colors.main:get():to_hex();
+
+        local name = fmt(target:get_name(), accent)
+        local script = fmt(_G.SCRIPT_NAME, prefix)
+        local hc = fmt(e.hitchance, accent)
+        local bt = fmt(e.backtrack, accent)
+        local bt_ms = fmt(math.floor(to_time(e.backtrack) * 1000), accent)
+
+        if e.state == nil then
+            local hitgroup = fmt(hitgroup_str[e.hitgroup], accent)..(e.wanted_hitgroup ~= e.hitgroup and fmt("("..hitgroup_str[e.wanted_hitgroup]..")", "DEFAULT") or "")
+            local damage = fmt(e.damage, accent)..(e.wanted_damage ~= e.damage and fmt("("..e.wanted_damage..")", "DEFAULT") or "")
+
+            if menu.misc.aimbot.logging.mode.is_notification:get() then
+                notify.new({
+                    "Hit ",
+                    target:get_name(),
+                    "'s ",
+                    hitgroup_str[e.hitgroup],
+                    " for ",
+                    e.damage,
+                    " damage"
+                }, ui.get_style()["Link Active"], "poo-storm")
+            end
+
+            print_dev(("%s · Hit %s's %s for %s damage [hc: %s%% · bt: %st]"):format(script, name, hitgroup, damage, hc, bt))
+            print_raw(("%s · Hit %s's %s for %s damage [hc: %s%% · bt: %st(%sms)]"):format(script, name, hitgroup, damage, hc, bt, bt_ms))
+        else
+            local wanted_dmg = fmt(e.wanted_damage, accent)
+            local wanted_hg = fmt(hitgroup_str[e.wanted_hitgroup], accent)
+            local state = fmt(e.state, accent)
+
+            if menu.misc.aimbot.logging.mode.is_notification:get() then
+                notify.new({
+                    "Missed ",
+                    target:get_name(),
+                    " in ",
+                    hitgroup_str[e.wanted_hitgroup],
+                    " due to ",
+                    e.state
+                }, color(255, 0, 0, 255), "poo")
+            end
+
+            print_dev(("%s · Missed %s's %s due to %s [dmg: %s · hc: %s%% · bt: %st]"):format(script, name, wanted_hg, state, wanted_dmg, hc, bt))
+            print_raw(("%s · Missed %s's %s due to %s [dmg: %s · hc: %s%% · bt: %st(%sms)]"):format(script, name, wanted_hg, state, wanted_dmg, hc, bt, bt_ms))
+        end
+    end
+
+    events.aim_ack(aim_ack);
+end
+local watermark = {}; do
+    watermark.window = windows:new("watermark", vector(screen.x / 2, screen.y * 0.8));
+
+
+    local holding = smoothy.new(0);
+    function watermark.frame()
+        local window = watermark.window
+        local watermark_info = menu.info.watermark
+        local font_map = {
+            ["Default"] = 1,
+            ["Small"] = 2, 
+            ["Console"] = 3,
+            ["Bold"] = 4
+        }
+
+        local text = _G.SCRIPT_NAME
+        if watermark_info.mode:get(1) then
+            local custom_text = watermark_info.text:get():gsub(" ", "")
+            if custom_text ~= "" then
+                text = watermark_info.text:get()
+            end
+        end
+
+        if watermark_info.mode:get(2) then
+            if watermark_info.gradient:get() then
+                local colors = watermark_info.color
+                text = text_effects:animate(
+                    watermark_info.speed:get(),
+                    colors:get("Outter")[1], 
+                    colors:get("Inner")[1],
+                    text
+                )
+            else
+                text = "\a" .. watermark_info.non_gradient:get():to_hex() .. text
+            end
+        end
+
+        local font = 1
+        if watermark_info.mode:get(3) then
+            font = font_map[watermark_info.font:get()] or 1
+        end
+
+        local is_dragging = window:is_dragging();
+
+        holding(.05, is_dragging and .6 or 1)
+
+        local pos = window.position;
+        local text_size = render.measure_text(1, nil, text);
+
+        render.text(font, pos, color(255, 255 * holding.value), nil, text)
+        window:update(text_size);
+    end
+
+    events.render(watermark.frame)
+end
+
+local sidebar do
+    local function update()
+        if ui.get_alpha() <= 0 then
+            return
+        end
+
+        local text = menu.info.sidebar.text:get();
+        if text:gsub(" ", "") == "" then text = _G.SCRIPT_NAME; end
+
+        local speed = menu.info.sidebar.speed:get();
+        local from, to = menu.info.sidebar.color:get("Outter")[1], menu.info.sidebar.color:get("Inner")[1]
+        local animated = text_effects:animate(speed, from, to, text);
+        ui.sidebar(animated, "👑")
+    end
+
+    events.render(update);
+end
+
+local scope_overlay do
+    local alpha = smoothy.new(0);
+    local scope = smoothy.new(0);
+
+    local ref = ui.find("Visuals", "World", "Main", "Override Zoom", "Scope Overlay")
+
+    local function on_draw()
+        local me = entity.get_local_player()
+
+        if me == nil or not me:is_alive() then
+            return
+        end
+
+        local weapon = me:get_player_weapon()
+
+        if weapon == nil then
+            return
+        end
+        
+        local can_show_scope = menu.visuals.scope_overlay.switch:get();
+        local is_scoped = me.m_bIsScoped
+
+        alpha(.05, can_show_scope);
+        scope(.05, can_show_scope and is_scoped);
+
+        if alpha.value <= 0 then
+            ref:override();
+            return
+        end
+
+        ref:override("Remove All");
+
+        local alpha = alpha.value * scope.value;
+
+        local center = screen * 0.5
+
+        local offset = menu.visuals.scope_overlay.gap:get() * screen.y * (1 / screen.y)
+        local position = menu.visuals.scope_overlay.length:get() * screen.y * (1 / screen.y)
+
+        offset = math.floor(offset)
+        position = math.floor(position)
+
+        local delta = position - offset
+
+        local color_a = menu.visuals.scope_overlay.colors.main:get()
+        local color_b = menu.visuals.scope_overlay.colors.edge:get()
+
+
+        if menu.visuals.scope_overlay.options:get(2) then
+            color_a = menu.visuals.scope_overlay.colors.edge:get();
+            color_b = menu.visuals.scope_overlay.colors.main:get()
+        end
+
+        color_a.a = color_a.a * alpha; 
+        color_b.a = color_b.a * alpha; 
+
+        local rotation = 45;
+        local should_rotate = menu.visuals.scope_overlay.options:get(1)
+        if should_rotate and menu.visuals.scope_overlay.animation:get() and me.m_vecVelocity:length2d() >= 5 then
+            rotation = globals.framecount % 360;
+        end
+
+        if should_rotate then
+            render.push_rotation(rotation)
+        end
+
+        render.gradient(vector(center.x, center.y - offset + 1), vector(center.x + 1, center.y - position * alpha), color_a, color_a, color_b, color_b) -- up
+        render.gradient(vector(center.x, center.y + offset), vector(center.x + 1, center.y + position * alpha), color_a, color_a, color_b, color_b) -- down
+        render.gradient(vector(center.x - offset + 1, center.y), vector(center.x - offset + 1 - delta * alpha, center.y + 1), color_a, color_b, color_a, color_b) -- left
+        render.gradient(vector(center.x + offset, center.y), vector(center.x + offset + delta * alpha + 1, center.y + 1), color_a, color_b, color_a, color_b) -- right
+
+        if should_rotate then
+            render.pop_rotation()
+        end
+    end
+
+    events.render(on_draw)
+end
+
+local manual_arrows do
+    local data = {
+        ["Left"] = {
+            text = menu.visuals.manual_arrows.symbols.left,
+            size = vector(-10, 0),
+            alpha = smoothy.new(0)
+        },
+        ["Right"] = {
+            text = menu.visuals.manual_arrows.symbols.right,
+            size = vector(12, 0),
+            alpha = smoothy.new(0)
+        },
+        ["Forward"] = {
+            text = menu.visuals.manual_arrows.symbols.forward,
+            size = vector(0, -10),
+            alpha = smoothy.new(0)  
+        }
+    }
+
+    local function on_draw()
+        local me = entity.get_local_player()
+
+        if me == nil or not me:is_alive() then
+            return
+        end
+
+        local center = render.screen_size() / 2
+        local enabled = menu.visuals.manual_arrows.switch:get()
+        local value = menu.antiaim.main.additional.manual_yaw.select:get()
+
+        local font = ({
+            ["Default"] = 1,
+            ["Small"] = 2,
+            ["Console"] = 3,
+            ["Bold"] = 4
+        })[menu.visuals.manual_arrows.font:get()];
+
+        local accent = menu.visuals.manual_arrows.color:get();
+        local offset = menu.visuals.manual_arrows.offset:get();
+
+        local list = {
+            ["Left"] = vector(-offset, 0),
+            ["Right"] = vector(offset, 0),
+            ["Forward"] = vector(0, -offset)
+        }
+
+        for i, ctx in pairs(data) do
+            ctx.alpha(.04, value == i and enabled);
+
+            if ctx.alpha.value <= 0 then goto continue end
+
+            local alpha = ctx.alpha.value;
+            if alpha > 0 then
+                render.text(font, center + ctx.size + list[i], accent:alpha_modulate(alpha * accent.a), "c", ctx.text:get())
+            end
+
+            ::continue::
+        end
+    end
+
+    events.render(on_draw)
+end
+
+local draw = {}; do
+    draw.data = {};
+    draw.icon = render.load_image_from_file('materials/panorama/images/icons/ui/bomb_c4.svg', vector(32, 32));
+    draw.font = render.load_font("Calibri Bold", vector(25, 23.5, 0), "da");
+
+    function draw.progress_bar(r, g, b, progress, height)
+        local progress_height = height * progress;
+        render.rect(vector(0, 0), vector(20, height), color(0, 0, 0, 120));
+        render.rect(vector(1, (0 + progress_height) + 1), vector(19, ((((0 + progress_height) + 1) + height) - progress_height) - 3), color(r, g, b, 120));
+    end
+
+    function draw.indicator(color, text, pct, should_draw_bomb)
+        draw.data[#draw.data + 1] = {
+            clr = color, 
+            text = text, 
+            pct = pct or -1,
+            should_draw_bomb = should_draw_bomb or false
+        };
+    end
+end
+
+local bomb = {}; do
+    bomb.site = nil;
+    bomb.plant_start_time = nil;
+    bomb.planter = nil;
+    
+    local function on_reset()
+        bomb.site = nil;
+        bomb.planter = nil;
+    end
+
+    local function on_plant(event)
+        local resource = entity.get_player_resource();
+
+        if not resource then
+            return
+        end
+
+        local a_center, b_center = resource.m_bombsiteCenterA, resource.m_bombsiteCenterB;
+        local site_entity = entity.get(event.site);
+
+        if not site_entity then
+            return
+        else
+            local center = site_entity.m_vecMins:lerp(site_entity.m_vecMaxs, 0.5);
+
+            bomb.site = center:distsqr(a_center) < center:distsqr(b_center) and "A" or "B";
+            bomb.plant_start_time = globals.curtime;
+            bomb.planter = entity.get(event.userid, true);
+        end
+    end
+    
+    function bomb.scale_damage(damage, armor)
+        if armor > 0 then
+            local reduced_damage = damage * 0.5;
+            if armor < (damage - reduced_damage) * 0.5 then
+                reduced_damage = damage - armor * 2;
+            end;
+
+            damage = reduced_damage;
+        end;
+
+        return damage;
+    end
+
+    events.bomb_beginplant(on_plant)
+    events.bomb_abortplant(on_reset);
+    events.bomb_planted(on_reset);
+    events.round_start(on_reset);
+    events.round_end(on_reset);
+end
+
+local skeet_indicators do
+    local data = {};
+
+    local function draw_indicator(text, color, should_draw_bomb, progress)
+        table.insert(draw.data, {
+            text = text,
+            clr = color,
+            should_draw_bomb = should_draw_bomb,
+            pct = progress or -1
+        })
+    end
+
+    local function get_lerp_time(entity)
+        local v6 = 0
+        local v7 = 0
+        local v8 = 0
+        local v10 = 0
+        
+        local net_channel = {
+            [1] = utils.net_channel(),
+            [2] = utils.net_channel()
+        }
+        
+        if entity ~= nil and entity:is_alive() then
+            net_channel[1] = utils.net_channel()
+            net_channel[2] = net_channel[1]
+        
+            if net_channel[1] then
+                v8 = net_channel[1].sequence_nr[0]
+                v8 = net_channel[2].sequence_nr[1] + v8
+        
+                v6 = v8
+        
+                v10 = v6 / math.min(math.max(0.1, 0.001), 0.2)
+                
+                return math.clamp(-1.7014636e38, math.min(math.max(v10, 0), 1), v10)
+            end
+        end
+    end
+
+    local function get_value(ref)
+        return ref:get() or ref:get_override()
+    end
+
+    local function draw_bomb_info(me, curtime)
+        if not menu.visuals.skeet_indicators.bomb:get() then return end
+
+        local bomb_entity = entity.get_entities(129)[1]
+        if bomb_entity and bomb_entity.m_hBombDefuser ~= nil then
+            local defuse_progress = 1 - (10 - (bomb_entity.m_flDefuseCountDown - curtime)) * 0.1
+            if defuse_progress > 0 and defuse_progress < 1 then
+                local color = bomb_entity.m_flC4Blow - curtime < bomb_entity.m_flDefuseCountDown - curtime 
+                    and color(255, 0, 0, 200)
+                    or color(44, 131, 52, 200)
+                draw.progress_bar(color.r, color.g, color.b, 1 - defuse_progress, screen.y)
+            end
+        end
+
+        if bomb.planter then
+            local plant_progress = (curtime - bomb.plant_start_time) / 3.125
+            if plant_progress > 0 and plant_progress < 1 and entity.get_game_rules().m_bBombPlanted ~= 1 then
+                draw_indicator(bomb.site, color(251, 237, 117, 200), true, plant_progress)
+            end
+            return
+        end
+
+        local armor = me.m_ArmorValue
+        local health = me.m_iHealth
+
+        entity.get_entities("CPlantedC4", true, function(ctx)
+            if ctx.m_bBombDefused then return end
+            
+            local blow_time = ctx.m_flC4Blow
+            local site = ctx.m_nBombSite == 0 and "A" or "B"
+
+            if blow_time - curtime >= 0 then
+                draw_indicator(string.format("%s - %.1fs", site, blow_time - curtime), color(255, 255, 255, 200), true)
+
+                if me:is_alive() then
+                    local distance = me:get_eye_position():dist(ctx:get_origin())
+                    local damage = bomb.scale_damage(
+                        math.max(500 * math.exp(-((distance * distance) / ((1750 * 2) / 3) * (1750 / 3))), 0),
+                        armor
+                    )
+
+                    if damage >= 1 then
+                        if damage < health then
+                            draw_indicator(string.format("-%d HP", damage), color(235, 236, 124, 200))
+                        else
+                            draw_indicator("FATAL", color(255, 0, 50, 200))
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    local function draw_features(me, is_alive)
+        local features = menu.visuals.skeet_indicators.features
+        local additional = menu.visuals.skeet_indicators.additional
+        if #features:get() == 0 and #additional:get() == 0 then return end
+        
+        local features = {
+            {
+                text = "PING",
+                condition = function() return features:get("Ping spike") and get_value(reference.ping_spike) > 0 and is_alive end,
+                color = function()
+                    local factor = get_lerp_time(me);
+                    return color(255, 200):lerp(color(151, 175, 54, 200), factor)
+                end
+            },
+            {
+                text = "DUCK",
+                condition = function() return features:get("Duck peek assist") and get_value(reference.antiaim.misc.fake_duck) end,
+                color = color(255, 255, 255, 200)
+            },
+            {
+                text = "OSAA", 
+                condition = function() return features:get("On shot anti-aim") and get_value(reference.rage.main.hide_shots) and not get_value(reference.rage.main.double_tap) end,
+                color = color(255, 255, 255, 200)
+            },
+            {
+                text = "DT",
+                condition = function() return features:get("Double tap") and get_value(reference.rage.main.double_tap) end,
+                color = function() return rage.exploit:get() == 1 and color(255, 255, 255, 200) or color(255, 0, 50, 200) end
+            },
+            {
+                text = "DA",
+                condition = function() return additional:get("Dormant aimbot") and get_value(reference.rage.main.dormant_aimbot) end,
+                color = color(255, 255, 255, 200)
+            },
+            {
+                text = "SAFE",
+                condition = function() return features:get("Force safe point") and get_value(reference.rage.selection.safe_points) == "Force" end,
+                color = color(255, 255, 255, 200)
+            },
+            {
+                text = "BODY",
+                condition = function() return features:get("Force body aim") and get_value(reference.rage.selection.body_aim) == "Force" end,
+                color = color(255, 255, 255, 200)
+            },
+            {
+                text = "MD",
+                condition = function() return features:get("Minimum damage override") and keybinds:get_state("Min. Damage")[2] end,
+                color = color(255, 255, 255, 200)
+            },
+            {
+                text = "H1TCHANCE",
+                condition = function() return additional:get("Hitchance override") and keybinds:get_state("Hit Chance")[2] end,
+                color = color(255, 255, 255, 200)
+            },
+            {
+                text = "FS",
+                condition = function() return features:get("Freestanding") and get_value(reference.antiaim.angles.freestanding) end,
+                color = color(255, 255, 255, 200)
+            }
+        }
+
+        for _, feature in ipairs(features) do
+            if feature.condition() then
+                local color = type(feature.color) == "function" and feature.color() or feature.color
+                draw_indicator(feature.text, color)
+            end
+        end
+    end
+
+    local function draw_indicators()
+        local position = vector(19, screen.y - 353)
+        local add_y = 0
+        
+        for _, ctx in ipairs(draw.data) do
+            if ctx.should_draw_bomb then
+                ctx.text = "      \xE2\x80\x8A" .. ctx.text
+            end
+
+            local size = render.measure_text(draw.font, "d", ctx.text)
+            size.y = size.y * 1.19
+
+            render.gradient(
+                position - vector(size.x, 4) + vector(0, add_y),
+                position + vector(size.x, size.y) + vector(0, add_y),
+                color(0, 0),
+                color(0, 51),
+                color(0, 0),
+                color(0, 51)
+            )
+
+            render.gradient(
+                position + vector(size.x + 0.5,  -4) + vector(0, add_y),
+                position + vector(size.x * 1.5, size.y) + vector(0, add_y),
+                color(0, 51),
+                color(0, 0),
+                color(0, 51),
+                color(0, 0)
+            )
+
+            if ctx.pct ~= -1 then
+                local circle_pos = vector(((position.x + 10) + size.x) + 20, ((position.y + add_y) + size.y * 0.5) - 2)
+                render.circle_outline(circle_pos, color(0, 200), 10, 0, 1, 5)
+                render.circle_outline(circle_pos, color(255, 200), 9, 0, ctx.pct, 3)
+            end
+
+            if ctx.should_draw_bomb then
+                render.texture(draw.icon, vector(position.x + 11, ((position.y + 2) + add_y) - 7), ctx.clr)
+            end
+
+            render.text(draw.font, vector(position.x + 10, ((position.y + 2) + add_y)), ctx.clr, "d", ctx.text)
+
+            add_y = add_y - (size.y + 12.5)
+        end
+    end
+
+    local function on_draw()
+        if not menu.visuals.skeet_indicators.switch:get() then return end
+        local me = entity.get_local_player()
+        if not me then return end
+
+        local is_alive = me:is_alive()
+        
+        draw_features(me, is_alive)
+        draw_bomb_info(me, globals.curtime)
+        draw_indicators()
+        
+        draw.data = {}
+    end
+
+    events.render(on_draw)
+end
+
+local velocity_warning = {}; do
+    velocity_warning.window = windows:new("velocity_warning", vector(screen.x / 2, screen.y * 0.2));
+
+    local alpha = smoothy.new(0);
+    local holding = smoothy.new(0);
+    
+    function velocity_warning.frame()
+        local me = entity.get_local_player()
+        if me == nil then return end
+
+        local window = velocity_warning.window;
+
+        local modifier = me.m_flVelocityModifier;
+
+        local menu_check = ui.get_alpha() > 0;
+        local alive_check = me:is_alive();
+        local velocity_check = modifier < 1;
+        
+
+        local is_dragging = window:is_dragging();
+        local can_show_warning = menu.visuals.velocity_warning.switch:get() and ((alive_check and velocity_check) or menu_check);
+
+        alpha(.05, can_show_warning);
+        holding(.5, can_show_warning and is_dragging and .6 or 1);
+
+        if alpha.value <= 0 then return end
+
+        if menu_check and (not velocity_check or not alive_check) then
+            modifier = math.min(1, globals.tickcount % 200 / 150)
+        end
+
+        local alpha = alpha.value * holding.value;
+
+        local bar_color = menu.visuals.velocity_warning.color:get();
+        
+        local position = window.position;
+        local size = window.size + vector(0, 2);
+
+        local text = ("Max velocity was reduced by %d%%"):format(modifier * 100)
+        local text_size = render.measure_text(1, "", text)
+
+        local bar_pos = position + vector(9, 24);
+        local bar_size = vector(size.x, 4);
+
+        render.text(1, 
+            position + vector(19, 7), color(255, 255, 255, bar_color.a * alpha), 
+            "", text
+        )
+        
+        render.rect(bar_pos - vector(1, 1), bar_pos + bar_size + vector(1, 1), color(0, alpha * bar_color.a), 2)
+        render.rect(bar_pos, bar_pos + vector(bar_size.x * alpha * modifier, bar_size.y), bar_color:alpha_modulate(bar_color.a * alpha), 2)
+
+        window:update(vector(
+            math.max(text_size.x + 15, bar_size.x), 
+            text_size.y + bar_size.y + 25
+        ), vector(10, -2))
+    end
+
+    events.render(velocity_warning.frame)
+end
+
+
+local hitmarker do
+    local data = {
+        time = globals.realtime,
+        alpha = smoothy.new(0),
+        wait_time = 0.4
+    }; 
+     
+    local function aim_ack(ctx)
+        if ctx.state ~= nil then return end
+        local duration = menu.visuals.hitmarker.time:get() / 10;
+        local time = globals.realtime + duration;
+        local position = ctx.aim;
+    
+        data = {
+            time = time,
+            point = position,
+            alpha = smoothy.new(0)
+        }
+    end
+
+
+    local function on_draw()
+        local me = entity.get_local_player();
+        if me == nil then return end;
+        
+        local element = menu.visuals.hitmarker.select;
+        local center = screen / 2;
+
+        local colors = {
+            menu.visuals.hitmarker.color:get("2D")[1],
+            menu.visuals.hitmarker.color:get("3D")[1]
+        }
+        
+        data.alpha(.025, globals.realtime <= data.time and me:is_alive());
+        if data.alpha.value <= 0 then return end
+
+        local pct = data.alpha.value;
+
+        if element:get(1) then
+            local accent = colors[1]:alpha_modulate(colors[1].a * pct);
+           
+            local offset = 5;
+            local length = 10;
+
+            render.line(center + vector(offset, offset), center + vector((length / screen.x) * screen.x, (length / screen.y * screen.y)), accent)
+            render.line(center - vector(offset, -offset), center - vector((length / screen.x) * screen.x, -(length / screen.y) * screen.y), accent)
+
+            render.line(center - vector(offset, offset), center - vector((length / screen.x) * screen.x, (length / screen.y) * screen.y), accent)
+            render.line(center + vector(offset, -offset), center + vector((length / screen.x) * screen.x, -(length / screen.y) * screen.y), accent)
+        end
+
+        if element:get(2) then
+            local accent = colors[2]:alpha_modulate(colors[2].a * pct);
+            local point = data.point;
+
+            if point == nil then
+                return;
+            end
+
+            local position = point:to_screen()
+
+            local size = 5
+
+            if position and position.x then
+                render.rect(position - vector(size, 0), position + vector(size, 0), accent)
+                render.rect(position - vector(0, size), position + vector(0, size), accent)
+            end
+        end
+    end
+
+    events.aim_ack(aim_ack)
+    events.render(on_draw)
+end
+
+local player_transparency do
+    local function on_change(alpha)
+        local me = entity.get_local_player();
+        if me == nil or not me:is_alive() then return end
+        if not menu.visuals.player_transparency.switch:get() then return end
+        
+        if me.m_bIsScoped or me.m_bResumeZoom then
+            alpha = 59
+        end
+    end
+
+    events.localplayer_transparency(on_change);
+end
+
+local damage_indicator = {} do
+    damage_indicator.window = windows:new("damage_indicator", vector(screen.x * 0.51, screen.y * 0.51))
+
+    local alpha = smoothy.new(0);
+    local holding = smoothy.new(0);
+
+    function damage_indicator.frame()
+        local me = entity.get_local_player()
+        if me == nil or not me:is_alive() then return end
+
+        local window = damage_indicator.window
+        local min_damage = keybinds:get_state("Min. Damage");
+
+        local can_show_damage = (min_damage[2] or ui.get_alpha() > 0) and menu.visuals.damage_indicator.switch:get();
+
+        alpha(.05, can_show_damage);
+        holding(.05, can_show_damage and window:is_dragging() and .6 or 1);
+
+        if alpha.value <= 0 then return end
+
+        local alpha = alpha.value * holding.value;
+        local position = window.position;
+
+        local text = tostring(min_damage[1])
+        local text_size = render.measure_text(1, nil, text) / 2
+
+        render.text(1, position + vector(7, 1), color(255, 255 * alpha), nil, text)
+
+        window:update(vector(
+            math.max(text_size.x, 10), 
+            text_size.y + 10)
+        )
+    end
+
+    events.render(damage_indicator.frame)
+end
+
+--[[local legacy_desync do
+
+    local sv_legacy_desync = cvar.sv_legacy_desync;
+
+    local function shutdown()
+        sv_legacy_desync:float(cvars:get_original(sv_legacy_desync), false)
+    end
+
+    local function on_createmove(e)
+        local me = entity.get_local_player();
+        if me == nil or not me:is_alive() then shutdown() return end
+        if not menu.visuals.legacy_desync.switch:get() then return shutdown() end
+
+        local weapon = me:get_player_weapon();
+        if weapon == nil then shutdown() return end
+
+        local last_shot_time = weapon.m_fLastShotTime;
+        local is_shot = last_shot_time > me:get_simulation_time().old and last_shot_time <= me:get_simulation_time().current;
+        sv_legacy_desync:float(is_shot and 0 or 1, true)
+    end
+
+    events.shutdown(shutdown);
+    events.createmove(on_createmove)
+end]]
+
+local remove_sleeves do
+    local thirdperson = ui.find("Visuals", "World", "Main", "Force Thirdperson");
+
+    local function on_draw(e)
+        local me = entity.get_local_player();
+        if me == nil or not me:is_alive() then return end
+        if not menu.visuals.remove_sleeves.switch:get() then return end
+        if thirdperson:get() or thirdperson:get_override() then return end
+        if e.name:find("sleeve") then return false end 
+
+        return true;
+    end
+
+    events.draw_model(on_draw);
+end
+
+local fall_damage do
+    local state = false
+
+    local function trace(player, length)
+        if not menu.misc.movement.fall_damage:get() then return false end
+    
+        local origin = player:get_origin()
+        local pi = math.pi;
+        
+        for angle = 0, pi * 2, pi / 4 do
+            local tr = utils.trace_line(origin, origin + vector(10 * math.cos(angle), 10 * math.sin(angle), -length), player)
+            if tr.fraction < 1 - (1 / 128) then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    local function createmove(e)
+        if not menu.misc.movement.fall_damage:get() then return false end
+        local me = entity.get_local_player()
+        if me == nil or not me:is_alive() then return end
+        local velocity = me.m_vecVelocity
+        if velocity.z >= -500 then state = false return end
+
+        e.in_duck = not trace(me, 15) and trace(me, 75)
+    end
+
+    events.createmove(createmove)
+end
+
+local fast_ladder do
+    local function change_view_angle(e, value)
+        e.view_angles.y = e.view_angles.y + value
+    end
+
+    local function createmove(e)
+        if not menu.misc.movement.fast_ladder:get() then return end
+        if e.in_use then return end
+
+        local me = entity.get_local_player()
+        if me == nil or not me:is_alive() then return end
+        if me.m_MoveType ~= 9 then return end
+
+        local pitch = render.camera_angles().x
+
+        if e.forwardmove <= 0 then return end
+        if pitch > 45 then return end
+
+        e.view_angles.x = 89
+        e.in_moveright = 1
+        e.in_moveleft = 0
+        e.in_forward = 0
+        e.in_back = 1
+
+        if e.sidemove == 0 then
+            change_view_angle(e, 90)
+        end
+
+        if e.sidemove < 0 then
+            change_view_angle(e, 150)
+            
+        end
+
+        if e.sidemove > 0 then
+            change_view_angle(e, 30)
+        end
+    end
+    
+
+    events.createmove(createmove)
+end
+
+local air_duck_collision do
+
+    local function create_ctx(player)
+        return player:simulate_movement(
+            player.m_vecOrigin, player.m_vecVelocity, player.m_fFlags
+        )
+    end
+
+    local function on_createmove(e)
+        if not menu.misc.movement.air_duck_collision:get() then return false end
+        local me = entity.get_local_player()
+        if me == nil or not me:is_alive() then return end
+        if me.m_MoveType == 9 or me.m_MoveType == 8 then return; end
+        if e.in_duck then return end
+
+        local flags = me.m_fFlags
+        if bit.band(flags, bit.lshift(1, 0)) ~= 0 then return end
+
+        local ctx = create_ctx(me)
+
+        e.in_duck = true
+        ctx:think(1)
+
+        local hit_with_duck = (
+            bit.band(ctx.flags, bit.lshift(1, 0)) == 0
+            and ctx.did_hit_collision
+        )
+
+        local ctx = create_ctx(me)
+
+        e.in_duck = false
+        ctx:think(1)
+
+        local hit_without_duck = (
+            bit.band(ctx.flags, bit.lshift(1, 0)) == 0
+            and ctx.did_hit_collision
+        )
+
+        if not hit_with_duck and hit_without_duck then
+            e.in_duck = true
+        end
+    end
+
+    events.createmove(on_createmove)
+end
+
+local edge_quick_stop do
+    local function create_ctx(player)
+        return player:simulate_movement(
+            player.m_vecOrigin, player.m_vecVelocity, player.m_fFlags
+        )
+    end
+
+    local function on_createmove(e)
+        if not menu.misc.movement.edge_quick_stop:get() then return end
+        local me = entity.get_local_player()
+        if me == nil or not me:is_alive() then return end
+        if me.m_MoveType == 9 or me.m_MoveType == 8 then return end
+
+        local ctx = create_ctx(me);
+        ctx:think(4);
+
+        if ctx.velocity.z < 0 then
+            e.block_movement = 2
+        end
+    end
+
+    events.createmove(on_createmove)
+end
+
+pui.setup(menu);
